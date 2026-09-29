@@ -1,12 +1,1140 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello, World!</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-      <h1 class="title">Hello World!</h1>
-      <p id="currentTime"></p>
-      <script src="script.js"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#141414">
+  <title>Flux</title>
+
+  <style>
+    /* ==========================================================================
+       1. VARIABLES & RESET
+       ========================================================================== */
+    :root {
+      --bg: #141414;
+      --surface: #1e1e1e;
+      --surface-card: #2a2a2a;
+      --accent: #E50914;
+      --text-main: #FFFFFF;
+      --text-muted: #888888;
+      --glass-nav: rgba(22, 22, 22, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --safe-top: env(safe-area-inset-top, 16px);
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: calc(84px + var(--safe-bottom));
+    }
+
+    /* Common SVG Helper */
+    .icon {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       2. TOP STATUS BAR GRADIENT & HEADER
+       ========================================================================== */
+    .top-gradient-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--safe-top) + 64px);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 20, 0.6) 60%, transparent 100%);
+      pointer-events: none;
+      z-index: 90;
+    }
+
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--safe-top) + 54px);
+      padding-top: var(--safe-top);
+      padding-left: 20px;
+      padding-right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-logo {
+      color: var(--accent);
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .hamburger-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    /* ==========================================================================
+       3. SLIDE-OUT DRAWER MENU
+       ========================================================================== */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 200;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: min(300px, 80vw);
+      height: 100%;
+      background: #181818;
+      box-shadow: -6px 0 24px rgba(0, 0, 0, 0.7);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 201;
+      display: flex;
+      flex-direction: column;
+      padding: calc(var(--safe-top) + 20px) 20px var(--safe-bottom) 20px;
+    }
+
+    .drawer-overlay.active + .drawer-panel,
+    .drawer-panel.active {
+      transform: translateX(-100%);
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .drawer-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .drawer-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .drawer-menu-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .drawer-item:hover, .drawer-item:active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .drawer-item.danger {
+      color: #ff5555;
+    }
+
+    /* ==========================================================================
+       4. HERO BANNER
+       ========================================================================== */
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      height: 58vh;
+      min-height: 400px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(20,20,20,1) 98%), 
+                  radial-gradient(circle at 75% 30%, #3d1214 0%, #141414 70%);
+      display: flex;
+      align-items: flex-end;
+      padding: 0 20px 24px 20px;
+    }
+
+    .hero-content {
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero-tag {
+      align-self: flex-start;
+      background: var(--accent);
+      color: #FFF;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .hero-title {
+      font-size: 2.1rem;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: #FFFFFF;
+      color: #000000;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.18);
+      color: #FFFFFF;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ==========================================================================
+       5. CONTENT RAILS & CARDS
+       ========================================================================== */
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .rail-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .rail-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .rail-scroller {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 0 20px;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .rail-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .poster-card {
+      flex: 0 0 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .poster-img-wrap {
+      width: 130px;
+      height: 195px;
+      border-radius: 8px;
+      background: var(--surface-card);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .poster-placeholder-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 8px;
+    }
+
+    .poster-card-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .poster-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    /* ==========================================================================
+       6. TAB VIEWS
+       ========================================================================== */
+    .view-container {
+      display: none;
+      padding: calc(var(--safe-top) + 64px) 20px 20px 20px;
+      min-height: 80vh;
+    }
+
+    .view-container.active {
+      display: block;
+    }
+
+    #view-home.active {
+      padding: 0 0 20px 0;
+      display: block;
+    }
+
+    .view-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      gap: 14px;
+    }
+
+    .view-empty-icon {
+      opacity: 0.4;
+      width: 48px;
+      height: 48px;
+    }
+
+    /* ==========================================================================
+       7. DYNAMIC FLOATING CAPSULE NAVIGATION (SVG & ACTIVE PILL)
+       ========================================================================== */
+    .bottom-nav-wrap {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 12px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .bottom-capsule-nav {
+      pointer-events: auto;
+      position: relative;
+      /* Dynamic proportional width: compact on mobile, bounded on tablet/desktop */
+      width: clamp(260px, 62vw, 380px);
+      height: 54px;
+      background: var(--glass-nav);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Sliding Active Capsule Highlight */
+    .nav-capsule-pill {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      bottom: 4px;
+      width: calc((100% - 12px) / 4);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .nav-tab-btn {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 999px;
+      transition: color 0.25s ease;
+    }
+
+    .nav-tab-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--text-muted);
+      transition: stroke 0.25s ease, transform 0.2s ease;
+    }
+
+    .nav-tab-btn.active svg {
+      stroke: var(--text-main);
+      transform: scale(1.1);
+    }
+
+    /* ==========================================================================
+       8. NATIVE STREAM INSPECTION MODAL
+       ========================================================================== */
+    .stream-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+      z-index: 300;
+    }
+
+    .stream-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .stream-modal-sheet {
+      background: #1c1c1c;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 24px 20px calc(var(--safe-bottom) + 20px) 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Safe Area Gradient Overlay -->
+  <div class="top-gradient-overlay"></div>
+
+  <!-- Top Sticky Header -->
+  <header class="top-header">
+    <div class="app-brand">
+      <div class="app-logo">FLUX</div>
+    </div>
+    <button class="hamburger-btn" id="openDrawerBtn" aria-label="Open menu">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+  </header>
+
+  <!-- Slide-out Drawer Overlay & Panel -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer-panel" id="drawerPanel">
+    <div class="drawer-header">
+      <span class="drawer-title">Menu & Repositories</span>
+      <button class="drawer-close-btn" id="closeDrawerBtn">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <!-- INSERT STEP 9 CODE HERE: Slide-Out Drawer Elements & Actions -->
+    <ul class="drawer-menu-list">
+      <li class="drawer-item" id="drawerItemFmhy">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <span>FMHY Directory</span>
+      </li>
+      <li class="drawer-item" id="drawerItemSettings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Settings & Scrapers</span>
+      </li>
+      <li class="drawer-item danger" id="drawerItemClearCache">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <span>Clear Local Cache</span>
+      </li>
+    </ul>
+    <!-- END STEP 9 CODE -->
+
+  </aside>
+
+  <!-- ========================================================================
+       MAIN APP VIEWS
+       ======================================================================== -->
+  <main id="mainContainer">
+
+    <!-- VIEW 1: HOME -->
+    <section class="view-container active" id="view-home">
+      
+      <!-- Hero Featured Banner -->
+      <div class="hero-banner">
+        <div class="hero-content">
+          <span class="hero-tag">Featured</span>
+          <h1 class="hero-title">Flux Stream</h1>
+          <p class="hero-desc">Dynamic scrapers and direct native streaming right on your device.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary">
+              <svg class="icon" viewBox="0 0 24 24" style="stroke:none;fill:#000;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Play</span>
+            </button>
+            <button class="btn btn-secondary">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Details</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Horizontal Rails -->
+      <div class="content-area">
+
+        <!-- INSERT STEP 6 CODE HERE: Rails (Continue Watching, Trending, Series) -->
+        <section class="rail-section" id="railContinueWatching">
+          <div class="rail-header"><h2 class="rail-title">Continue Watching</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card">
+              <div class="poster-img-wrap"><span class="poster-placeholder-text">Resume Item</span></div>
+              <span class="poster-card-title">Sample Movie</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="rail-section" id="railTrendingMovies">
+          <div class="rail-header"><h2 class="rail-title">Trending Movies</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card">
+              <div class="poster-img-wrap"><span class="poster-badge">HD</span><span class="poster-placeholder-text">Slot 1</span></div>
+              <span class="poster-card-title">Sample Title 1</span>
+            </div>
+            <div class="poster-card">
+              <div class="poster-img-wrap"><span class="poster-badge">4K</span><span class="poster-placeholder-text">Slot 2</span></div>
+              <span class="poster-card-title">Sample Title 2</span>
+            </div>
+          </div>
+        </section>
+        <!-- END STEP 6 CODE -->
+
+      </div>
+    </section>
+
+    <!-- VIEW 2: SEARCH -->
+    <section class="view-container" id="view-search">
+      <!-- INSERT STEP 5 CODE HERE: Search Input & Results Grid -->
+      <div class="view-empty-state">
+        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h3>Search Engine</h3>
+        <p>Instant multi-provider search results will appear here.</p>
+      </div>
+      <!-- END STEP 5 CODE -->
+    </section>
+
+    <!-- VIEW 3: WATCH HISTORY -->
+    <section class="view-container" id="view-history">
+      <!-- STEP 3: Watch History IndexedDB Binding & Engine -->
+      <div class="history-view-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="font-size:1.25rem; font-weight:800;">Watch History</h2>
+        <button id="btnClearHistory" style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; font-weight:600; cursor:pointer;">Clear All</button>
+      </div>
+
+      <div id="historyListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+      <div id="historyEmptyState" class="view-empty-state">
+        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <h3>No Watch History</h3>
+        <p>Media you start watching will appear here with saved progress.</p>
+      </div>
+
+      <script>
+        (function() {
+          const DB_NAME = 'FluxDB';
+          const DB_VERSION = 1;
+
+          class LocalDatabase {
+            constructor() {
+              this.db = null;
+              this.readyPromise = this.init();
+            }
+
+            init() {
+              return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = (e) => {
+                  const db = e.target.result;
+                  if (!db.objectStoreNames.contains('watch_progress')) {
+                    db.createObjectStore('watch_progress', { keyPath: 'id' });
+                  }
+                  if (!db.objectStoreNames.contains('search_history')) {
+                    const searchStore = db.createObjectStore('search_history', { keyPath: 'query' });
+                    searchStore.createIndex('timestamp', 'timestamp', { unique: false });
+                  }
+                };
+
+                request.onsuccess = (e) => {
+                  this.db = e.target.result;
+                  resolve(this.db);
+                };
+
+                request.onerror = (e) => {
+                  console.error('[FluxDB] Error opening database', e);
+                  reject(e);
+                };
+              });
+            }
+
+            async getStore(storeName, mode = 'readonly') {
+              await this.readyPromise;
+              const tx = this.db.transaction(storeName, mode);
+              return tx.objectStore(storeName);
+            }
+
+            // Save or update media playback state
+            async saveWatchProgress(item) {
+              const store = await this.getStore('watch_progress', 'readwrite');
+              return new Promise((resolve, reject) => {
+                const record = {
+                  id: item.id,
+                  title: item.title || 'Untitled',
+                  poster: item.poster || '',
+                  url: item.url || '',
+                  position: item.position || 0,
+                  duration: item.duration || 0,
+                  updatedAt: Date.now()
+                };
+                const req = store.put(record);
+                req.onsuccess = () => {
+                  window.dispatchEvent(new CustomEvent('flux:history-updated'));
+                  resolve(record);
+                };
+                req.onerror = () => reject(req.error);
+              });
+            }
+
+            // Fetch all progress records sorted newest first
+            async getAllWatchProgress() {
+              const store = await this.getStore('watch_progress', 'readonly');
+              return new Promise((resolve) => {
+                const req = store.getAll();
+                req.onsuccess = () => {
+                  const list = req.result || [];
+                  list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+                  resolve(list);
+                };
+                req.onerror = () => resolve([]);
+              });
+            }
+
+            // Clear all watch history records
+            async clearWatchHistory() {
+              const store = await this.getStore('watch_progress', 'readwrite');
+              return new Promise((resolve) => {
+                const req = store.clear();
+                req.onsuccess = () => {
+                  window.dispatchEvent(new CustomEvent('flux:history-updated'));
+                  resolve(true);
+                };
+                req.onerror = () => resolve(false);
+              });
+            }
+          }
+
+          window.FluxDB = new LocalDatabase();
+
+          // Render History View UI
+          const container = document.getElementById('historyListContainer');
+          const emptyState = document.getElementById('historyEmptyState');
+          const btnClear = document.getElementById('btnClearHistory');
+
+          async function renderHistory() {
+            if (!container || !emptyState) return;
+            const records = await window.FluxDB.getAllWatchProgress();
+
+            if (records.length === 0) {
+              container.innerHTML = '';
+              emptyState.style.display = 'flex';
+              btnClear.style.display = 'none';
+              return;
+            }
+
+            emptyState.style.display = 'none';
+            btnClear.style.display = 'block';
+
+            container.innerHTML = records.map(item => {
+              const progressPct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 0;
+              return `
+                <div style="display:flex; gap:12px; background:var(--surface); padding:10px; border-radius:10px; align-items:center;">
+                  <div style="width:70px; height:95px; background:var(--surface-card); border-radius:6px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                    ${item.poster ? `<img src="${item.poster}" alt="" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:0.65rem; color:var(--text-muted); text-align:center;">No Poster</span>`}
+                  </div>
+                  <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
+                    <h4 style="font-size:0.92rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">${progressPct}% watched</div>
+                    <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                      <div style="width:${progressPct}%; height:100%; background:var(--accent);"></div>
+                    </div>
+                  </div>
+                  <button onclick="window.NativeAppBridge.playMedia({ url: '${item.url}', title: '${item.title}', position: ${item.position} })" style="background:var(--accent); border:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; flex-shrink:0;">
+                    <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#fff; width:16px; height:16px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  </button>
+                </div>
+              `;
+            }).join('');
+          }
+
+          if (btnClear) {
+            btnClear.addEventListener('click', () => {
+              window.FluxDB.clearWatchHistory();
+            });
+          }
+
+          window.addEventListener('flux:history-updated', renderHistory);
+
+          // Safely attach after full DOM has loaded
+          document.addEventListener('DOMContentLoaded', () => {
+            const historyTab = document.querySelector('[data-target="view-history"]');
+            if (historyTab) {
+              historyTab.addEventListener('click', renderHistory);
+            }
+            renderHistory();
+          });
+        })();
+      </script>
+      <!-- END STEP 3 CODE -->
+    </section>
+
+    <!-- VIEW 4: DOWNLOADS -->
+    <section class="view-container" id="view-downloads">
+      <!-- INSERT STEP 8 CODE HERE: Downloads Queue & 1DM Bridge -->
+      <div class="view-empty-state">
+        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <h3>Downloads Queue</h3>
+        <p>1DM download manager queue monitor will appear here.</p>
+      </div>
+      <!-- END STEP 8 CODE -->
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       7. DYNAMIC FLOATING CAPSULE NAVIGATION (Pure SVG, Dynamic Pill)
+       ======================================================================== -->
+  <div class="bottom-nav-wrap">
+    <nav class="bottom-capsule-nav" id="capsuleNav">
+      <!-- Sliding active highlight capsule -->
+      <div class="nav-capsule-pill" id="navCapsulePill"></div>
+
+      <!-- Home Tab -->
+      <button class="nav-tab-btn active" data-index="0" data-target="view-home" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </button>
+
+      <!-- Search Tab -->
+      <button class="nav-tab-btn" data-index="1" data-target="view-search" aria-label="Search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </button>
+
+      <!-- Watch History Tab -->
+      <button class="nav-tab-btn" data-index="2" data-target="view-history" aria-label="Watch History">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      </button>
+
+      <!-- Downloads Tab -->
+      <button class="nav-tab-btn" data-index="3" data-target="view-downloads" aria-label="Downloads">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========================================================================
+       8. NATIVE STREAM INSPECTION MODAL (PLACEHOLDER)
+       ======================================================================== -->
+  <!-- INSERT STEP 7 CODE HERE: Stream Inspection Sheet -->
+  <div class="stream-modal-overlay" id="streamModal">
+    <div class="stream-modal-sheet">
+      <h3>Stream Details</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Parsed quality streams ready for ExoPlayer & Downloader.</p>
+    </div>
+  </div>
+  <!-- END STEP 7 CODE -->
+
+  <!-- ========================================================================
+       SCRIPTS & LOGIC
+       ======================================================================== -->
+  <!-- STEP 2: Universal NativeAppBridge Script -->
+  <script>
+    (function () {
+      class NativeBridge {
+        constructor() {
+          this.listeners = new Map();
+          this.initInboundListener();
+        }
+
+        // Returns true if running inside the React Native Android Shell
+        isNative() {
+          return Boolean(window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function');
+        }
+
+        // Core outbound dispatch
+        send(action, payload = {}) {
+          const packet = { action, payload, timestamp: Date.now() };
+
+          if (this.isNative()) {
+            window.ReactNativeWebView.postMessage(JSON.stringify(packet));
+          } else {
+            console.log(
+              `%c[NativeBridge Fallback]%c Action: ${action}`,
+              'background: #E50914; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
+              'color: #00bcd4; font-weight: bold;',
+              payload
+            );
+          }
+        }
+
+        // Action 1: ExoPlayer native playback invocation
+        playMedia({ url, title, poster = '', headers = {}, position = 0 }) {
+          this.send('PLAY_MEDIA', { url, title, poster, headers, position });
+        }
+
+        // Action 2: 1DM-style downloader trigger
+        startDownload({ url, title, filename = '', headers = {} }) {
+          this.send('START_DOWNLOAD', { url, title, filename, headers });
+        }
+
+        // Action 3: Android Native Toast
+        showToast(message) {
+          this.send('SHOW_TOAST', { message });
+        }
+
+        // Action 4: Register callbacks for events sent from React Native to the PWA
+        on(event, callback) {
+          if (!this.listeners.has(event)) {
+            this.listeners.set(event, []);
+          }
+          this.listeners.get(event).push(callback);
+        }
+
+        // Listen for inbound messages from React Native Shell (postMessage or document events)
+        initInboundListener() {
+          const handleIncoming = (eventData) => {
+            try {
+              const data = typeof eventData === 'string' ? JSON.parse(eventData) : eventData;
+              if (data && data.type && this.listeners.has(data.type)) {
+                this.listeners.get(data.type).forEach(cb => cb(data.payload));
+              }
+            } catch (err) {
+              // Ignore non-JSON window messages
+            }
+          };
+
+          window.addEventListener('message', (event) => handleIncoming(event.data));
+          document.addEventListener('message', (event) => handleIncoming(event.data));
+        }
+      }
+
+      window.NativeAppBridge = new NativeBridge();
+    })();
+  </script>
+
+  <!-- STEP 4: Plugins & Scraper Script Engine -->
+  <script>
+    (function () {
+      class PluginEngine {
+        constructor() {
+          this.plugins = new Map();
+          this.manifestUrl = 'plugins.json';
+        }
+
+        // Called by scraper scripts to register themselves into Flux
+        register(plugin) {
+          if (!plugin || !plugin.id) {
+            console.error('[FluxPlugins] Invalid plugin schema:', plugin);
+            return;
+          }
+          this.plugins.set(plugin.id, {
+            enabled: true,
+            ...plugin
+          });
+          console.log(`%c[FluxPlugins] Registered: ${plugin.name} (v${plugin.version || '1.0'})`, 'color: #4caf50; font-weight: bold;');
+          window.dispatchEvent(new CustomEvent('flux:plugins-updated'));
+        }
+
+        // Fetch manifest and dynamically inject scraper .js files
+        async loadManifest(url = this.manifestUrl) {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const manifest = await res.json();
+
+            if (Array.isArray(manifest.plugins)) {
+              for (const entry of manifest.plugins) {
+                if (entry.url) this.injectScript(entry.url);
+              }
+            }
+          } catch (err) {
+            console.warn('[FluxPlugins] Could not load external plugins.json manifest (using local scrapers):', err.message);
+          }
+        }
+
+        // Dynamically injects a remote or local plugin script
+        injectScript(scriptSrc) {
+          const script = document.createElement('script');
+          script.src = scriptSrc;
+          script.async = true;
+          script.onerror = () => console.error(`[FluxPlugins] Failed to load plugin script: ${scriptSrc}`);
+          document.head.appendChild(script);
+        }
+
+        // Returns all active and enabled plugins
+        getEnabledPlugins() {
+          return Array.from(this.plugins.values()).filter(p => p.enabled);
+        }
+
+        // Parallel search across all enabled scrapers
+        async searchAll(query) {
+          const enabled = this.getEnabledPlugins();
+          if (enabled.length === 0) return [];
+
+          const promises = enabled.map(async (plugin) => {
+            try {
+              if (typeof plugin.search === 'function') {
+                const results = await plugin.search(query);
+                return (results || []).map(item => ({ ...item, providerId: plugin.id, providerName: plugin.name }));
+              }
+            } catch (err) {
+              console.warn(`[FluxPlugins] Scraper ${plugin.id} search failed:`, err);
+            }
+            return [];
+          });
+
+          const settled = await Promise.allSettled(promises);
+          return settled.flatMap(res => (res.status === 'fulfilled' ? res.value : []));
+        }
+
+        // Parallel extraction of trending titles for home rails
+        async getTrending(category = 'movies') {
+          const enabled = this.getEnabledPlugins();
+          for (const plugin of enabled) {
+            try {
+              if (typeof plugin.getTrending === 'function') {
+                const items = await plugin.getTrending(category);
+                if (items && items.length > 0) return items;
+              }
+            } catch (err) {
+              console.warn(`[FluxPlugins] Trending fetch failed on ${plugin.id}:`, err);
+            }
+          }
+          return [];
+        }
+
+        // Extract direct video streams (.m3u8 / .mp4) from the selected provider
+        async extractStreams(providerId, mediaId, episodeInfo = {}) {
+          const plugin = this.plugins.get(providerId);
+          if (!plugin || typeof plugin.extractStreams !== 'function') {
+            throw new Error(`Provider "${providerId}" does not support stream extraction.`);
+          }
+          return await plugin.extractStreams(mediaId, episodeInfo);
+        }
+      }
+
+      window.FluxPlugins = new PluginEngine();
+
+      // ========================================================================
+      // BUILT-IN DEMO SCRAPER PROVIDER (For Testing & Fallback)
+      // ========================================================================
+      window.FluxPlugins.register({
+        id: 'demo-source',
+        name: 'Demo Media Provider',
+        version: '1.0.0',
+        async search(query) {
+          const q = query.toLowerCase();
+          const mockDatabase = [
+            { id: 'sintel', title: 'Sintel (Open Movie)', year: '2010', type: 'movie', poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300' },
+            { id: 'tears-of-steel', title: 'Tears of Steel (Sci-Fi)', year: '2012', type: 'movie', poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300' },
+            { id: 'big-buck-bunny', title: 'Big Buck Bunny (Animation)', year: '2008', type: 'movie', poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300' }
+          ];
+          return mockDatabase.filter(item => item.title.toLowerCase().includes(q));
+        },
+        async getTrending(category) {
+          return [
+            { id: 'sintel', title: 'Sintel', badge: '1080p', type: 'movie', poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300' },
+            { id: 'tears-of-steel', title: 'Tears of Steel', badge: '4K', type: 'movie', poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300' },
+            { id: 'big-buck-bunny', title: 'Big Buck Bunny', badge: 'HD', type: 'movie', poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300' }
+          ];
+        },
+        async extractStreams(mediaId) {
+          // Standard public test streams
+          const streams = {
+            'sintel': [
+              { quality: '1080p (m3u8)', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', format: 'm3u8' },
+              { quality: '720p (MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', format: 'mp4' }
+            ],
+            'tears-of-steel': [
+              { quality: '1080p (m3u8)', url: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', format: 'm3u8' },
+              { quality: '720p (MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', format: 'mp4' }
+            ],
+            'big-buck-bunny': [
+              { quality: '1080p (MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', format: 'mp4' }
+            ]
+          };
+          return streams[mediaId] || streams['sintel'];
+        }
+      });
+    })();
+  </script>
+
+  <!-- Master UI Control Script (Tab switching & Drawer) -->
+  <script>
+    // Drawer open / close
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const drawerPanel = document.getElementById('drawerPanel');
+    const openDrawerBtn = document.getElementById('openDrawerBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+    function toggleDrawer(open) {
+      drawerOverlay.classList.toggle('active', open);
+      drawerPanel.classList.toggle('active', open);
+    }
+    openDrawerBtn.addEventListener('click', () => toggleDrawer(true));
+    closeDrawerBtn.addEventListener('click', () => toggleDrawer(false));
+    drawerOverlay.addEventListener('click', () => toggleDrawer(false));
+
+    // Dynamic Capsule Pill Slider & View Switcher
+    const tabBtns = document.querySelectorAll('.nav-tab-btn');
+    const views = document.querySelectorAll('.view-container');
+    const capsulePill = document.getElementById('navCapsulePill');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = parseInt(btn.getAttribute('data-index'), 10);
+        
+        tabBtns.forEach(b => b.classList.remove('active'));
+        views.forEach(v => v.classList.remove('active'));
+
+        btn.classList.add('active');
+        capsulePill.style.transform = `translateX(${index * 100}%)`;
+
+        const targetView = document.getElementById(btn.getAttribute('data-target'));
+        if (targetView) targetView.classList.add('active');
+      });
+    });
+  </script>
+</body>
 </html>
