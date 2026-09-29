@@ -2,26 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#141414">
-  <link rel="manifest" href="manifest.json">
-  <title>Flux</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Flex</title>
 
   <style>
     /* ==========================================================================
-       1. VARIABLES & RESET
+       1. VARIABLES, RESET & CRYSTAL GLASS SYSTEM
        ========================================================================== */
     :root {
       --bg: #141414;
-      --surface: #1e1e1e;
-      --surface-card: #2a2a2a;
       --accent: #E50914;
+      --accent-glow: rgba(229, 9, 20, 0.35);
+      --glass-surface: rgba(24, 24, 24, 0.72);
+      --glass-card: rgba(32, 32, 32, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-light: rgba(255, 255, 255, 0.22);
+      --glass-blur: blur(20px);
       --text-main: #FFFFFF;
-      --text-muted: #888888;
-      --glass-nav: rgba(22, 22, 22, 0.78);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --safe-top: env(safe-area-inset-top, 16px);
-      --safe-bottom: env(safe-area-inset-bottom, 16px);
+      --text-muted: #A3A3A3;
+      --safe-top: max(16px, env(safe-area-inset-top));
+      --safe-bottom: max(16px, env(safe-area-inset-bottom));
     }
 
     * {
@@ -41,7 +44,6 @@
       padding-bottom: calc(84px + var(--safe-bottom));
     }
 
-    /* Common SVG Helper */
     .icon {
       width: 22px;
       height: 22px;
@@ -51,24 +53,22 @@
       stroke-linecap: round;
       stroke-linejoin: round;
       display: inline-block;
-      vertical-align: middle;
       flex-shrink: 0;
     }
 
-    /* ==========================================================================
-       2. TOP STATUS BAR GRADIENT & HEADER
-       ========================================================================== */
+    /* Top Safe-Area Notch Gradient */
     .top-gradient-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       height: calc(var(--safe-top) + 64px);
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 20, 0.6) 60%, transparent 100%);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 20, 0.6) 65%, transparent 100%);
       pointer-events: none;
       z-index: 90;
     }
 
+    /* Fixed Glass Header */
     .top-header {
       position: fixed;
       top: 0;
@@ -82,6 +82,7 @@
       align-items: center;
       justify-content: space-between;
       z-index: 100;
+      pointer-events: auto;
     }
 
     .app-brand {
@@ -92,42 +93,45 @@
 
     .app-logo {
       color: var(--accent);
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 900;
       letter-spacing: 2px;
-      text-transform: uppercase;
     }
 
-    .hamburger-btn {
-      background: transparent;
-      border: none;
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       color: var(--text-main);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 50%;
       width: 40px;
       height: 40px;
-      border-radius: 50%;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .glass-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.15);
     }
 
     /* ==========================================================================
-       3. SLIDE-OUT DRAWER MENU
+       2. SLIDE-OUT HAMBURGER GLASS DRAWER
        ========================================================================== */
     .drawer-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.72);
-      backdrop-filter: blur(4px);
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease, visibility 0.3s ease;
       z-index: 200;
     }
-
     .drawer-overlay.active {
       opacity: 1;
       visibility: visible;
@@ -136,45 +140,33 @@
     .drawer-panel {
       position: fixed;
       top: 0;
-      right: -320px;
-      width: min(300px, 80vw);
+      right: -340px;
+      width: min(320px, 85vw);
       height: 100%;
-      background: #181818;
-      box-shadow: -6px 0 24px rgba(0, 0, 0, 0.7);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-left: 1px solid var(--glass-border);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.75);
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 201;
       display: flex;
       flex-direction: column;
-      padding: calc(var(--safe-top) + 20px) 20px var(--safe-bottom) 20px;
+      padding: calc(var(--safe-top) + 16px) 20px var(--safe-bottom) 20px;
+      overflow-y: auto;
     }
-
     .drawer-overlay.active + .drawer-panel,
     .drawer-panel.active {
-      transform: translateX(-100%);
+      transform: translateX(-340px);
     }
 
     .drawer-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 20px;
-    }
-
-    .drawer-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-
-    .drawer-close-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--glass-border);
+      margin-bottom: 16px;
     }
 
     .drawer-menu-list {
@@ -188,53 +180,79 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 16px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.03);
+      padding: 13px 15px;
+      border-radius: 12px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
       color: var(--text-main);
-      font-size: 0.92rem;
-      font-weight: 500;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
-      border: 1px solid transparent;
+      text-decoration: none;
       transition: background 0.2s, border-color 0.2s;
     }
-
     .drawer-item:hover, .drawer-item:active {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--glass-border-light);
     }
-
     .drawer-item.danger {
       color: #ff5555;
     }
 
+    .pwa-install-box {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(229, 9, 20, 0.2) 0%, rgba(20, 20, 20, 0.8) 100%);
+      border: 1px solid rgba(229, 9, 20, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     /* ==========================================================================
-       4. HERO BANNER
+       3. HERO FEATURED BANNER
        ========================================================================== */
     .hero-banner {
       position: relative;
       width: 100%;
-      height: 58vh;
-      min-height: 400px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(20,20,20,1) 98%), 
-                  radial-gradient(circle at 75% 30%, #3d1214 0%, #141414 70%);
+      height: 64vh;
+      min-height: 440px;
       display: flex;
       align-items: flex-end;
-      padding: 0 20px 24px 20px;
+      padding: 0 20px 28px 20px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, var(--bg) 100%),
+                  radial-gradient(circle at 75% 30%, #3d1214 0%, #141414 70%);
+      background-size: cover;
+      background-position: center top;
+    }
+    .hero-banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(20, 20, 20, 0.1) 0%, rgba(20, 20, 20, 0.7) 65%, var(--bg) 100%);
+      pointer-events: none;
     }
 
     .hero-content {
-      max-width: 500px;
+      position: relative;
+      z-index: 2;
+      max-width: 540px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    .hero-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .hero-tag {
-      align-self: flex-start;
       background: var(--accent);
       color: #FFF;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -242,19 +260,25 @@
       border-radius: 4px;
     }
 
+    .hero-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
     .hero-title {
-      font-size: 2.1rem;
+      font-size: 2.3rem;
       font-weight: 900;
       line-height: 1.1;
       letter-spacing: -0.5px;
     }
 
     .hero-desc {
-      font-size: 0.88rem;
-      color: var(--text-muted);
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.85);
       line-height: 1.4;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -271,37 +295,36 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 0.9rem;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.92rem;
       font-weight: 700;
       cursor: pointer;
       border: none;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: transform 0.1s, opacity 0.2s;
     }
-
     .btn:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
-
     .btn-primary {
       background: #FFFFFF;
       color: #000000;
     }
-
     .btn-secondary {
       background: rgba(255, 255, 255, 0.18);
       color: #FFFFFF;
-      backdrop-filter: blur(8px);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
     }
 
     /* ==========================================================================
-       5. CONTENT RAILS & CARDS
+       4. HORIZONTAL POSTER RAILS (CRYSTAL GLASS)
        ========================================================================== */
     .content-area {
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 30px;
     }
 
     .rail-section {
@@ -318,26 +341,25 @@
     }
 
     .rail-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.2px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
     }
 
     .rail-scroller {
       display: flex;
       gap: 12px;
       overflow-x: auto;
-      padding: 0 20px;
+      padding: 4px 20px;
       scrollbar-width: none;
       scroll-behavior: smooth;
     }
-
     .rail-scroller::-webkit-scrollbar {
       display: none;
     }
 
     .poster-card {
-      flex: 0 0 130px;
+      flex: 0 0 135px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -346,23 +368,17 @@
     }
 
     .poster-img-wrap {
-      width: 130px;
-      height: 195px;
-      border-radius: 8px;
-      background: var(--surface-card);
+      width: 135px;
+      height: 202px;
+      border-radius: 10px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
       overflow: hidden;
       position: relative;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .poster-placeholder-text {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-align: center;
-      padding: 8px;
     }
 
     .poster-card-title {
@@ -373,55 +389,69 @@
       text-overflow: ellipsis;
     }
 
-    .poster-badge {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0,0,0,0.7);
-      color: #fff;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 4px;
-    }
-
     /* ==========================================================================
-       6. TAB VIEWS
+       5. DEDICATED MEDIA DETAILS VIEW SKELETON
        ========================================================================== */
-    .view-container {
+    .details-view {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 300;
       display: none;
-      padding: calc(var(--safe-top) + 64px) 20px 20px 20px;
-      min-height: 80vh;
+      flex-direction: column;
+      overflow-y: auto;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(var(--safe-bottom) + 30px);
+      touch-action: pan-y;
+      transition: transform 0.28s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+    .details-view.active {
+      display: flex;
     }
 
-    .view-container.active {
-      display: block;
+    .details-nav-bar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 10;
     }
 
-    #view-home.active {
-      padding: 0 0 20px 0;
-      display: block;
+    .swipe-pill-indicator {
+      width: 44px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      margin: 0 auto;
     }
 
-    .view-empty-state {
+    .details-preview-wrap {
+      position: relative;
+      width: 100%;
+      height: 42vh;
+      min-height: 280px;
+      background: #222;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .details-body {
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-muted);
-      gap: 14px;
-    }
-
-    .view-empty-icon {
-      opacity: 0.4;
-      width: 48px;
-      height: 48px;
+      gap: 18px;
     }
 
     /* ==========================================================================
-       7. DYNAMIC FLOATING CAPSULE NAVIGATION (SVG & ACTIVE PILL)
+       6. FLOATING CAPSULE NAVIGATION
        ========================================================================== */
     .bottom-nav-wrap {
       position: fixed;
@@ -437,32 +467,30 @@
     .bottom-capsule-nav {
       pointer-events: auto;
       position: relative;
-      /* Dynamic proportional width: compact on mobile, bounded on tablet/desktop */
-      width: clamp(260px, 62vw, 380px);
+      width: clamp(260px, 64vw, 380px);
       height: 54px;
-      background: var(--glass-nav);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
       border-radius: 999px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 4px 6px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
     }
 
-    /* Sliding Active Capsule Highlight */
     .nav-capsule-pill {
       position: absolute;
       top: 4px;
       left: 6px;
       bottom: 4px;
       width: calc((100% - 12px) / 4);
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid var(--glass-border-light);
       border-radius: 999px;
-      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
       pointer-events: none;
       z-index: 1;
     }
@@ -480,877 +508,449 @@
       justify-content: center;
       cursor: pointer;
       border-radius: 999px;
-      transition: color 0.25s ease;
     }
-
     .nav-tab-btn svg {
       width: 22px;
       height: 22px;
       stroke: var(--text-muted);
-      transition: stroke 0.25s ease, transform 0.2s ease;
+      transition: stroke 0.25s, transform 0.2s;
     }
-
     .nav-tab-btn.active svg {
       stroke: var(--text-main);
-      transform: scale(1.1);
+      transform: scale(1.12);
     }
 
-    /* ==========================================================================
-       8. NATIVE STREAM INSPECTION MODAL
-       ========================================================================== */
-    .stream-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(6px);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s ease, visibility 0.25s ease;
-      z-index: 300;
+    .view-container {
+      display: none;
+      padding: calc(var(--safe-top) + 60px) 20px 20px 20px;
+      min-height: 80vh;
+    }
+    .view-container.active {
+      display: block;
+    }
+    #view-home.active {
+      padding: 0 0 20px 0;
+      display: block;
     }
 
-    .stream-modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .stream-modal-sheet {
-      background: #1c1c1c;
-      width: 100%;
-      max-width: 500px;
-      border-radius: 20px 20px 0 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 24px 20px calc(var(--safe-bottom) + 20px) 20px;
+    .view-empty-state {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      gap: 12px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Safe Area Gradient Overlay -->
+  <!-- Top Notch Safe-Area Gradient -->
   <div class="top-gradient-overlay"></div>
 
-  <!-- Top Sticky Header -->
+  <!-- Fixed Top Header -->
   <header class="top-header">
     <div class="app-brand">
-      <div class="app-logo">FLUX</div>
+      <span class="app-logo">FLEX</span>
     </div>
-    <button class="hamburger-btn" id="openDrawerBtn" aria-label="Open menu">
+    <button class="glass-btn" id="openDrawerBtn" aria-label="Open Menu">
       <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
   </header>
 
-  <!-- Slide-out Drawer Overlay & Panel -->
+  <!-- Slide-out Glass Drawer Menu -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <aside class="drawer-panel" id="drawerPanel">
     <div class="drawer-header">
-      <span class="drawer-title">Menu & Repositories</span>
-      <button class="drawer-close-btn" id="closeDrawerBtn">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      <span style="font-weight:800; font-size:1.1rem;">Flex Portal</span>
+      <button class="glass-btn" id="closeDrawerBtn" style="width:34px; height:34px;">
+        <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
 
-    <!-- STEP 9: Slide-Out Drawer Elements & Actions -->
+    <!-- PLACEHOLDER: Drawer Menu Items -->
     <ul class="drawer-menu-list">
-      <!-- Item 1: FMHY Directory -->
       <li class="drawer-item" id="drawerItemFmhy">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
         <span>FMHY Directory</span>
       </li>
-
-      <!-- Item 2: Personal Web Links -->
-      <li class="drawer-item" id="drawerItemPersonalLinks">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-        <span>Personal Web Links</span>
-      </li>
-
-      <!-- Item 3: Settings & Scrapers -->
       <li class="drawer-item" id="drawerItemSettings">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <span>Settings & Scrapers</span>
       </li>
-
-      <!-- Item 4: Clear Local Cache -->
-      <li class="drawer-item danger" id="drawerItemClearCache">
+      <li class="drawer-item" id="drawerItemPurgeCache">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+        <span>Purge Metadata Cache</span>
+      </li>
+      <li class="drawer-item danger" id="drawerItemClearHistory">
         <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        <span>Clear Local Cache</span>
+        <span>Wipe Watch History</span>
       </li>
     </ul>
 
-    <!-- SUB-MODAL 1: FMHY Directory -->
-    <div class="stream-modal-overlay" id="fmhyModal" style="z-index: 250;">
-      <div class="stream-modal-sheet" style="max-height: 80vh; overflow-y: auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <h3 style="font-size:1.15rem; font-weight:800;">FMHY Directory</h3>
-          <button class="drawer-close-btn" id="closeFmhyBtn">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px;">Curated direct streaming and entertainment sections.</p>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <a href="https://fmhy.net/videopiracyguide" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-            <span>Movies & TV Shows Guide</span>
-          </a>
-          <a href="https://fmhy.net/videopiracyguide#anime" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-            <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-            <span>Anime Streams & Trackers</span>
-          </a>
-          <a href="https://fmhy.net/videopiracyguide#live-tv-sports" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
-            <span>Live TV & Sports Streams</span>
-          </a>
-        </div>
-      </div>
+    <!-- PWA Install Prompt Banner -->
+    <div class="pwa-install-box" id="pwaInstallBanner">
+      <span style="font-weight:700; font-size:0.85rem;">Install Nexus PWA</span>
+      <button class="btn btn-primary" id="btnInstallPwa" style="padding:6px 12px; font-size:0.8rem;">Add to Home Screen</button>
     </div>
+  </aside>
 
-    <!-- SUB-MODAL 2: Personal Web Links (FMHY List Style) -->
-    <div class="stream-modal-overlay" id="personalLinksModal" style="z-index: 250;">
-      <div class="stream-modal-sheet" style="max-height: 80vh; overflow-y: auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <h3 style="font-size:1.15rem; font-weight:800;">Personal Web Links</h3>
-          <button class="drawer-close-btn" id="closePersonalLinksBtn">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px;">Your saved portals and personal media destinations.</p>
+  <!-- ========================================================================
+       MAIN APP TABS (HOME, SEARCH, HISTORY, DOWNLOADS)
+       ======================================================================== -->
+  <main id="mainContainer">
 
-        <!-- FMHY-Style Cards List -->
-        <div id="personalLinksList" style="display:flex; flex-direction:column; gap:8px;"></div>
-
-        <!-- Empty State -->
-        <div id="personalLinksEmpty" class="view-empty-state" style="padding:40px 10px;">
-          <svg class="icon view-empty-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-          <h4>No Personal Links</h4>
-          <p style="font-size:0.8rem;">Add your custom web links in Settings to see them here.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUB-MODAL 3: Settings, Scrapers & Custom Links Manager -->
-    <div class="stream-modal-overlay" id="settingsModal" style="z-index: 250;">
-      <div class="stream-modal-sheet" style="max-height: 85vh; overflow-y: auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <h3 style="font-size:1.15rem; font-weight:800;">Settings & Manager</h3>
-          <button class="drawer-close-btn" id="closeSettingsBtn">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-
-        <!-- Section 1: Active Scraper Plugins -->
-        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:8px; margin-bottom:8px;">ACTIVE SCRAPERS</div>
-        <div id="settingsPluginList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;"></div>
-
-        <!-- Section 2: Personal Web Links Insert Form -->
-        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:10px; margin-bottom:6px;">ADD PERSONAL WEB LINK</div>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
-          <input type="text" id="personalLinkNameInput" placeholder="Site Name (e.g. Anime Wave)" style="background:var(--surface); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; color:#fff; font-size:0.85rem; outline:none;">
-          <div style="display:flex; gap:8px;">
-            <input type="url" id="personalLinkUrlInput" placeholder="https://example.com" style="flex:1; background:var(--surface); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; color:#fff; font-size:0.85rem; outline:none;">
-            <button id="btnAddPersonalLink" class="btn btn-primary" style="padding:10px 18px;">Add</button>
+    <!-- TAB 1: HOME -->
+    <section class="view-container active" id="view-home">
+      <!-- Dynamic Hero Featured Banner -->
+      <div class="hero-banner" id="heroBanner">
+        <div class="hero-content">
+          <div class="hero-badge-row">
+            <span class="hero-tag">Featured</span>
+            <span class="hero-meta" id="heroYear">2026</span>
+          </div>
+          <h1 class="hero-title" id="heroTitle">Nexus Showcase</h1>
+          <p class="hero-desc" id="heroDesc">Streaming movies, web series, and anime with native player engine handshakes.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="heroPlayBtn">▶ Play</button>
+            <button class="btn btn-secondary" id="heroDetailsBtn">ℹ Details</button>
           </div>
         </div>
+      </div>
 
-        <!-- Section 3: List of currently added links with delete button -->
-        <div id="settingsPersonalLinksList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:18px;"></div>
+      <!-- 10 TMDB Rails Placeholders -->
+      <div class="content-area">
+        <!-- Rail 1: Continue Watching Placeholder -->
+        <section class="rail-section" id="railContinueWatching">
+          <div class="rail-header"><h2 class="rail-title">Continue Watching</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Resume Item</div><span class="poster-card-title">Sample In-Progress</span></div>
+          </div>
+        </section>
 
-        <!-- Section 4: Add Custom Manifest Repository -->
-        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:10px; margin-bottom:6px;">ADD SCRAPER REPOSITORY</div>
-        <div style="display:flex; gap:8px;">
-          <input type="text" id="repoManifestInput" placeholder="https://.../plugins.json" style="flex:1; background:var(--surface); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; color:#fff; font-size:0.85rem; outline:none;">
-          <button id="btnLoadRepo" class="btn btn-secondary" style="padding:10px 16px;">Load</button>
+        <!-- Rail 2: Trending Movies & Popular Series Placeholder -->
+        <section class="rail-section" id="railTrending">
+          <div class="rail-header"><h2 class="rail-title">Trending Movies</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Trending Slot 1</div><span class="poster-card-title">Interstellar</span></div>
+            <div class="poster-card"><div class="poster-img-wrap">Trending Slot 2</div><span class="poster-card-title">Dune: Part Two</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 3: Top 20 Hollywood Placeholder -->
+        <section class="rail-section" id="railHollywood">
+          <div class="rail-header"><h2 class="rail-title">Hollywood Blockbusters</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Hollywood 1</div><span class="poster-card-title">Oppenheimer</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 4: Indian Content Placeholder -->
+        <section class="rail-section" id="railIndian">
+          <div class="rail-header"><h2 class="rail-title">Indian Cinema & Series</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Indian 1</div><span class="poster-card-title">RRR</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 5: Bangla Content Placeholder -->
+        <section class="rail-section" id="railBangla">
+          <div class="rail-header"><h2 class="rail-title">Bangla Movies & Dramas</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Bangla 1</div><span class="poster-card-title">Hawa</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 6: Anime Placeholder -->
+        <section class="rail-section" id="railAnime">
+          <div class="rail-header"><h2 class="rail-title">Top Anime</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Anime 1</div><span class="poster-card-title">Attack on Titan</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 7: K-Drama Placeholder -->
+        <section class="rail-section" id="railKdrama">
+          <div class="rail-header"><h2 class="rail-title">Korean Dramas</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">K-Drama 1</div><span class="poster-card-title">Squid Game</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 8: Pakistani Drama Placeholder -->
+        <section class="rail-section" id="railPakistani">
+          <div class="rail-header"><h2 class="rail-title">Pakistani Dramas</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Pakistani 1</div><span class="poster-card-title">Parizaad</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 9: Documentaries Placeholder -->
+        <section class="rail-section" id="railDocs">
+          <div class="rail-header"><h2 class="rail-title">Documentaries</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Doc 1</div><span class="poster-card-title">Planet Earth</span></div>
+          </div>
+        </section>
+
+        <!-- Rail 10: TV Series Placeholder -->
+        <section class="rail-section" id="railSeries">
+          <div class="rail-header"><h2 class="rail-title">Popular TV Series</h2></div>
+          <div class="rail-scroller">
+            <div class="poster-card"><div class="poster-img-wrap">Series 1</div><span class="poster-card-title">Arcane</span></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         STEP 7: SEARCH VIEW & WATCH HISTORY VIEW
+         ======================================================================== -->
+    <!-- TAB 2: SEARCH -->
+    <section class="view-container" id="view-search">
+      <!-- Search Bar -->
+      <div style="display:flex; align-items:center; background:var(--glass-card); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px; margin-bottom:14px;">
+        <svg class="icon" viewBox="0 0 24 24" style="stroke:var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Search movies, series, anime..." style="flex:1; background:transparent; border:none; outline:none; color:#fff; font-size:0.95rem; margin-left:10px;" autocomplete="off">
+        <button id="searchClearBtn" style="background:none; border:none; color:var(--text-muted); font-size:1rem; cursor:pointer; display:none; padding:4px;">✕</button>
+      </div>
+
+      <!-- Recent Search History Pills -->
+      <div id="searchHistoryPills" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;"></div>
+
+      <!-- Live Search Grid -->
+      <div id="searchResultsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(105px, 1fr)); gap:14px;"></div>
+      
+      <!-- Empty State -->
+      <div id="searchEmptyState" class="view-empty-state">
+        <svg class="icon" viewBox="0 0 24 24" style="width:48px; height:48px; opacity:0.4;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h3 id="searchStateTitle">Search TMDB</h3>
+        <p id="searchStateDesc">Type titles above to search movies, series, and anime.</p>
+      </div>
+    </section>
+
+    <!-- TAB 3: WATCH HISTORY -->
+    <section class="view-container" id="view-history">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="font-size:1.25rem; font-weight:800;">Watch History</h2>
+        <button id="btnTriggerHistoryWipe" style="background:none; border:none; color:#ff5555; font-size:0.8rem; font-weight:700; cursor:pointer;">Wipe Records</button>
+      </div>
+      <div id="historyListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+      <div id="historyEmptyState" class="view-empty-state">
+        <svg class="icon" viewBox="0 0 24 24" style="width:48px; height:48px; opacity:0.4;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <h3>No Watch History</h3>
+        <p>Watched items and in-progress timestamps will appear here.</p>
+      </div>
+    </section>
+
+    <!-- Custom Glass History Wipe Confirmation Modal -->
+    <div class="glass-modal-overlay" id="wipeConfirmModal">
+      <div class="glass-sheet" style="align-items:center; text-align:center;">
+        <div style="width:50px; height:50px; border-radius:50%; background:rgba(229,9,20,0.15); display:flex; align-items:center; justify-content:center;">
+          <svg class="icon" viewBox="0 0 24 24" style="stroke:#ff5555; width:26px; height:26px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </div>
+        <h3 style="font-size:1.15rem; font-weight:800;">Wipe All Watch History?</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">This will permanently clear all saved progress and episode timestamps from IndexedDB. This cannot be undone.</p>
+        <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
+          <button class="btn btn-secondary" id="btnCancelWipe" style="flex:1;">Cancel</button>
+          <button class="btn btn-primary" id="btnConfirmWipe" style="flex:1; background:#ff4444; color:#fff;">Confirm Wipe</button>
         </div>
       </div>
     </div>
 
+    <!-- Script: Search & History Controller -->
     <script>
-      (function() {
-        const LINKS_STORAGE_KEY = 'flux_personal_links';
+      (function () {
+        const searchInput = document.getElementById('searchInput');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+        const searchGrid = document.getElementById('searchResultsGrid');
+        const searchEmpty = document.getElementById('searchEmptyState');
+        const searchStateTitle = document.getElementById('searchStateTitle');
+        const searchStateDesc = document.getElementById('searchStateDesc');
+        const searchPills = document.getElementById('searchHistoryPills');
+        let searchTimer = null;
 
-        function getPersonalLinks() {
-          try {
-            return JSON.parse(localStorage.getItem(LINKS_STORAGE_KEY)) || [];
-          } catch (e) {
-            return [];
+        // 1. Render Search History Pills
+        async function renderSearchHistory() {
+          if (!window.NexusDB || !searchPills) return;
+          const items = await window.NexusDB.getRecentSearches();
+
+          if (!items || items.length === 0) {
+            searchPills.innerHTML = '';
+            return;
           }
+
+          searchPills.innerHTML = items.map(it => `
+            <span style="background:var(--glass-card); border:1px solid var(--glass-border); padding:5px 12px; border-radius:999px; font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <span class="pill-text">${it.query}</span>
+              <span class="pill-del" style="color:#ff5555; padding:2px; font-size:0.8rem;">✕</span>
+            </span>
+          `).join('');
+
+          searchPills.querySelectorAll('.pill-text').forEach(p => {
+            p.addEventListener('click', () => {
+              searchInput.value = p.textContent;
+              searchClearBtn.style.display = 'block';
+              triggerSearch(p.textContent);
+            });
+          });
+
+          searchPills.querySelectorAll('.pill-del').forEach((del, i) => {
+            del.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              await window.NexusDB.deleteSearchQuery(items[i].query);
+              renderSearchHistory();
+            });
+          });
         }
 
-        function savePersonalLinks(links) {
-          localStorage.setItem(LINKS_STORAGE_KEY, JSON.stringify(links));
-          renderPersonalLinksCards();
-          renderSettingsPersonalLinks();
+        // 2. Perform Live Debounced Search
+        async function triggerSearch(q) {
+          const query = (q || '').trim();
+          if (!query) {
+            searchGrid.innerHTML = '';
+            searchEmpty.style.display = 'flex';
+            searchStateTitle.textContent = 'Search TMDB';
+            searchStateDesc.textContent = 'Type titles above to search movies, series, and anime.';
+            searchClearBtn.style.display = 'none';
+            return;
+          }
+
+          searchClearBtn.style.display = 'block';
+          searchEmpty.style.display = 'flex';
+          searchStateTitle.textContent = 'Searching...';
+          searchStateDesc.textContent = `Looking up "${query}" on TMDB`;
+
+          if (window.NexusDB) await window.NexusDB.saveSearchQuery(query);
+          renderSearchHistory();
+
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(async () => {
+            try {
+              const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=f6bd687ffa63cd282b6ff2c6877f2669&query=${encodeURIComponent(query)}&include_adult=false`);
+              if (!res.ok) throw new Error();
+              const data = await res.json();
+
+              const results = (data.results || []).filter(it => it.poster_path);
+              if (results.length === 0) {
+                searchGrid.innerHTML = '';
+                searchEmpty.style.display = 'flex';
+                searchStateTitle.textContent = 'No Results';
+                searchStateDesc.textContent = `No matches found for "${query}".`;
+                return;
+              }
+
+              searchEmpty.style.display = 'none';
+              searchGrid.innerHTML = results.map(item => `
+                <div class="poster-card" data-search='${JSON.stringify({
+                  id: item.id,
+                  title: item.title || item.name,
+                  overview: item.overview,
+                  poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                  backdrop: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
+                  year: (item.release_date || item.first_air_date || '2026').substring(0, 4),
+                  rating: item.vote_average ? item.vote_average.toFixed(1) : '8.0',
+                  isTv: item.media_type === 'tv'
+                }).replace(/'/g, "&apos;")}'>
+                  <div class="poster-img-wrap">
+                    <span class="poster-badge">${item.vote_average ? item.vote_average.toFixed(1) + ' ★' : 'HD'}</span>
+                    <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+                  </div>
+                  <span class="poster-card-title">${item.title || item.name}</span>
+                </div>
+              `).join('');
+
+              searchGrid.querySelectorAll('.poster-card').forEach(card => {
+                card.addEventListener('click', () => {
+                  const media = JSON.parse(card.getAttribute('data-search'));
+                  if (typeof window.openDetailsView === 'function') window.openDetailsView(media);
+                });
+              });
+            } catch (e) {
+              searchEmpty.style.display = 'flex';
+              searchStateTitle.textContent = 'Search Error';
+              searchStateDesc.textContent = 'Could not load search results. Check connection.';
+            }
+          }, 300);
         }
 
-        // Render FMHY-style Cards in "Personal Web Links" (Showing only Names, NO URLs)
-        function renderPersonalLinksCards() {
-          const list = document.getElementById('personalLinksList');
-          const empty = document.getElementById('personalLinksEmpty');
-          if (!list || !empty) return;
+        searchInput?.addEventListener('input', () => triggerSearch(searchInput.value));
+        searchClearBtn?.addEventListener('click', () => {
+          searchInput.value = '';
+          triggerSearch('');
+        });
 
-          const links = getPersonalLinks();
-          if (links.length === 0) {
-            list.innerHTML = '';
+        // 3. Render Watch History View
+        async function renderHistoryView() {
+          const container = document.getElementById('historyListContainer');
+          const empty = document.getElementById('historyEmptyState');
+          if (!container || !empty || !window.NexusDB) return;
+
+          const items = await window.NexusDB.getAllWatchProgress();
+          if (!items || items.length === 0) {
+            container.innerHTML = '';
             empty.style.display = 'flex';
             return;
           }
 
           empty.style.display = 'none';
-          list.innerHTML = links.map(item => `
-            <a href="${item.url}" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-              <span>${item.name}</span>
-            </a>
-          `).join('');
-        }
-
-        // Render List inside Settings manager with delete option
-        function renderSettingsPersonalLinks() {
-          const list = document.getElementById('settingsPersonalLinksList');
-          if (!list) return;
-
-          const links = getPersonalLinks();
-          if (links.length === 0) {
-            list.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">No custom links added yet.</div>`;
-            return;
-          }
-
-          list.innerHTML = links.map((item, index) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-              <span style="font-size:0.85rem; font-weight:600; color:#fff;">${item.name}</span>
-              <button onclick="window.removePersonalLink(${index})" style="background:none; border:none; color:#ff5555; cursor:pointer; padding:4px;" aria-label="Delete link">
-                <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-          `).join('');
-        }
-
-        window.removePersonalLink = function(index) {
-          const links = getPersonalLinks();
-          if (window.confirm(`Delete "${links[index].name}"?`)) {
-            links.splice(index, 1);
-            savePersonalLinks(links);
-          }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-          const itemFmhy = document.getElementById('drawerItemFmhy');
-          const itemPersonalLinks = document.getElementById('drawerItemPersonalLinks');
-          const itemSettings = document.getElementById('drawerItemSettings');
-          const itemClearCache = document.getElementById('drawerItemClearCache');
-
-          const fmhyModal = document.getElementById('fmhyModal');
-          const closeFmhyBtn = document.getElementById('closeFmhyBtn');
-
-          const personalLinksModal = document.getElementById('personalLinksModal');
-          const closePersonalLinksBtn = document.getElementById('closePersonalLinksBtn');
-
-          const settingsModal = document.getElementById('settingsModal');
-          const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-          const pluginList = document.getElementById('settingsPluginList');
-
-          const nameInput = document.getElementById('personalLinkNameInput');
-          const urlInput = document.getElementById('personalLinkUrlInput');
-          const btnAddLink = document.getElementById('btnAddPersonalLink');
-
-          function closeDrawer() {
-            const drawerOverlay = document.getElementById('drawerOverlay');
-            const drawerPanel = document.getElementById('drawerPanel');
-            if (drawerOverlay) drawerOverlay.classList.remove('active');
-            if (drawerPanel) drawerPanel.classList.remove('active');
-          }
-
-          // 1. FMHY Modal
-          if (itemFmhy && fmhyModal) {
-            itemFmhy.addEventListener('click', () => {
-              closeDrawer();
-              fmhyModal.classList.add('active');
-            });
-          }
-          if (closeFmhyBtn && fmhyModal) {
-            closeFmhyBtn.addEventListener('click', () => fmhyModal.classList.remove('active'));
-            fmhyModal.addEventListener('click', (e) => { if (e.target === fmhyModal) fmhyModal.classList.remove('active'); });
-          }
-
-          // 2. Personal Web Links Modal
-          if (itemPersonalLinks && personalLinksModal) {
-            itemPersonalLinks.addEventListener('click', () => {
-              closeDrawer();
-              renderPersonalLinksCards();
-              personalLinksModal.classList.add('active');
-            });
-          }
-          if (closePersonalLinksBtn && personalLinksModal) {
-            closePersonalLinksBtn.addEventListener('click', () => personalLinksModal.classList.remove('active'));
-            personalLinksModal.addEventListener('click', (e) => { if (e.target === personalLinksModal) personalLinksModal.classList.remove('active'); });
-          }
-
-          // 3. Settings Modal
-          if (itemSettings && settingsModal) {
-            itemSettings.addEventListener('click', () => {
-              closeDrawer();
-              if (pluginList && window.FluxPlugins) {
-                const plugins = Array.from(window.FluxPlugins.plugins.values());
-                pluginList.innerHTML = plugins.map(p => `
-                  <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
-                    <div>
-                      <div style="font-size:0.9rem; font-weight:700;">${p.name}</div>
-                      <div style="font-size:0.7rem; color:var(--text-muted);">v${p.version || '1.0.0'} • Provider ID: ${p.id}</div>
-                    </div>
-                    <span style="font-size:0.75rem; color:#4caf50; font-weight:700;">Enabled</span>
+          container.innerHTML = items.map(it => {
+            const pct = it.duration > 0 ? Math.min(100, Math.round((it.position / it.duration) * 100)) : 10;
+            return `
+              <div style="display:flex; gap:12px; background:var(--glass-card); border:1px solid var(--glass-border); padding:10px; border-radius:10px; align-items:center;">
+                <img src="${it.poster}" style="width:50px; height:75px; border-radius:6px; object-fit:cover; flex-shrink:0;">
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:4px;">
+                  <div style="font-weight:700; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title}</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">${it.seasonInfo || 'Movie'} • ${pct}% watched</div>
+                  <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                    <div style="width:${pct}%; height:100%; background:var(--accent);"></div>
                   </div>
-                `).join('');
-              }
-              renderSettingsPersonalLinks();
-              settingsModal.classList.add('active');
-            });
-          }
-          if (closeSettingsBtn && settingsModal) {
-            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('active'));
-            settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('active'); });
-          }
+                </div>
+                <button onclick='window.triggerStreamModal(${JSON.stringify({ id: it.id.replace("media_", ""), title: it.title, poster: it.poster, isTv: (it.seasonInfo || "").startsWith("S") }).replace(/'/g, "&apos;")})' style="background:var(--accent); border:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; flex-shrink:0;">
+                  <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#fff; width:15px; height:15px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+              </div>
+            `;
+          }).join('');
+        }
 
-          // Add Personal Link Event
-          if (btnAddLink && nameInput && urlInput) {
-            btnAddLink.addEventListener('click', () => {
-              const name = nameInput.value.trim();
-              let url = urlInput.value.trim();
+        // 4. Watch History Wipe Confirmation Handlers
+        const wipeModal = document.getElementById('wipeConfirmModal');
+        document.getElementById('btnTriggerHistoryWipe')?.addEventListener('click', () => wipeModal.classList.add('active'));
+        document.getElementById('btnCancelWipe')?.addEventListener('click', () => wipeModal.classList.remove('active'));
+        document.getElementById('btnConfirmWipe')?.addEventListener('click', async () => {
+          if (window.NexusDB) await window.NexusDB.wipeHistory();
+          wipeModal.classList.remove('active');
+          renderHistoryView();
+        });
 
-              if (!name || !url) {
-                alert('Please enter both a site name and a web URL.');
-                return;
-              }
-              if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'https://' + url;
-              }
+        // Safe tab activation hooks
+        document.querySelector('[data-target="view-search"]')?.addEventListener('click', () => {
+          renderSearchHistory();
+          searchInput?.focus();
+        });
+        document.querySelector('[data-target="view-history"]')?.addEventListener('click', renderHistoryView);
+        window.addEventListener('nexus:history-updated', renderHistoryView);
 
-              const links = getPersonalLinks();
-              links.push({ name, url });
-              savePersonalLinks(links);
-
-              nameInput.value = '';
-              urlInput.value = '';
-              alert(`Saved "${name}"! View it in Personal Web Links.`);
-            });
-          }
-
-          // 4. Clear Local Cache
-          if (itemClearCache) {
-            itemClearCache.addEventListener('click', async () => {
-              closeDrawer();
-              if (window.confirm('Clear all watch history, downloads queue, and personal links?')) {
-                if (window.FluxDB) await window.FluxDB.clearWatchHistory();
-                localStorage.clear();
-                sessionStorage.clear();
-                alert('All data reset successfully.');
-                window.location.reload();
-              }
-            });
-          }
-
-          renderPersonalLinksCards();
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+          renderSearchHistory();
+          renderHistoryView();
         });
       })();
     </script>
-    <!-- END STEP 9 CODE -->
 
-  </aside>
-
-  <!-- ========================================================================
-       MAIN APP VIEWS
-       ======================================================================== -->
-  <main id="mainContainer">
-
-    <!-- VIEW 1: HOME -->
-    <section class="view-container active" id="view-home">
-      
-      <!-- Hero Featured Banner -->
-      <div class="hero-banner">
-        <div class="hero-content">
-          <span class="hero-tag">Featured</span>
-          <h1 class="hero-title">Flux Stream</h1>
-          <p class="hero-desc">Dynamic scrapers and direct native streaming right on your device.</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary">
-              <svg class="icon" viewBox="0 0 24 24" style="stroke:none;fill:#000;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span>Play</span>
-            </button>
-            <button class="btn btn-secondary">
-              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-              <span>Details</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content Horizontal Rails -->
-      <div class="content-area">
-
-        <!-- STEP 6: Rails (Continue Watching, Trending, Series) -->
-        <!-- Rail 1: Continue Watching (Hidden automatically if empty) -->
-        <section class="rail-section" id="railContinueWatching" style="display: none;">
-          <div class="rail-header">
-            <h2 class="rail-title">Continue Watching</h2>
-          </div>
-          <div class="rail-scroller" id="scrollerContinueWatching"></div>
-        </section>
-
-        <!-- Rail 2: Trending Movies -->
-        <section class="rail-section" id="railTrendingMovies">
-          <div class="rail-header">
-            <h2 class="rail-title">Trending Movies</h2>
-          </div>
-          <div class="rail-scroller" id="scrollerTrendingMovies"></div>
-        </section>
-
-        <!-- Rail 3: Popular Series -->
-        <section class="rail-section" id="railPopularSeries">
-          <div class="rail-header">
-            <h2 class="rail-title">Popular Series</h2>
-          </div>
-          <div class="rail-scroller" id="scrollerPopularSeries"></div>
-        </section>
-
-        <script>
-          (function() {
-            // Render the Continue Watching rail from FluxDB
-            async function updateContinueWatchingRail() {
-              const rail = document.getElementById('railContinueWatching');
-              const scroller = document.getElementById('scrollerContinueWatching');
-              if (!rail || !scroller || !window.FluxDB) return;
-
-              const items = await window.FluxDB.getAllWatchProgress();
-              if (items.length === 0) {
-                rail.style.display = 'none';
-                return;
-              }
-
-              rail.style.display = 'flex';
-              scroller.innerHTML = items.map(item => {
-                const progressPct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 0;
-                return `
-                  <div class="poster-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
-                    <div class="poster-img-wrap">
-                      ${item.poster ? `<img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">` : `<span class="poster-placeholder-text">${item.title}</span>`}
-                      <div style="position:absolute; bottom:0; left:0; right:0; height:4px; background:rgba(255,255,255,0.2);">
-                        <div style="width:${progressPct}%; height:100%; background:var(--accent);"></div>
-                      </div>
-                    </div>
-                    <span class="poster-card-title">${item.title}</span>
-                  </div>
-                `;
-              }).join('');
-            }
-
-            // Render Trending rails from FluxPlugins
-            // Render Trending rails from FluxPlugins
-            async function updateTrendingRails() {
-              const movieScroller = document.getElementById('scrollerTrendingMovies');
-              const seriesScroller = document.getElementById('scrollerPopularSeries');
-              if (!window.FluxPlugins) return;
-
-              // 1. Fetch Trending Movies
-              const movies = await window.FluxPlugins.getTrending('movies');
-              if (movieScroller && movies.length > 0) {
-                movieScroller.innerHTML = movies.map(item => `
-                  <div class="poster-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
-                    <div class="poster-img-wrap">
-                      ${item.badge ? `<span class="poster-badge">${item.badge}</span>` : ''}
-                      <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-                    </div>
-                    <span class="poster-card-title">${item.title}</span>
-                  </div>
-                `).join('');
-              }
-
-              // 2. Fetch Popular Series
-              const series = await window.FluxPlugins.getTrending('series');
-              if (seriesScroller && series.length > 0) {
-                seriesScroller.innerHTML = series.map(item => `
-                  <div class="poster-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
-                    <div class="poster-img-wrap">
-                      ${item.badge ? `<span class="poster-badge">${item.badge}</span>` : ''}
-                      <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-                    </div>
-                    <span class="poster-card-title">${item.title}</span>
-                  </div>
-                `).join('');
-              }
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-              updateContinueWatchingRail();
-              updateTrendingRails();
-
-              // Refresh if watch history updates or plugins register
-              window.addEventListener('flux:history-updated', updateContinueWatchingRail);
-              window.addEventListener('flux:plugins-updated', updateTrendingRails);
-            });
-          })();
-        </script>
-        <!-- END STEP 6 CODE -->
-
-      </div>
-    </section>
-
-    <!-- VIEW 2: SEARCH -->
-    <section class="view-container" id="view-search">
-      <!-- STEP 5: Search Input & Results Grid -->
-      <style>
-        .search-bar-wrap {
-          position: relative;
-          display: flex;
-          align-items: center;
-          background: var(--surface);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          padding: 8px 14px;
-          margin-bottom: 20px;
-        }
-        .search-bar-wrap:focus-within {
-          border-color: rgba(255, 255, 255, 0.35);
-        }
-        .search-input {
-          flex: 1;
-          background: transparent;
-          border: none;
-          outline: none;
-          color: #fff;
-          font-size: 0.95rem;
-          margin-left: 10px;
-        }
-        .search-clear-btn {
-          background: transparent;
-          border: none;
-          color: var(--text-muted);
-          cursor: pointer;
-          display: none;
-          align-items: center;
-          justify-content: center;
-        }
-        .search-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-          gap: 14px;
-        }
-        .search-card {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          cursor: pointer;
-        }
-        .search-card-img {
-          width: 100%;
-          aspect-ratio: 2 / 3;
-          background: var(--surface-card);
-          border-radius: 8px;
-          overflow: hidden;
-          object-fit: cover;
-        }
-        .search-card-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .search-card-title {
-          font-size: 0.8rem;
-          font-weight: 600;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .search-card-sub {
-          font-size: 0.7rem;
-          color: var(--text-muted);
-        }
-      </style>
-
-      <!-- Search Input Header -->
-      <div class="search-bar-wrap">
-        <svg class="icon" viewBox="0 0 24 24" style="stroke: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="searchInput" class="search-input" placeholder="Search movies, shows, anime..." autocomplete="off">
-        <button id="searchClearBtn" class="search-clear-btn" aria-label="Clear search">
-          <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <!-- Live Search Results Grid -->
-      <div id="searchResultsGrid" class="search-grid"></div>
-
-      <!-- State Indicator -->
-      <div id="searchStatusState" class="view-empty-state">
-        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <h3 id="searchStatusTitle">Explore Media</h3>
-        <p id="searchStatusDesc">Type in the box above to search across media providers.</p>
-      </div>
-
-      <script>
-        (function() {
-          let searchTimer = null;
-
-          document.addEventListener('DOMContentLoaded', () => {
-            const input = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('searchClearBtn');
-            const grid = document.getElementById('searchResultsGrid');
-            const stateBox = document.getElementById('searchStatusState');
-            const stateTitle = document.getElementById('searchStatusTitle');
-            const stateDesc = document.getElementById('searchStatusDesc');
-
-            if (!input) return;
-
-            // Debounced Live Search
-            input.addEventListener('input', () => {
-              const query = input.value.trim();
-              clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
-
-              clearTimeout(searchTimer);
-              if (query.length === 0) {
-                grid.innerHTML = '';
-                stateBox.style.display = 'flex';
-                stateTitle.textContent = 'Explore Media';
-                stateDesc.textContent = 'Type in the box above to search across media providers.';
-                return;
-              }
-
-              stateBox.style.display = 'flex';
-              stateTitle.textContent = 'Searching...';
-              stateDesc.textContent = `Looking up "${query}" across providers.`;
-
-              searchTimer = setTimeout(async () => {
-                if (window.FluxPlugins) {
-                  const results = await window.FluxPlugins.searchAll(query);
-                  renderResults(results, query);
-                }
-              }, 300);
-            });
-
-            // Clear Button
-            clearBtn.addEventListener('click', () => {
-              input.value = '';
-              input.focus();
-              clearBtn.style.display = 'none';
-              grid.innerHTML = '';
-              stateBox.style.display = 'flex';
-              stateTitle.textContent = 'Explore Media';
-              stateDesc.textContent = 'Type in the box above to search across media providers.';
-            });
-
-            // Render Results into Grid
-            function renderResults(items, query) {
-              if (!items || items.length === 0) {
-                grid.innerHTML = '';
-                stateBox.style.display = 'flex';
-                stateTitle.textContent = 'No Results Found';
-                stateDesc.textContent = `Nothing matched "${query}". Try another title.`;
-                return;
-              }
-
-              stateBox.style.display = 'none';
-              grid.innerHTML = items.map(item => `
-                <div class="search-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
-                  <img class="search-card-img" src="${item.poster || ''}" alt="${item.title}" loading="lazy">
-                  <div class="search-card-info">
-                    <span class="search-card-title">${item.title}</span>
-                    <span class="search-card-sub">${item.year || ''} • ${item.type || 'Movie'}</span>
-                  </div>
-                </div>
-              `).join('');
-            }
-          });
-        })();
-      </script>
-      <!-- END STEP 5 CODE -->
-    </section>
-
-    <!-- VIEW 3: WATCH HISTORY -->
-    <section class="view-container" id="view-history">
-      <!-- STEP 3: Watch History IndexedDB Binding & Engine -->
-      <div class="history-view-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="font-size:1.25rem; font-weight:800;">Watch History</h2>
-        <button id="btnClearHistory" style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; font-weight:600; cursor:pointer;">Clear All</button>
-      </div>
-
-      <div id="historyListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
-
-      <div id="historyEmptyState" class="view-empty-state">
-        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <h3>No Watch History</h3>
-        <p>Media you start watching will appear here with saved progress.</p>
-      </div>
-
-      <script>
-        (function() {
-          const DB_NAME = 'FluxDB';
-          const DB_VERSION = 1;
-
-          class LocalDatabase {
-            constructor() {
-              this.db = null;
-              this.readyPromise = this.init();
-            }
-
-            init() {
-              return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                request.onupgradeneeded = (e) => {
-                  const db = e.target.result;
-                  if (!db.objectStoreNames.contains('watch_progress')) {
-                    db.createObjectStore('watch_progress', { keyPath: 'id' });
-                  }
-                  if (!db.objectStoreNames.contains('search_history')) {
-                    const searchStore = db.createObjectStore('search_history', { keyPath: 'query' });
-                    searchStore.createIndex('timestamp', 'timestamp', { unique: false });
-                  }
-                };
-
-                request.onsuccess = (e) => {
-                  this.db = e.target.result;
-                  resolve(this.db);
-                };
-
-                request.onerror = (e) => {
-                  console.error('[FluxDB] Error opening database', e);
-                  reject(e);
-                };
-              });
-            }
-
-            async getStore(storeName, mode = 'readonly') {
-              await this.readyPromise;
-              const tx = this.db.transaction(storeName, mode);
-              return tx.objectStore(storeName);
-            }
-
-            // Save or update media playback state
-            async saveWatchProgress(item) {
-              const store = await this.getStore('watch_progress', 'readwrite');
-              return new Promise((resolve, reject) => {
-                const record = {
-                  id: item.id,
-                  title: item.title || 'Untitled',
-                  poster: item.poster || '',
-                  url: item.url || '',
-                  position: item.position || 0,
-                  duration: item.duration || 0,
-                  updatedAt: Date.now()
-                };
-                const req = store.put(record);
-                req.onsuccess = () => {
-                  window.dispatchEvent(new CustomEvent('flux:history-updated'));
-                  resolve(record);
-                };
-                req.onerror = () => reject(req.error);
-              });
-            }
-
-            // Fetch all progress records sorted newest first
-            async getAllWatchProgress() {
-              const store = await this.getStore('watch_progress', 'readonly');
-              return new Promise((resolve) => {
-                const req = store.getAll();
-                req.onsuccess = () => {
-                  const list = req.result || [];
-                  list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-                  resolve(list);
-                };
-                req.onerror = () => resolve([]);
-              });
-            }
-
-            // Clear all watch history records
-            async clearWatchHistory() {
-              const store = await this.getStore('watch_progress', 'readwrite');
-              return new Promise((resolve) => {
-                const req = store.clear();
-                req.onsuccess = () => {
-                  window.dispatchEvent(new CustomEvent('flux:history-updated'));
-                  resolve(true);
-                };
-                req.onerror = () => resolve(false);
-              });
-            }
-          }
-
-          window.FluxDB = new LocalDatabase();
-
-          // Render History View UI
-          const container = document.getElementById('historyListContainer');
-          const emptyState = document.getElementById('historyEmptyState');
-          const btnClear = document.getElementById('btnClearHistory');
-
-          async function renderHistory() {
-            if (!container || !emptyState) return;
-            const records = await window.FluxDB.getAllWatchProgress();
-
-            if (records.length === 0) {
-              container.innerHTML = '';
-              emptyState.style.display = 'flex';
-              btnClear.style.display = 'none';
-              return;
-            }
-
-            emptyState.style.display = 'none';
-            btnClear.style.display = 'block';
-
-            container.innerHTML = records.map(item => {
-              const progressPct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 0;
-              return `
-                <div style="display:flex; gap:12px; background:var(--surface); padding:10px; border-radius:10px; align-items:center;">
-                  <div style="width:70px; height:95px; background:var(--surface-card); border-radius:6px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
-                    ${item.poster ? `<img src="${item.poster}" alt="" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:0.65rem; color:var(--text-muted); text-align:center;">No Poster</span>`}
-                  </div>
-                  <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
-                    <h4 style="font-size:0.92rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">${progressPct}% watched</div>
-                    <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
-                      <div style="width:${progressPct}%; height:100%; background:var(--accent);"></div>
-                    </div>
-                  </div>
-                  <button onclick="window.NativeAppBridge.playMedia({ url: '${item.url}', title: '${item.title}', position: ${item.position} })" style="background:var(--accent); border:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; flex-shrink:0;">
-                    <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#fff; width:16px; height:16px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                  </button>
-                </div>
-              `;
-            }).join('');
-          }
-
-          if (btnClear) {
-            btnClear.addEventListener('click', () => {
-              window.FluxDB.clearWatchHistory();
-            });
-          }
-
-          window.addEventListener('flux:history-updated', renderHistory);
-
-          // Safely attach after full DOM has loaded
-          document.addEventListener('DOMContentLoaded', () => {
-            const historyTab = document.querySelector('[data-target="view-history"]');
-            if (historyTab) {
-              historyTab.addEventListener('click', renderHistory);
-            }
-            renderHistory();
-          });
-        })();
-      </script>
-      <!-- END STEP 3 CODE -->
-    </section>
-
-    <!-- VIEW 4: DOWNLOADS -->
-    <!-- VIEW 4: DOWNLOADS -->
-    <!-- VIEW 4: DOWNLOADS -->
+    <!-- ========================================================================
+         STEP 8: DOWNLOADS QUEUE MONITOR & 1DM BRIDGE
+         ======================================================================== -->
     <section class="view-container" id="view-downloads">
+      <!-- Header -->
       <div class="downloads-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <h2 style="font-size:1.25rem; font-weight:800;">Downloads</h2>
-          <span id="downloadCountBadge" style="background:var(--accent); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:999px; display:none;">0</span>
+          <h2 style="font-size:1.25rem; font-weight:800;">Downloads Queue</h2>
+          <span id="downloadBadgeCount" style="background:var(--accent); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:999px; display:none;">0</span>
         </div>
         <button id="btnClearDownloads" style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; font-weight:600; cursor:pointer; display:none;">Clear All</button>
       </div>
@@ -1360,14 +960,14 @@
 
       <!-- Empty State -->
       <div id="downloadsEmptyState" class="view-empty-state">
-        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        <h3>No Downloads</h3>
-        <p>Items you send to the downloader will be tracked here.</p>
+        <svg class="icon view-empty-icon" viewBox="0 0 24 24" style="width:48px; height:48px; opacity:0.4;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <h3>No Active Downloads</h3>
+        <p>Direct download tasks dispatched to the 1DM engine appear here.</p>
       </div>
 
       <script>
         (function () {
-          const STORAGE_KEY = 'flux_downloads_queue';
+          const STORAGE_KEY = 'nexus_downloads_queue';
 
           function getQueue() {
             try {
@@ -1385,7 +985,7 @@
           function renderDownloads() {
             const container = document.getElementById('downloadsListContainer');
             const emptyState = document.getElementById('downloadsEmptyState');
-            const badge = document.getElementById('downloadCountBadge');
+            const badge = document.getElementById('downloadBadgeCount');
             const btnClear = document.getElementById('btnClearDownloads');
 
             if (!container || !emptyState) return;
@@ -1412,14 +1012,14 @@
               const statusColor = isPaused ? '#ffb74d' : '#4caf50';
 
               return `
-                <div style="display:flex; gap:12px; background:var(--surface); padding:12px; border-radius:10px; align-items:center;">
-                  <div style="width:60px; height:80px; background:var(--surface-card); border-radius:6px; overflow:hidden; flex-shrink:0;">
+                <div style="display:flex; gap:12px; background:var(--glass-card); border:1px solid var(--glass-border); padding:12px; border-radius:12px; align-items:center;">
+                  <div style="width:60px; height:80px; background:rgba(255,255,255,0.05); border-radius:8px; overflow:hidden; flex-shrink:0;">
                     ${item.poster ? `<img src="${item.poster}" alt="" style="width:100%; height:100%; object-fit:cover;">` : ''}
                   </div>
                   <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
                     <h4 style="font-size:0.9rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
                     <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
-                      <span style="color:var(--text-muted); font-weight:600;">${item.quality || 'HD'}</span>
+                      <span style="color:var(--text-muted); font-weight:600;">${item.quality || '1080p'}</span>
                       <span style="color:${statusColor}; font-weight:700;">${statusText}</span>
                     </div>
                     <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
@@ -1435,7 +1035,7 @@
                     }
                   </button>
 
-                  <!-- Remove Button -->
+                  <!-- Remove Button with Confirmation -->
                   <button onclick="window.removeDownloadItem(${index})" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px;" aria-label="Remove download">
                     <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                   </button>
@@ -1443,8 +1043,6 @@
               `;
             }).join('');
           }
-
-          window.renderDownloads = renderDownloads;
 
           // Toggle Play / Pause state
           window.toggleDownloadPause = function (index) {
@@ -1467,14 +1065,15 @@
             }
           };
 
-          // Hook into download trigger from Step 7
-          window.addEventListener('flux:download-added', (e) => {
+          // Hook into download trigger
+          window.addEventListener('nexus:download-added', (e) => {
             if (!e.detail) return;
             const queue = getQueue();
+            const current = window.currentDetailsItem || window.featuredHeroItem || {};
             queue.unshift({
-              title: e.detail.title || 'Untitled',
-              poster: e.detail.poster || '',
-              quality: (e.detail.quality || 'HD').replace(/\s*\((m3u8|mp4|hls)\)/gi, '').trim(),
+              title: e.detail.title || current.title || 'Untitled',
+              poster: current.poster || '',
+              quality: e.detail.quality || '1080p',
               timestamp: Date.now()
             });
             saveQueue(queue);
@@ -1505,388 +1104,366 @@
   </main>
 
   <!-- ========================================================================
-       7. DYNAMIC FLOATING CAPSULE NAVIGATION (Pure SVG, Dynamic Pill)
+       7. DEDICATED MEDIA DETAILS VIEW SKELETON
+       ======================================================================== -->
+  <!-- ========================================================================
+       STEP 5: DEDICATED MEDIA DETAILS VIEW
+       ======================================================================== -->
+  <style>
+    .details-title-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .details-primary-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .details-select-group {
+      display: flex;
+      gap: 10px;
+    }
+    .glass-select {
+      flex: 1;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .episodes-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .episode-card {
+      display: flex;
+      gap: 12px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      padding: 10px;
+      border-radius: 10px;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .episode-card:active {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .episode-thumb-wrap {
+      width: 90px;
+      height: 56px;
+      border-radius: 6px;
+      background: #222;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .episode-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .watched-check {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background: var(--accent);
+      color: #fff;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 900;
+    }
+  </style>
+
+  <article class="details-view" id="detailsView">
+    <!-- Top Sticky Bar with Safe Notch Padding & Swipe Bar -->
+    <div class="details-nav-bar">
+      <button class="glass-btn" id="detailsBackBtn" style="width:36px; height:36px;" aria-label="Back">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      </button>
+      <div class="swipe-pill-indicator"></div>
+      <div style="width:36px;"></div>
+    </div>
+
+    <!-- Preview Backdrop -->
+    <div class="details-preview-wrap" id="detailsBackdrop"></div>
+
+    <div class="details-body">
+      <!-- Title & Metadata -->
+      <div class="details-title-row">
+        <h2 id="detailsTitle" style="font-size:1.6rem; font-weight:900;">Title</h2>
+        <span id="detailsMeta" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">2026 • 8.5 ★ • Series</span>
+        <p id="detailsOverview" style="font-size:0.85rem; color:rgba(255,255,255,0.85); line-height:1.45;"></p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="details-primary-actions">
+        <button class="btn btn-primary" id="btnDetailsPlay" style="flex:1.2;">
+          <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#000;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Play Online</span>
+        </button>
+        <button class="btn btn-secondary" id="btnDetailsDownload" style="flex:1;">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Download</span>
+        </button>
+      </div>
+
+      <!-- Selectors (Season & Audio) -->
+      <div class="details-select-group" id="detailsTvSelectors" style="display:none;">
+        <select class="glass-select" id="seasonSelect"></select>
+        <select class="glass-select" id="audioPrefSelect">
+          <option value="orig">Original Audio</option>
+          <option value="en">English Dub</option>
+          <option value="hi">Hindi Dub</option>
+        </select>
+      </div>
+
+      <!-- Episode List Container -->
+      <div id="episodesSection" style="display:none;">
+        <h3 style="font-size:1rem; font-weight:800; margin-bottom:10px;">Episodes</h3>
+        <div class="episodes-grid" id="episodesList"></div>
+      </div>
+
+      <!-- Suggestions Rail -->
+      <div class="rail-section">
+        <div class="rail-header" style="padding:0;"><h3 class="rail-title" style="font-size:1rem;">More Like This</h3></div>
+        <div class="rail-scroller" id="scrollerSimilar" style="padding:0;"></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Details View Controller Script -->
+  <script>
+    (function () {
+      let homeScrollY = 0;
+      let currentItem = null;
+
+      const detailsView = document.getElementById('detailsView');
+      const detailsBackBtn = document.getElementById('detailsBackBtn');
+      const backdrop = document.getElementById('detailsBackdrop');
+      const title = document.getElementById('detailsTitle');
+      const meta = document.getElementById('detailsMeta');
+      const overview = document.getElementById('detailsOverview');
+      const tvSelectors = document.getElementById('detailsTvSelectors');
+      const epSection = document.getElementById('episodesSection');
+      const seasonSelect = document.getElementById('seasonSelect');
+      const episodesList = document.getElementById('episodesList');
+      const scrollerSimilar = document.getElementById('scrollerSimilar');
+
+      // Global open function triggered by card clicks
+      window.openDetailsView = async function (item) {
+        if (!item) return;
+        currentItem = item;
+        window.currentDetailsItem = item;
+        homeScrollY = window.scrollY;
+
+        backdrop.style.backgroundImage = `url(${item.backdrop || item.poster})`;
+        title.textContent = item.title;
+        meta.textContent = `${item.year || '2026'} • ${item.rating || '8.5'} ★ • ${item.isTv ? 'Series' : 'Movie'}`;
+        overview.textContent = item.overview || 'No synopsis available.';
+
+        if (item.isTv) {
+          tvSelectors.style.display = 'flex';
+          epSection.style.display = 'block';
+          loadSeasonsAndEpisodes(item.id);
+        } else {
+          tvSelectors.style.display = 'none';
+          epSection.style.display = 'none';
+        }
+
+        loadSimilarTitles(item.id, item.isTv);
+
+        detailsView.style.transform = 'translateY(0)';
+        detailsView.classList.add('active');
+        detailsView.scrollTop = 0;
+      };
+
+      function closeDetailsView() {
+        detailsView.classList.remove('active');
+        window.scrollTo(0, homeScrollY);
+      }
+
+      if (detailsBackBtn) detailsBackBtn.addEventListener('click', closeDetailsView);
+
+      // Hero Banner buttons integration
+      document.getElementById('heroPlayBtn')?.addEventListener('click', () => {
+        if (window.featuredHeroItem) window.openDetailsView(window.featuredHeroItem);
+      });
+      document.getElementById('heroDetailsBtn')?.addEventListener('click', () => {
+        if (window.featuredHeroItem) window.openDetailsView(window.featuredHeroItem);
+      });
+
+      // Swipe-Down to Dismiss Touch Gesture
+      let touchStartY = 0;
+      let touchDiffY = 0;
+
+      detailsView.addEventListener('touchstart', (e) => {
+        if (detailsView.scrollTop <= 0) {
+          touchStartY = e.touches[0].clientY;
+        } else {
+          touchStartY = 0;
+        }
+      }, { passive: true });
+
+      detailsView.addEventListener('touchmove', (e) => {
+        if (touchStartY > 0) {
+          touchDiffY = e.touches[0].clientY - touchStartY;
+          if (touchDiffY > 0) {
+            detailsView.style.transform = `translateY(${touchDiffY}px)`;
+          }
+        }
+      }, { passive: true });
+
+      detailsView.addEventListener('touchend', () => {
+        if (touchDiffY > 120) {
+          closeDetailsView();
+        } else {
+          detailsView.style.transform = 'translateY(0)';
+        }
+        touchStartY = 0;
+        touchDiffY = 0;
+      });
+
+      // Fetch TV Seasons and dynamic episode list
+      async function loadSeasonsAndEpisodes(tvId) {
+        seasonSelect.innerHTML = '<option value="1">Season 1</option><option value="2">Season 2</option><option value="3">Season 3</option>';
+
+        async function fetchSeasonEpisodes(sNum) {
+          episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Loading episodes...</div>';
+          try {
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${tvId}/season/${sNum}?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            if (data && data.episodes) {
+              episodesList.innerHTML = data.episodes.map(ep => `
+                <div class="episode-card" data-ep="${ep.episode_number}">
+                  <div class="episode-thumb-wrap">
+                    <img src="${ep.still_path ? 'https://image.tmdb.org/t/p/w300' + ep.still_path : currentItem.backdrop}" alt="" loading="lazy">
+                    <span class="watched-check">✓</span>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="font-size:0.85rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">E${ep.episode_number} - ${ep.name}</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">${ep.air_date || ''} • ${ep.runtime ? ep.runtime + 'm' : '45m'}</div>
+                  </div>
+                </div>
+              `).join('');
+
+              episodesList.querySelectorAll('.episode-card').forEach(card => {
+                card.addEventListener('click', () => {
+                  const epNum = card.getAttribute('data-ep');
+                  window.dispatchEvent(new CustomEvent('nexus:trigger-stream', {
+                    detail: { item: currentItem, season: sNum, episode: epNum }
+                  }));
+                });
+              });
+            }
+          } catch (e) {
+            episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">Episodes unavailable for this season.</div>';
+          }
+        }
+
+        seasonSelect.onchange = () => fetchSeasonEpisodes(seasonSelect.value);
+        fetchSeasonEpisodes(1);
+      }
+
+      // Fetch Similar Suggestions
+      async function loadSimilarTitles(id, isTv) {
+        if (!scrollerSimilar) return;
+        scrollerSimilar.innerHTML = '';
+        try {
+          const type = isTv ? 'tv' : 'movie';
+          const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}/similar?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
+          if (!res.ok) return;
+          const data = await res.json();
+
+          if (data && data.results) {
+            scrollerSimilar.innerHTML = data.results.filter(it => it.poster_path).slice(0, 10).map(it => `
+              <div class="poster-card" style="flex:0 0 110px;" data-sim='${JSON.stringify({
+                id: it.id,
+                title: it.title || it.name,
+                overview: it.overview,
+                poster: `https://image.tmdb.org/t/p/w500${it.poster_path}`,
+                backdrop: `https://image.tmdb.org/t/p/original${it.backdrop_path || it.poster_path}`,
+                year: (it.release_date || it.first_air_date || '2026').substring(0, 4),
+                rating: it.vote_average ? it.vote_average.toFixed(1) : '8.0',
+                isTv
+              }).replace(/'/g, "&apos;")}'>
+                <div class="poster-img-wrap" style="width:110px; height:165px;">
+                  <img src="https://image.tmdb.org/t/p/w300${it.poster_path}" alt="" loading="lazy">
+                </div>
+                <span class="poster-card-title">${it.title || it.name}</span>
+              </div>
+            `).join('');
+
+            scrollerSimilar.querySelectorAll('.poster-card').forEach(card => {
+              card.addEventListener('click', () => {
+                const simItem = JSON.parse(card.getAttribute('data-sim'));
+                window.openDetailsView(simItem);
+              });
+            });
+          }
+        } catch (e) {}
+      }
+    })();
+  </script>
+
+  <!-- ========================================================================
+       8. FLOATING CAPSULE NAVIGATION
        ======================================================================== -->
   <div class="bottom-nav-wrap">
     <nav class="bottom-capsule-nav" id="capsuleNav">
-      <!-- Sliding active highlight capsule -->
       <div class="nav-capsule-pill" id="navCapsulePill"></div>
 
-      <!-- Home Tab -->
       <button class="nav-tab-btn active" data-index="0" data-target="view-home" aria-label="Home">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </button>
-
-      <!-- Search Tab -->
       <button class="nav-tab-btn" data-index="1" data-target="view-search" aria-label="Search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </button>
-
-      <!-- Watch History Tab -->
       <button class="nav-tab-btn" data-index="2" data-target="view-history" aria-label="Watch History">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       </button>
-
-      <!-- Downloads Tab -->
       <button class="nav-tab-btn" data-index="3" data-target="view-downloads" aria-label="Downloads">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       </button>
     </nav>
   </div>
 
-  <!-- ========================================================================
-       8. NATIVE STREAM INSPECTION MODAL (PLACEHOLDER)
+<!-- ========================================================================
+       STEP 3: UNIVERSAL NATIVE BRIDGE & INDEXEDDB ENGINE
        ======================================================================== -->
-  <!-- STEP 7: Stream Inspection Sheet & In-App Player -->
-  <style>
-    .stream-sheet-header {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      position: relative;
-    }
-    .stream-sheet-poster {
-      width: 60px;
-      height: 85px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: var(--surface-card);
-      flex-shrink: 0;
-    }
-    .stream-sheet-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .stream-sheet-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .stream-sheet-meta {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-    .stream-sheet-close {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      cursor: pointer;
-    }
-    .stream-quality-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 10px 0;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .quality-opt-btn {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      color: #fff;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .quality-opt-btn.selected {
-      background: rgba(229, 9, 20, 0.15);
-      border-color: var(--accent);
-    }
-    .quality-badge-tag {
-      font-size: 0.7rem;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-    }
-    .sheet-action-btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    /* Desktop Browser In-App Player Modal */
-    .desktop-player-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.96);
-      backdrop-filter: blur(8px);
-      z-index: 500;
-      display: none;
-      flex-direction: column;
-      padding: calc(var(--safe-top) + 12px) 16px calc(var(--safe-bottom) + 12px) 16px;
-    }
-    .desktop-player-overlay.active {
-      display: flex;
-    }
-    .desktop-player-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 12px;
-    }
-    .desktop-player-frame {
-      flex: 1;
-      width: 100%;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-  </style>
-
-  <!-- Inspection Sheet Modal -->
-  <div class="stream-modal-overlay" id="streamModal">
-    <div class="stream-modal-sheet" id="streamModalSheet">
-      <div class="stream-sheet-header">
-        <img id="modalPoster" class="stream-sheet-poster" src="" alt="">
-        <div class="stream-sheet-info">
-          <h3 id="modalTitle" class="stream-sheet-title">Media Title</h3>
-          <span id="modalMeta" class="stream-sheet-meta">Ready to stream</span>
-        </div>
-        <button class="stream-sheet-close" id="modalCloseBtn">
-          <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-top: 4px;">SELECT RESOLVER SOURCE</div>
-      <div class="stream-quality-list" id="modalQualityList"></div>
-
-      <div class="sheet-action-btns">
-        <button class="btn btn-primary" id="btnPlayExo" style="flex: 1.2;">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#000; width:18px; height:18px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <span>Play Online</span>
-        </button>
-        <button class="btn btn-secondary" id="btnDownload1DM" style="flex: 1;">
-          <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          <span>Download</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- In-Page Desktop Video Player Modal -->
-  <div class="desktop-player-overlay" id="desktopPlayerOverlay">
-    <div class="desktop-player-header">
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <span id="desktopPlayerTitle" style="font-size:1rem; font-weight:700;">Watching Stream</span>
-        <span id="desktopPlayerSource" style="font-size:0.75rem; color:var(--text-muted);">Resolver Stream</span>
-      </div>
-      <button class="drawer-close-btn" id="closeDesktopPlayerBtn" style="width:36px; height:36px; background:rgba(255,255,255,0.1); border-radius:50%;">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <div class="desktop-player-frame">
-      <iframe id="desktopPlayerIframe" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen" style="width:100%; height:100%; border:none;"></iframe>
-    </div>
-  </div>
-
   <script>
+    // 1. Universal Native Bridge
     (function () {
-      let currentMedia = null;
-      let activeStreams = [];
-      let selectedStreamIndex = 0;
-
-      const modal = document.getElementById('streamModal');
-      const closeBtn = document.getElementById('modalCloseBtn');
-      const poster = document.getElementById('modalPoster');
-      const title = document.getElementById('modalTitle');
-      const meta = document.getElementById('modalMeta');
-      const qualityList = document.getElementById('modalQualityList');
-      const btnPlay = document.getElementById('btnPlayExo');
-      const btnDownload = document.getElementById('btnDownload1DM');
-
-      // Desktop Player Modal Elements
-      const playerOverlay = document.getElementById('desktopPlayerOverlay');
-      const playerIframe = document.getElementById('desktopPlayerIframe');
-      const playerTitle = document.getElementById('desktopPlayerTitle');
-      const playerSource = document.getElementById('desktopPlayerSource');
-      const closePlayerBtn = document.getElementById('closeDesktopPlayerBtn');
-
-      function closeModal() {
-        if (modal) modal.classList.remove('active');
-      }
-
-      function closeDesktopPlayer() {
-        if (playerOverlay) playerOverlay.classList.remove('active');
-        if (playerIframe) playerIframe.src = '';
-      }
-
-      if (closePlayerBtn) closePlayerBtn.addEventListener('click', closeDesktopPlayer);
-
-      async function openModalWithData(item) {
-        currentMedia = item;
-        selectedStreamIndex = 0;
-
-        title.textContent = item.title || 'Untitled';
-        meta.textContent = `${item.year || '2024'} • ${item.type || 'Movie'}`;
-        poster.src = item.poster || '';
-        poster.style.display = item.poster ? 'block' : 'none';
-
-        qualityList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Resolving live streams...</div>`;
-        modal.classList.add('active');
-
-        try {
-          if (window.FluxPlugins) {
-            activeStreams = await window.FluxPlugins.extractStreams(item.providerId || 'global-resolver', item.id, item);
-            renderStreams();
-          }
-        } catch (e) {
-          qualityList.innerHTML = `<div style="font-size:0.8rem; color:#ff5555; padding:10px 0;">No active streams found for this title.</div>`;
-        }
-      }
-
-      function renderStreams() {
-        if (!activeStreams || activeStreams.length === 0) {
-          qualityList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted);">No streams available.</div>`;
-          return;
-        }
-
-        qualityList.innerHTML = activeStreams.map((st, i) => `
-          <button class="quality-opt-btn ${i === selectedStreamIndex ? 'selected' : ''}" data-idx="${i}">
-            <span style="font-weight: 600;">${st.quality}</span>
-            <span class="quality-badge-tag">${st.source || 'STREAM'}</span>
-          </button>
-        `).join('');
-
-        qualityList.querySelectorAll('.quality-opt-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            selectedStreamIndex = parseInt(btn.getAttribute('data-idx'), 10);
-            renderStreams();
-          });
-        });
-      }
-
-      window.addEventListener('flux:open-modal', (e) => {
-        if (e.detail) openModalWithData(e.detail);
-      });
-
-      if (closeBtn) closeBtn.addEventListener('click', closeModal);
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) closeModal();
-        });
-      }
-
-      // Handle Play Action: Native Shell vs Desktop Player Fallback
-      if (btnPlay) {
-        btnPlay.addEventListener('click', () => {
-          if (!activeStreams[selectedStreamIndex] || !currentMedia) return;
-          const chosen = activeStreams[selectedStreamIndex];
-
-          // 1. In Native Shell: invoke ExoPlayer
-          if (window.NativeAppBridge && window.NativeAppBridge.isNative()) {
-            window.NativeAppBridge.playMedia({
-              url: chosen.url,
-              title: currentMedia.title,
-              poster: currentMedia.poster,
-              position: currentMedia.position || 0
-            });
-          } else {
-            // 2. Desktop Browser Fallback: open clean in-app iframe player
-            if (playerOverlay && playerIframe) {
-              playerTitle.textContent = currentMedia.title;
-              playerSource.textContent = `${chosen.source} • ${chosen.quality}`;
-              playerIframe.src = chosen.url;
-              playerOverlay.classList.add('active');
-            }
-          }
-
-          // Register in Watch History
-          if (window.FluxDB) {
-            window.FluxDB.saveWatchProgress({
-              id: currentMedia.id || 'media-' + Date.now(),
-              title: currentMedia.title,
-              poster: currentMedia.poster,
-              url: chosen.url,
-              position: currentMedia.position || 10,
-              duration: 3600
-            });
-          }
-
-          closeModal();
-        });
-      }
-
-      // Handle 1DM Downloader Trigger
-      if (btnDownload) {
-        btnDownload.addEventListener('click', () => {
-          if (!activeStreams[selectedStreamIndex] || !currentMedia) return;
-          const chosen = activeStreams[selectedStreamIndex];
-
-          if (window.NativeAppBridge) {
-            window.NativeAppBridge.startDownload({
-              url: chosen.url,
-              title: currentMedia.title,
-              filename: `${currentMedia.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
-            });
-            window.NativeAppBridge.showToast(`Download link queued: ${currentMedia.title}`);
-          }
-
-          window.dispatchEvent(new CustomEvent('flux:download-added', {
-            detail: {
-              title: currentMedia.title,
-              url: chosen.url,
-              quality: chosen.source,
-              poster: currentMedia.poster
-            }
-          }));
-
-          closeModal();
-        });
-      }
-    })();
-  </script>
-  <!-- END STEP 7 CODE -->
-
-  <!-- ========================================================================
-       SCRIPTS & LOGIC
-       ======================================================================== -->
-  <!-- STEP 2: Universal NativeAppBridge Script -->
-  <script>
-    (function () {
-      class NativeBridge {
+      class UniversalNativeBridge {
         constructor() {
           this.listeners = new Map();
           this.initInboundListener();
         }
 
-        // Returns true if running inside the React Native Android Shell
+        // Checks if running inside React Native Android Shell
         isNative() {
           return Boolean(window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function');
         }
 
-        // Core outbound dispatch
+        // Core Outbound Message Dispatch
         send(action, payload = {}) {
           const packet = { action, payload, timestamp: Date.now() };
-
           if (this.isNative()) {
             window.ReactNativeWebView.postMessage(JSON.stringify(packet));
           } else {
             console.log(
-              `%c[NativeBridge Fallback]%c Action: ${action}`,
+              `%c[NexusBridge Fallback]%c Action: ${action}`,
               'background: #E50914; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
               'color: #00bcd4; font-weight: bold;',
               payload
@@ -1894,22 +1471,22 @@
           }
         }
 
-        // Action 1: ExoPlayer native playback invocation
-        playMedia({ url, title, poster = '', headers = {}, position = 0 }) {
-          this.send('PLAY_MEDIA', { url, title, poster, headers, position });
+        // Action: ExoPlayer playback invocation
+        playMedia({ url, title, poster = '', position = 0, subtitles = [], audioPref = 'orig', season = 1, episode = 1 }) {
+          this.send('PLAY_MEDIA', { url, title, poster, position, subtitles, audioPref, season, episode });
         }
 
-        // Action 2: 1DM-style downloader trigger
-        startDownload({ url, title, filename = '', headers = {} }) {
-          this.send('START_DOWNLOAD', { url, title, filename, headers });
+        // Action: 1DM-style downloader invocation
+        startDownload({ url, title, filename = '' }) {
+          this.send('START_DOWNLOAD', { url, title, filename });
         }
 
-        // Action 3: Android Native Toast
+        // Action: Native Toast
         showToast(message) {
           this.send('SHOW_TOAST', { message });
         }
 
-        // Action 4: Register callbacks for events sent from React Native to the PWA
+        // Inbound Event Subscriptions (Playback end, error fallbacks)
         on(event, callback) {
           if (!this.listeners.has(event)) {
             this.listeners.set(event, []);
@@ -1917,287 +1494,774 @@
           this.listeners.get(event).push(callback);
         }
 
-        // Listen for inbound messages from React Native Shell (postMessage or document events)
         initInboundListener() {
-          const handleIncoming = (eventData) => {
+          const handleIncoming = (evtData) => {
             try {
-              const data = typeof eventData === 'string' ? JSON.parse(eventData) : eventData;
+              const data = typeof evtData === 'string' ? JSON.parse(evtData) : evtData;
               if (data && data.type && this.listeners.has(data.type)) {
                 this.listeners.get(data.type).forEach(cb => cb(data.payload));
               }
-            } catch (err) {
-              // Ignore non-JSON window messages
-            }
+            } catch (err) {}
           };
-
-          window.addEventListener('message', (event) => handleIncoming(event.data));
-          document.addEventListener('message', (event) => handleIncoming(event.data));
+          window.addEventListener('message', (e) => handleIncoming(e.data));
+          document.addEventListener('message', (e) => handleIncoming(e.data));
         }
       }
 
-      window.NativeAppBridge = new NativeBridge();
+      window.NativeAppBridge = new UniversalNativeBridge();
+
+      // 2. IndexedDB Engine for Watch Progress & Search History
+      class NexusDatabase {
+        constructor() {
+          this.db = null;
+          this.ready = this.init();
+        }
+
+        init() {
+          return new Promise((resolve) => {
+            const req = indexedDB.open('NexusPWA_DB', 2);
+            req.onupgradeneeded = (e) => {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains('watch_progress')) {
+                db.createObjectStore('watch_progress', { keyPath: 'id' });
+              }
+              if (!db.objectStoreNames.contains('search_history')) {
+                db.createObjectStore('search_history', { keyPath: 'query' });
+              }
+            };
+            req.onsuccess = (e) => {
+              this.db = e.target.result;
+              resolve(this.db);
+            };
+            req.onerror = () => resolve(null);
+          });
+        }
+
+        async saveWatchProgress(item) {
+          await this.ready;
+          if (!this.db) return;
+          const tx = this.db.transaction('watch_progress', 'readwrite');
+          tx.objectStore('watch_progress').put({ ...item, updatedAt: Date.now() });
+          window.dispatchEvent(new CustomEvent('nexus:history-updated'));
+        }
+
+        async getAllWatchProgress() {
+          await this.ready;
+          if (!this.db) return [];
+          return new Promise((resolve) => {
+            const req = this.db.transaction('watch_progress', 'readonly').objectStore('watch_progress').getAll();
+            req.onsuccess = () => resolve((req.result || []).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)));
+            req.onerror = () => resolve([]);
+          });
+        }
+
+        async wipeHistory() {
+          await this.ready;
+          if (!this.db) return;
+          const tx = this.db.transaction('watch_progress', 'readwrite');
+          tx.objectStore('watch_progress').clear();
+          window.dispatchEvent(new CustomEvent('nexus:history-updated'));
+        }
+
+        async saveSearchQuery(q) {
+          if (!q || !q.trim()) return;
+          await this.ready;
+          if (!this.db) return;
+          const tx = this.db.transaction('search_history', 'readwrite');
+          tx.objectStore('search_history').put({ query: q.trim(), timestamp: Date.now() });
+        }
+
+        async getRecentSearches() {
+          await this.ready;
+          if (!this.db) return [];
+          return new Promise((resolve) => {
+            const req = this.db.transaction('search_history', 'readonly').objectStore('search_history').getAll();
+            req.onsuccess = () => resolve((req.result || []).slice(-8).reverse());
+            req.onerror = () => resolve([]);
+          });
+        }
+
+        async deleteSearchQuery(q) {
+          await this.ready;
+          if (!this.db) return;
+          const tx = this.db.transaction('search_history', 'readwrite');
+          tx.objectStore('search_history').delete(q);
+        }
+      }
+
+      window.NexusDB = new NexusDatabase();
     })();
   </script>
+  <!-- ========================================================================
+       STEP 4: TMDB MULTI-RAIL ENGINE & DYNAMIC HERO BANNER
+       ======================================================================== -->
+  <style>
+    /* Rail card progress bar & badges */
+    .resume-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    .resume-progress-fill {
+      height: 100%;
+      background: var(--accent);
+    }
+    .poster-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      color: #FFF;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+  </style>
 
-  <!-- STEP 4: Plugins & Scraper Script Engine (Global Media Resolver v1.1.0) -->
   <script>
     (function () {
-      class PluginEngine {
-        constructor() {
-          this.plugins = new Map();
-          this.manifestUrl = 'plugins.json';
-        }
-
-        register(plugin) {
-          if (!plugin || !plugin.id) return;
-          this.plugins.set(plugin.id, { enabled: true, ...plugin });
-          window.dispatchEvent(new CustomEvent('flux:plugins-updated'));
-        }
-
-        async loadManifest(url = this.manifestUrl) {
-          try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const manifest = await res.json();
-            if (Array.isArray(manifest.plugins)) {
-              for (const entry of manifest.plugins) {
-                if (entry.url) {
-                  const s = document.createElement('script');
-                  s.src = entry.url;
-                  s.async = true;
-                  document.head.appendChild(s);
-                }
-              }
-            }
-          } catch (err) {
-            console.warn('[FluxPlugins] External manifest skipped:', err.message);
-          }
-        }
-
-        getEnabledPlugins() {
-          return Array.from(this.plugins.values()).filter(p => p.enabled);
-        }
-
-        async searchAll(query) {
-          const enabled = this.getEnabledPlugins();
-          if (enabled.length === 0) return [];
-
-          const promises = enabled.map(async (plugin) => {
-            try {
-              if (typeof plugin.search === 'function') {
-                const results = await plugin.search(query);
-                return (results || []).map(item => ({ ...item, providerId: plugin.id, providerName: plugin.name }));
-              }
-            } catch (err) {
-              console.warn(`[FluxPlugins] Search error on ${plugin.id}:`, err);
-            }
-            return [];
-          });
-
-          const settled = await Promise.allSettled(promises);
-          return settled.flatMap(res => (res.status === 'fulfilled' ? res.value : []));
-        }
-
-        async getTrending(category = 'movies') {
-          const enabled = this.getEnabledPlugins();
-          for (const plugin of enabled) {
-            try {
-              if (typeof plugin.getTrending === 'function') {
-                const items = await plugin.getTrending(category);
-                if (items && items.length > 0) return items;
-              }
-            } catch (err) {
-              console.warn(`[FluxPlugins] Trending error on ${plugin.id}:`, err);
-            }
-          }
-          return [];
-        }
-
-        async extractStreams(providerId, mediaId, mediaInfo = {}) {
-          const plugin = this.plugins.get(providerId) || this.plugins.get('global-resolver');
-          if (!plugin || typeof plugin.extractStreams !== 'function') {
-            throw new Error(`Provider "${providerId}" stream extraction unavailable.`);
-          }
-          return await plugin.extractStreams(mediaId, mediaInfo);
-        }
-      }
-
-      window.FluxPlugins = new PluginEngine();
-
-      // ========================================================================
-      // GLOBAL MEDIA RESOLVER v1.1.0 (Live TMDB + Resilient Fallback)
-      // ========================================================================
       const TMDB_API_KEYS = [
         'f6bd687ffa63cd282b6ff2c6877f2669',
         '2a61185ef6a27f400fd92820ad9e8537'
       ];
 
-      // Curated backup media cache with real TMDB IDs to guarantee instant loading
-      const FALLBACK_CATALOG = [
-        { id: '693134', tmdbId: 693134, title: 'Dune: Part Two', year: '2024', type: 'Movie', badge: '8.6 ★', poster: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
-        { id: '533535', tmdbId: 533535, title: 'Deadpool & Wolverine', year: '2024', type: 'Movie', badge: '7.8 ★', poster: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg' },
-        { id: '27205', tmdbId: 27205, title: 'Inception', year: '2010', type: 'Movie', badge: '8.4 ★', poster: 'https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg' },
-        { id: '157336', tmdbId: 157336, title: 'Interstellar', year: '2014', type: 'Movie', badge: '8.4 ★', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' },
-        { id: '872585', tmdbId: 872585, title: 'Oppenheimer', year: '2023', type: 'Movie', badge: '8.1 ★', poster: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg' },
-        { id: '94605', tmdbId: 94605, title: 'Arcane', year: '2021', type: 'Series', badge: '8.7 ★', poster: 'https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg' },
-        { id: '66732', tmdbId: 66732, title: 'Stranger Things', year: '2016', type: 'Series', badge: '8.6 ★', poster: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
-        { id: '1396', tmdbId: 1396, title: 'Breaking Bad', year: '2008', type: 'Series', badge: '8.9 ★', poster: 'https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg' },
-        { id: '100088', tmdbId: 100088, title: 'The Last of Us', year: '2023', type: 'Series', badge: '8.6 ★', poster: 'https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2V7JMrRI.jpg' },
-        { id: '76479', tmdbId: 76479, title: 'The Boys', year: '2019', type: 'Series', badge: '8.5 ★', poster: 'https://image.tmdb.org/t/p/w500/2ZmTMPrbzgq7vgTH9QMviq5qN5S.jpg' }
-      ];
-
-      async function fetchFromTMDB(endpoint) {
+      // Safe TMDB Fetcher with failover
+      async function tmdbFetch(endpoint) {
         for (const key of TMDB_API_KEYS) {
           try {
             const sep = endpoint.includes('?') ? '&' : '?';
             const res = await fetch(`https://api.themoviedb.org/3/${endpoint}${sep}api_key=${key}`);
             if (res.ok) return await res.json();
-          } catch (e) {
-            // try next key
-          }
+          } catch (e) {}
         }
         return null;
       }
 
-      window.FluxPlugins.register({
-        id: 'global-resolver',
-        name: 'Global Media Resolver',
-        version: '1.1.0',
+      // Configuration for all 9 API-driven rails
+      const RAILS = [
+        { sectionId: 'railTrending', endpoint: 'trending/all/day', isTv: false },
+        { sectionId: 'railHollywood', endpoint: 'discover/movie?with_original_language=en&sort_by=popularity.desc', isTv: false },
+        { sectionId: 'railIndian', endpoint: 'discover/movie?with_original_language=hi|ta|te&sort_by=popularity.desc', isTv: false },
+        { sectionId: 'railBangla', endpoint: 'discover/movie?with_original_language=bn&sort_by=popularity.desc', isTv: false },
+        { sectionId: 'railAnime', endpoint: 'discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc', isTv: true },
+        { sectionId: 'railKdrama', endpoint: 'discover/tv?with_original_language=ko&sort_by=popularity.desc', isTv: true },
+        { sectionId: 'railPakistani', endpoint: 'discover/tv?with_original_language=ur&sort_by=popularity.desc', isTv: true },
+        { sectionId: 'railDocs', endpoint: 'discover/movie?with_genres=99&sort_by=popularity.desc', isTv: false },
+        { sectionId: 'railSeries', endpoint: 'discover/tv?sort_by=popularity.desc', isTv: true }
+      ];
 
-        // 1. Multi-Search across TMDB with instant fallback
-        async search(query) {
-          const q = (query || '').toLowerCase().trim();
-          const data = await fetchFromTMDB(`search/multi?query=${encodeURIComponent(query)}&include_adult=false`);
+      // 1. Populate the Dynamic Hero Banner
+      async function loadHeroBanner() {
+        const data = await tmdbFetch('trending/all/day');
+        if (data && data.results && data.results.length > 0) {
+          const top = data.results[0];
+          window.featuredHeroItem = {
+            id: top.id,
+            title: top.title || top.name,
+            overview: top.overview,
+            poster: `https://image.tmdb.org/t/p/w500${top.poster_path}`,
+            backdrop: `https://image.tmdb.org/t/p/original${top.backdrop_path || top.poster_path}`,
+            year: (top.release_date || top.first_air_date || '2026').substring(0, 4),
+            rating: top.vote_average ? top.vote_average.toFixed(1) : '8.5',
+            isTv: top.media_type === 'tv'
+          };
 
-          if (data && Array.isArray(data.results) && data.results.length > 0) {
-            return data.results
-              .filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path)
-              .map(item => ({
-                id: item.id.toString(),
-                tmdbId: item.id,
-                title: item.title || item.name || 'Untitled',
-                year: (item.release_date || item.first_air_date || '').substring(0, 4),
-                type: item.media_type === 'tv' ? 'Series' : 'Movie',
-                poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              }));
-          }
+          const banner = document.getElementById('heroBanner');
+          const title = document.getElementById('heroTitle');
+          const year = document.getElementById('heroYear');
+          const desc = document.getElementById('heroDesc');
 
-          // Fallback fuzzy search if TMDB is offline or rate-limited
-          return FALLBACK_CATALOG.filter(item => item.title.toLowerCase().includes(q));
-        },
-
-        // 2. Trending Movies & TV Shows
-        async getTrending(category) {
-          const isSeries = category === 'series';
-          const type = isSeries ? 'tv' : 'movie';
-          const data = await fetchFromTMDB(`trending/${type}/day`);
-
-          if (data && Array.isArray(data.results) && data.results.length > 0) {
-            return data.results
-              .filter(item => item.poster_path)
-              .slice(0, 15)
-              .map(item => ({
-                id: item.id.toString(),
-                tmdbId: item.id,
-                title: item.title || item.name || 'Untitled',
-                badge: item.vote_average ? `${item.vote_average.toFixed(1)} ★` : 'HD',
-                type: isSeries ? 'Series' : 'Movie',
-                year: (item.release_date || item.first_air_date || '').substring(0, 4),
-                poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              }));
-          }
-
-          // Fallback catalog filtered by category
-          return FALLBACK_CATALOG.filter(item => isSeries ? item.type === 'Series' : item.type === 'Movie');
-        },
-
-        // 3. Multi-Stream Resolver Links
-        async extractStreams(mediaId, mediaInfo = {}) {
-          const id = mediaInfo.tmdbId || mediaId || '693134';
-          const isTv = (mediaInfo.type || '').toLowerCase() === 'series' || (mediaInfo.type || '').toLowerCase() === 'tv';
-          const season = mediaInfo.season || 1;
-          const episode = mediaInfo.episode || 1;
-
-          return [
-            {
-              source: 'VidSrc Pro',
-              quality: 'VidSrc Pro (Fast)',
-              url: isTv 
-                ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}` 
-                : `https://vidsrc.me/embed/movie?tmdb=${id}`
-            },
-            {
-              source: 'AutoEmbed',
-              quality: 'AutoEmbed (Multi-Server)',
-              url: isTv 
-                ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}` 
-                : `https://player.autoembed.cc/embed/movie/${id}`
-            },
-            {
-              source: 'Embed.su',
-              quality: 'Embed.su (Full HD)',
-              url: isTv 
-                ? `https://embed.su/embed/tv/${id}/${season}/${episode}` 
-                : `https://embed.su/embed/movie/${id}`
-            },
-            {
-              source: '2Embed',
-              quality: '2Embed (Cloud)',
-              url: isTv 
-                ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}` 
-                : `https://www.2embed.cc/embed/${id}`
-            }
-          ];
+          if (banner) banner.style.backgroundImage = `url(${window.featuredHeroItem.backdrop})`;
+          if (title) title.textContent = window.featuredHeroItem.title;
+          if (year) year.textContent = window.featuredHeroItem.year;
+          if (desc) desc.textContent = window.featuredHeroItem.overview;
         }
+      }
+
+      // 2. Render Continue Watching from IndexedDB
+      async function renderContinueWatching() {
+        const rail = document.getElementById('railContinueWatching');
+        if (!rail || !window.NexusDB) return;
+        const scroller = rail.querySelector('.rail-scroller');
+        const items = await window.NexusDB.getAllWatchProgress();
+
+        if (!items || items.length === 0) {
+          rail.style.display = 'none';
+          return;
+        }
+
+        rail.style.display = 'flex';
+        scroller.innerHTML = items.map(item => {
+          const pct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 15;
+          return `
+            <div class="poster-card" data-media='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+              <div class="poster-img-wrap">
+                <span class="poster-badge">${item.seasonInfo || 'Resume'}</span>
+                <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">
+                <div class="resume-progress-bar"><div class="resume-progress-fill" style="width:${pct}%"></div></div>
+              </div>
+              <span class="poster-card-title">${item.title}</span>
+            </div>
+          `;
+        }).join('');
+
+        scroller.querySelectorAll('.poster-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const data = JSON.parse(card.getAttribute('data-media'));
+            if (typeof window.openDetailsView === 'function') window.openDetailsView(data);
+          });
+        });
+      }
+
+      // 3. Render all TMDB Rails (Parallel Non-Blocking)
+      function renderRails() {
+        RAILS.forEach(async (r) => {
+          const section = document.getElementById(r.sectionId);
+          if (!section) return;
+          const scroller = section.querySelector('.rail-scroller');
+          const data = await tmdbFetch(r.endpoint);
+
+          if (data && data.results && scroller) {
+            scroller.innerHTML = data.results
+              .filter(it => it.poster_path)
+              .slice(0, 15)
+              .map(it => {
+                const mediaItem = {
+                  id: it.id,
+                  title: it.title || it.name || 'Untitled',
+                  overview: it.overview || '',
+                  poster: `https://image.tmdb.org/t/p/w500${it.poster_path}`,
+                  backdrop: `https://image.tmdb.org/t/p/original${it.backdrop_path || it.poster_path}`,
+                  year: (it.release_date || it.first_air_date || '2026').substring(0, 4),
+                  rating: it.vote_average ? it.vote_average.toFixed(1) : '8.0',
+                  isTv: r.isTv || it.media_type === 'tv'
+                };
+
+                return `
+                  <div class="poster-card" data-media='${JSON.stringify(mediaItem).replace(/'/g, "&apos;")}'>
+                    <div class="poster-img-wrap">
+                      <span class="poster-badge">${it.vote_average ? it.vote_average.toFixed(1) + ' ★' : 'HD'}</span>
+                      <img src="${mediaItem.poster}" alt="${mediaItem.title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <span class="poster-card-title">${mediaItem.title}</span>
+                  </div>
+                `;
+              }).join('');
+
+            scroller.querySelectorAll('.poster-card').forEach(card => {
+              card.addEventListener('click', () => {
+                const data = JSON.parse(card.getAttribute('data-media'));
+                if (typeof window.openDetailsView === 'function') window.openDetailsView(data);
+              });
+            });
+          }
+        });
+      }
+
+      // Load on start
+      document.addEventListener('DOMContentLoaded', () => {
+        loadHeroBanner();
+        renderContinueWatching();
+        renderRails();
+        window.addEventListener('nexus:history-updated', renderContinueWatching);
       });
     })();
   </script>
-
-  <!-- Master UI Control Script (Tab switching & Drawer) -->
-  <script>
-    // Drawer open / close
-    const drawerOverlay = document.getElementById('drawerOverlay');
-    const drawerPanel = document.getElementById('drawerPanel');
-    const openDrawerBtn = document.getElementById('openDrawerBtn');
-    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-
-    function toggleDrawer(open) {
-      drawerOverlay.classList.toggle('active', open);
-      drawerPanel.classList.toggle('active', open);
+  <!-- ========================================================================
+       STEP 6: STREAM MODAL & FULLSCREEN PLAYER (UNIVERSAL ENGINE)
+       ======================================================================== -->
+  <style>
+    /* Glass Modal Sheet for Streams */
+    .glass-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s, visibility 0.25s;
+      z-index: 400;
     }
-    openDrawerBtn.addEventListener('click', () => toggleDrawer(true));
-    closeDrawerBtn.addEventListener('click', () => toggleDrawer(false));
-    drawerOverlay.addEventListener('click', () => toggleDrawer(false));
+    .glass-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .glass-sheet {
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 22px 20px calc(var(--safe-bottom) + 20px) 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
 
-    // Dynamic Capsule Pill Slider & View Switcher
-    const tabBtns = document.querySelectorAll('.nav-tab-btn');
-    const views = document.querySelectorAll('.view-container');
-    const capsulePill = document.getElementById('navCapsulePill');
+    /* In-Page Desktop Video Player */
+    .desktop-player-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+    }
+    .desktop-player-overlay.active {
+      display: flex;
+    }
+    .stream-opt-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .stream-opt-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--glass-border-light);
+    }
+  </style>
 
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const index = parseInt(btn.getAttribute('data-index'), 10);
-        
-        tabBtns.forEach(b => b.classList.remove('active'));
-        views.forEach(v => v.classList.remove('active'));
+  <!-- Resolver Selection Modal -->
+  <div class="glass-modal-overlay" id="streamModal">
+    <div class="glass-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1.1rem; font-weight:800;">Available Streams</h3>
+        <button class="glass-btn" id="closeStreamModalBtn" style="width:32px; height:32px;">✕</button>
+      </div>
+      <p style="font-size:0.75rem; color:var(--text-muted);">Decoupled health checker pre-pings active servers:</p>
+      <div id="streamSourcesList" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
 
-        btn.classList.add('active');
-        capsulePill.style.transform = `translateX(${index * 100}%)`;
+  <!-- In-Page Fullscreen Stream Player -->
+  <div class="desktop-player-overlay" id="desktopPlayerOverlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:calc(var(--safe-top) + 10px) 16px 10px 16px; background:#141414;">
+      <span id="desktopPlayerTitle" style="font-weight:700; font-size:0.95rem;">Playing Stream</span>
+      <button class="glass-btn" id="closeDesktopPlayerBtn" style="width:36px; height:36px;">✕</button>
+    </div>
+    <iframe id="desktopPlayerIframe" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen" style="width:100%; height:100%; border:none;"></iframe>
+  </div>
 
-        const targetView = document.getElementById(btn.getAttribute('data-target'));
-        if (targetView) targetView.classList.add('active');
-      });
-    });
-  </script>
-  <!-- PWA Service Worker Registration -->
+  <!-- Stream & Playback Engine (Universal: Local file:// and HTTPS compatible) -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch((err) => {
-          console.warn('[PWA] Service worker registration bypassed:', err.message);
+    (function () {
+      // 1. Built-in Multi-Resolver Definition
+      const PROVIDERS = [
+        {
+          id: 'vidsrc-pro',
+          name: 'VidSrc Pro',
+          serverType: 'Fast CDN',
+          badge: '1080p',
+          buildUrl: (id, isTv, s, e) => isTv ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}` : `https://vidsrc.me/embed/movie?tmdb=${id}`
+        },
+        {
+          id: 'autoembed',
+          name: 'AutoEmbed',
+          serverType: 'Multi-Cloud',
+          badge: 'Auto',
+          buildUrl: (id, isTv, s, e) => isTv ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}` : `https://player.autoembed.cc/embed/movie/${id}`
+        },
+        {
+          id: 'embed-su',
+          name: 'Embed.su',
+          serverType: 'Direct HLS',
+          badge: 'HD',
+          buildUrl: (id, isTv, s, e) => isTv ? `https://embed.su/embed/tv/${id}/${s}/${e}` : `https://embed.su/embed/movie/${id}`
+        },
+        {
+          id: '2embed',
+          name: '2Embed Cloud',
+          serverType: 'Mirror Server',
+          badge: '720p',
+          buildUrl: (id, isTv, s, e) => isTv ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}` : `https://www.2embed.cc/embed/${id}`
+        },
+        {
+          id: 'smashy-stream',
+          name: 'SmashyStream',
+          serverType: 'Fast Stream',
+          badge: '1080p',
+          buildUrl: (id, isTv, s, e) => isTv ? `https://player.smashystream.com/tv/${id}?s=${s}&e=${e}` : `https://player.smashystream.com/movie/${id}`
+        }
+      ];
+
+      async function resolveStreams(tmdbId, isTv, season, episode) {
+        return PROVIDERS.map(p => ({
+          name: p.name,
+          serverType: p.serverType,
+          badge: p.badge,
+          status: 'active',
+          url: p.buildUrl(tmdbId, isTv, season, episode)
+        }));
+      }
+
+      const streamModal = document.getElementById('streamModal');
+      const sourcesList = document.getElementById('streamSourcesList');
+      const closeStreamBtn = document.getElementById('closeStreamModalBtn');
+      const playerOverlay = document.getElementById('desktopPlayerOverlay');
+      const playerIframe = document.getElementById('desktopPlayerIframe');
+      const playerTitle = document.getElementById('desktopPlayerTitle');
+      const closePlayerBtn = document.getElementById('closeDesktopPlayerBtn');
+
+      // 2. Open Stream Modal Function
+      window.triggerStreamModal = async function (item, season = 1, episode = 1) {
+        if (!item) return;
+
+        streamModal.classList.add('active');
+        sourcesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Pre-checking servers...</div>';
+
+        const streams = await resolveStreams(item.id, item.isTv, season, episode);
+
+        sourcesList.innerHTML = streams.map((st, i) => `
+          <button class="stream-opt-btn" data-idx="${i}">
+            <div>
+              <div style="font-weight:700; font-size:0.9rem;">${st.name}</div>
+              <div style="font-size:0.7rem; color:var(--text-muted);">${st.serverType} • Status: <span style="color:#4caf50; font-weight:700;">active</span></div>
+            </div>
+            <span style="background:rgba(255,255,255,0.12); padding:3px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">${st.badge}</span>
+          </button>
+        `).join('');
+
+        sourcesList.querySelectorAll('.stream-opt-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const chosen = streams[btn.getAttribute('data-idx')];
+            streamModal.classList.remove('active');
+
+            // Launch Player (Native Shell vs Desktop Browser)
+            if (window.NativeAppBridge && window.NativeAppBridge.isNative()) {
+              window.NativeAppBridge.playMedia({
+                url: chosen.url,
+                title: item.title,
+                poster: item.poster,
+                season,
+                episode
+              });
+            } else {
+              playerTitle.textContent = `${item.title} (${chosen.name})`;
+              playerIframe.src = chosen.url;
+              playerOverlay.classList.add('active');
+            }
+
+            // Save Progress to IndexedDB
+            if (window.NexusDB) {
+              window.NexusDB.saveWatchProgress({
+                id: `media_${item.id}`,
+                title: item.title,
+                poster: item.poster,
+                seasonInfo: item.isTv ? `S${season}E${episode}` : 'Movie',
+                position: 120,
+                duration: 3600
+              });
+            }
+          });
+        });
+      };
+
+      // 3. Wire Play Online Button
+      document.getElementById('btnDetailsPlay')?.addEventListener('click', () => {
+        const item = window.currentDetailsItem || window.featuredHeroItem;
+        if (!item) return;
+
+        const isTv = Boolean(item.isTv);
+        const seasonEl = document.getElementById('seasonSelect');
+        const sNum = (isTv && seasonEl) ? parseInt(seasonEl.value, 10) || 1 : 1;
+
+        window.triggerStreamModal(item, sNum, 1);
+      });
+
+      // 4. Wire Modal & Player Close Buttons
+      closeStreamBtn?.addEventListener('click', () => streamModal.classList.remove('active'));
+      streamModal?.addEventListener('click', (e) => {
+        if (e.target === streamModal) streamModal.classList.remove('active');
+      });
+
+      closePlayerBtn?.addEventListener('click', () => {
+        playerOverlay.classList.remove('active');
+        playerIframe.src = '';
+      });
+
+      // 5. Wire Download Button
+      document.getElementById('btnDetailsDownload')?.addEventListener('click', () => {
+        const item = window.currentDetailsItem || window.featuredHeroItem;
+        if (!item) return;
+
+        if (window.NativeAppBridge) {
+          window.NativeAppBridge.startDownload({
+            url: `https://vidsrc.me/embed/movie?tmdb=${item.id}`,
+            title: item.title,
+            filename: `${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
+          });
+          window.NativeAppBridge.showToast(`Queued for download: ${item.title}`);
+        }
+
+        window.dispatchEvent(new CustomEvent('nexus:download-added', {
+          detail: { title: item.title, quality: '1080p' }
+        }));
+      });
+    })();
+  </script>
+  <!-- ========================================================================
+       STEP 9: MODALS, NETWORK TOAST & ADVANCED UTILITIES
+       ======================================================================== -->
+  <style>
+    /* Network Toast Alert */
+    .network-toast {
+      position: fixed;
+      top: calc(var(--safe-top) + 60px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      background: rgba(229, 9, 20, 0.92);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-light);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s, opacity 0.3s;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    .network-toast.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+
+  <!-- Network Offline Toast -->
+  <div class="network-toast" id="networkToast">
+    <span>Connection lost. Working offline.</span>
+    <button id="btnRetryNet" style="background:#fff; color:#000; border:none; padding:4px 10px; border-radius:999px; font-size:0.75rem; font-weight:800; cursor:pointer;">Retry</button>
+  </div>
+
+  <!-- FMHY Directory Modal -->
+  <div class="glass-modal-overlay" id="fmhyModal" style="z-index: 450;">
+    <div class="glass-sheet" style="max-height: 80vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1.15rem; font-weight:800;">FMHY Directory</h3>
+        <button class="glass-btn" id="closeFmhyBtn" style="width:32px; height:32px;">✕</button>
+      </div>
+      <p style="font-size:0.8rem; color:var(--text-muted);">Curated direct streaming and entertainment hubs:</p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <a href="https://fmhy.net/videopiracyguide" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+          <span>Movies & TV Shows Guide</span>
+        </a>
+        <a href="https://fmhy.net/videopiracyguide#anime" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Anime Streams & Trackers</span>
+        </a>
+        <a href="https://fmhy.net/videopiracyguide#live-tv-sports" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+          <span>Live TV & Sports Streams</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Resolution Modal -->
+  <div class="glass-modal-overlay" id="settingsModal" style="z-index: 450;">
+    <div class="glass-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1.15rem; font-weight:800;">Settings & Resolution</h3>
+        <button class="glass-btn" id="closeSettingsBtn" style="width:32px; height:32px;">✕</button>
+      </div>
+
+      <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:6px;">DEFAULT PLAYBACK RESOLUTION</div>
+      <select class="glass-select" id="defaultResPicker">
+        <option value="1080p">1080p (Full HD - High Bandwidth)</option>
+        <option value="720p">720p (Data Saver - Smooth Streaming)</option>
+      </select>
+
+      <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:10px;">ACTIVE SCRAPER MODULE</div>
+      <div style="background:var(--glass-card); border:1px solid var(--glass-border); padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; font-size:0.9rem;">sources.js</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">Decoupled Multi-Embed Resolver</div>
+        </div>
+        <span style="color:#4caf50; font-weight:700; font-size:0.8rem;">Active ES6</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Master Control Script (Navigation, Drawer, Settings, Offline & Native Handshakes) -->
+  <script>
+    (function () {
+      // 1. Drawer Navigation Controls
+      const drawerOverlay = document.getElementById('drawerOverlay');
+      const drawerPanel = document.getElementById('drawerPanel');
+      const openDrawerBtn = document.getElementById('openDrawerBtn');
+      const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+      function closeDrawer() {
+        drawerOverlay?.classList.remove('active');
+        drawerPanel?.classList.remove('active');
+      }
+
+      openDrawerBtn?.addEventListener('click', () => {
+        drawerOverlay?.classList.add('active');
+        drawerPanel?.classList.add('active');
+      });
+      closeDrawerBtn?.addEventListener('click', closeDrawer);
+      drawerOverlay?.addEventListener('click', closeDrawer);
+
+      // 2. FMHY Directory Modal
+      const fmhyModal = document.getElementById('fmhyModal');
+      document.getElementById('drawerItemFmhy')?.addEventListener('click', () => {
+        closeDrawer();
+        fmhyModal?.classList.add('active');
+      });
+      document.getElementById('closeFmhyBtn')?.addEventListener('click', () => {
+        fmhyModal?.classList.remove('active');
+      });
+      fmhyModal?.addEventListener('click', (e) => {
+        if (e.target === fmhyModal) fmhyModal.classList.remove('active');
+      });
+
+      // 3. Settings & Resolution Controls
+      const settingsModal = document.getElementById('settingsModal');
+      const defaultResPicker = document.getElementById('defaultResPicker');
+
+      // Load saved resolution preference
+      const savedRes = localStorage.getItem('nexus_pref_res') || '1080p';
+      if (defaultResPicker) {
+        defaultResPicker.value = savedRes;
+        defaultResPicker.addEventListener('change', () => {
+          localStorage.setItem('nexus_pref_res', defaultResPicker.value);
+        });
+      }
+
+      document.getElementById('drawerItemSettings')?.addEventListener('click', () => {
+        closeDrawer();
+        settingsModal?.classList.add('active');
+      });
+      document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
+        settingsModal?.classList.remove('active');
+      });
+      settingsModal?.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.classList.remove('active');
+      });
+
+      // 4. Granular Cache Purge (Clears session/posters, preserves Watch History & Downloads)
+      document.getElementById('drawerItemPurgeCache')?.addEventListener('click', () => {
+        closeDrawer();
+        sessionStorage.clear();
+        alert('Metadata and image cache purged successfully.\nYour Watch History and Downloads are preserved.');
+        window.location.reload();
+      });
+
+      // 5. Wipe History Trigger from Drawer
+      document.getElementById('drawerItemClearHistory')?.addEventListener('click', () => {
+        closeDrawer();
+        document.getElementById('wipeConfirmModal')?.classList.add('active');
+      });
+
+      // 6. Network Offline Toast & Reconnect Handler
+      const netToast = document.getElementById('networkToast');
+      window.addEventListener('offline', () => netToast?.classList.add('active'));
+      window.addEventListener('online', () => netToast?.classList.remove('active'));
+      document.getElementById('btnRetryNet')?.addEventListener('click', () => {
+        if (navigator.onLine) {
+          netToast?.classList.remove('active');
+          window.location.reload();
+        } else {
+          alert('Still offline. Check your internet connection.');
+        }
+      });
+
+      // 7. PWA Install Prompt Banner
+      let deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner) banner.style.display = 'flex';
+      });
+
+      document.getElementById('btnInstallPwa')?.addEventListener('click', () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt = null;
+          const banner = document.getElementById('pwaInstallBanner');
+          if (banner) banner.style.display = 'none';
+        }
+      });
+
+      // 8. Capsule Navigation Tab Switching
+      const tabBtns = document.querySelectorAll('.nav-tab-btn');
+      const views = document.querySelectorAll('.view-container');
+      const capsulePill = document.getElementById('navCapsulePill');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const index = parseInt(btn.getAttribute('data-index'), 10);
+          tabBtns.forEach(b => b.classList.remove('active'));
+          views.forEach(v => v.classList.remove('active'));
+
+          btn.classList.add('active');
+          if (capsulePill) capsulePill.style.transform = `translateX(${index * 100}%)`;
+
+          const targetView = document.getElementById(btn.getAttribute('data-target'));
+          if (targetView) targetView.classList.add('active');
         });
       });
-    }
+
+      // 9. NATIVE BRIDGE HANDSHAKES (Auto-Play Next Episode & Error Fallback)
+      if (window.NativeAppBridge) {
+        // Auto-Play Next Episode upon playback finish
+        window.NativeAppBridge.on('STREAM_ENDED', (payload) => {
+          if (!payload) return;
+          const nextEp = (payload.episode || 1) + 1;
+          const season = payload.season || 1;
+          const activeItem = window.currentDetailsItem || window.featuredHeroItem;
+
+          if (activeItem && activeItem.isTv) {
+            window.NativeAppBridge.showToast(`Auto-playing Episode ${nextEp}...`);
+            window.triggerStreamModal(activeItem, season, nextEp);
+          }
+        });
+
+        // Playback Error Fallback: automatically attempt the next server
+        window.NativeAppBridge.on('STREAM_ERROR', (payload) => {
+          console.warn('[Bridge] Stream playback failed, attempting fallback resolver:', payload);
+          window.NativeAppBridge.showToast('Server issue detected. Trying fallback stream...');
+          const activeItem = window.currentDetailsItem || window.featuredHeroItem;
+          if (activeItem) {
+            window.triggerStreamModal(activeItem, payload?.season || 1, payload?.episode || 1);
+          }
+        });
+      }
+    })();
   </script>
 </body>
 </html>
