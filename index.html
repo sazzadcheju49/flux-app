@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#141414">
+  <link rel="manifest" href="manifest.json">
   <title>Flux</title>
 
   <style>
@@ -557,21 +558,307 @@
       </button>
     </div>
 
-    <!-- INSERT STEP 9 CODE HERE: Slide-Out Drawer Elements & Actions -->
+    <!-- STEP 9: Slide-Out Drawer Elements & Actions -->
     <ul class="drawer-menu-list">
+      <!-- Item 1: FMHY Directory -->
       <li class="drawer-item" id="drawerItemFmhy">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
         <span>FMHY Directory</span>
       </li>
+
+      <!-- Item 2: Personal Web Links -->
+      <li class="drawer-item" id="drawerItemPersonalLinks">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+        <span>Personal Web Links</span>
+      </li>
+
+      <!-- Item 3: Settings & Scrapers -->
       <li class="drawer-item" id="drawerItemSettings">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <span>Settings & Scrapers</span>
       </li>
+
+      <!-- Item 4: Clear Local Cache -->
       <li class="drawer-item danger" id="drawerItemClearCache">
         <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         <span>Clear Local Cache</span>
       </li>
     </ul>
+
+    <!-- SUB-MODAL 1: FMHY Directory -->
+    <div class="stream-modal-overlay" id="fmhyModal" style="z-index: 250;">
+      <div class="stream-modal-sheet" style="max-height: 80vh; overflow-y: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h3 style="font-size:1.15rem; font-weight:800;">FMHY Directory</h3>
+          <button class="drawer-close-btn" id="closeFmhyBtn">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px;">Curated direct streaming and entertainment sections.</p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <a href="https://fmhy.net/videopiracyguide" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+            <span>Movies & TV Shows Guide</span>
+          </a>
+          <a href="https://fmhy.net/videopiracyguide#anime" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>Anime Streams & Trackers</span>
+          </a>
+          <a href="https://fmhy.net/videopiracyguide#live-tv-sports" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+            <span>Live TV & Sports Streams</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-MODAL 2: Personal Web Links (FMHY List Style) -->
+    <div class="stream-modal-overlay" id="personalLinksModal" style="z-index: 250;">
+      <div class="stream-modal-sheet" style="max-height: 80vh; overflow-y: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h3 style="font-size:1.15rem; font-weight:800;">Personal Web Links</h3>
+          <button class="drawer-close-btn" id="closePersonalLinksBtn">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px;">Your saved portals and personal media destinations.</p>
+
+        <!-- FMHY-Style Cards List -->
+        <div id="personalLinksList" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+        <!-- Empty State -->
+        <div id="personalLinksEmpty" class="view-empty-state" style="padding:40px 10px;">
+          <svg class="icon view-empty-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+          <h4>No Personal Links</h4>
+          <p style="font-size:0.8rem;">Add your custom web links in Settings to see them here.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-MODAL 3: Settings, Scrapers & Custom Links Manager -->
+    <div class="stream-modal-overlay" id="settingsModal" style="z-index: 250;">
+      <div class="stream-modal-sheet" style="max-height: 85vh; overflow-y: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h3 style="font-size:1.15rem; font-weight:800;">Settings & Manager</h3>
+          <button class="drawer-close-btn" id="closeSettingsBtn">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <!-- Section 1: Active Scraper Plugins -->
+        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:8px; margin-bottom:8px;">ACTIVE SCRAPERS</div>
+        <div id="settingsPluginList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;"></div>
+
+        <!-- Section 2: Personal Web Links Insert Form -->
+        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:10px; margin-bottom:6px;">ADD PERSONAL WEB LINK</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+          <input type="text" id="personalLinkNameInput" placeholder="Site Name (e.g. Anime Wave)" style="background:var(--surface); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; color:#fff; font-size:0.85rem; outline:none;">
+          <div style="display:flex; gap:8px;">
+            <input type="url" id="personalLinkUrlInput" placeholder="https://example.com" style="flex:1; background:var(--surface); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; color:#fff; font-size:0.85rem; outline:none;">
+            <button id="btnAddPersonalLink" class="btn btn-primary" style="padding:10px 18px;">Add</button>
+          </div>
+        </div>
+
+        <!-- Section 3: List of currently added links with delete button -->
+        <div id="settingsPersonalLinksList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:18px;"></div>
+
+        <!-- Section 4: Add Custom Manifest Repository -->
+        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:10px; margin-bottom:6px;">ADD SCRAPER REPOSITORY</div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="repoManifestInput" placeholder="https://.../plugins.json" style="flex:1; background:var(--surface); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; color:#fff; font-size:0.85rem; outline:none;">
+          <button id="btnLoadRepo" class="btn btn-secondary" style="padding:10px 16px;">Load</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const LINKS_STORAGE_KEY = 'flux_personal_links';
+
+        function getPersonalLinks() {
+          try {
+            return JSON.parse(localStorage.getItem(LINKS_STORAGE_KEY)) || [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function savePersonalLinks(links) {
+          localStorage.setItem(LINKS_STORAGE_KEY, JSON.stringify(links));
+          renderPersonalLinksCards();
+          renderSettingsPersonalLinks();
+        }
+
+        // Render FMHY-style Cards in "Personal Web Links" (Showing only Names, NO URLs)
+        function renderPersonalLinksCards() {
+          const list = document.getElementById('personalLinksList');
+          const empty = document.getElementById('personalLinksEmpty');
+          if (!list || !empty) return;
+
+          const links = getPersonalLinks();
+          if (links.length === 0) {
+            list.innerHTML = '';
+            empty.style.display = 'flex';
+            return;
+          }
+
+          empty.style.display = 'none';
+          list.innerHTML = links.map(item => `
+            <a href="${item.url}" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              <span>${item.name}</span>
+            </a>
+          `).join('');
+        }
+
+        // Render List inside Settings manager with delete option
+        function renderSettingsPersonalLinks() {
+          const list = document.getElementById('settingsPersonalLinksList');
+          if (!list) return;
+
+          const links = getPersonalLinks();
+          if (links.length === 0) {
+            list.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">No custom links added yet.</div>`;
+            return;
+          }
+
+          list.innerHTML = links.map((item, index) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+              <span style="font-size:0.85rem; font-weight:600; color:#fff;">${item.name}</span>
+              <button onclick="window.removePersonalLink(${index})" style="background:none; border:none; color:#ff5555; cursor:pointer; padding:4px;" aria-label="Delete link">
+                <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          `).join('');
+        }
+
+        window.removePersonalLink = function(index) {
+          const links = getPersonalLinks();
+          if (window.confirm(`Delete "${links[index].name}"?`)) {
+            links.splice(index, 1);
+            savePersonalLinks(links);
+          }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+          const itemFmhy = document.getElementById('drawerItemFmhy');
+          const itemPersonalLinks = document.getElementById('drawerItemPersonalLinks');
+          const itemSettings = document.getElementById('drawerItemSettings');
+          const itemClearCache = document.getElementById('drawerItemClearCache');
+
+          const fmhyModal = document.getElementById('fmhyModal');
+          const closeFmhyBtn = document.getElementById('closeFmhyBtn');
+
+          const personalLinksModal = document.getElementById('personalLinksModal');
+          const closePersonalLinksBtn = document.getElementById('closePersonalLinksBtn');
+
+          const settingsModal = document.getElementById('settingsModal');
+          const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+          const pluginList = document.getElementById('settingsPluginList');
+
+          const nameInput = document.getElementById('personalLinkNameInput');
+          const urlInput = document.getElementById('personalLinkUrlInput');
+          const btnAddLink = document.getElementById('btnAddPersonalLink');
+
+          function closeDrawer() {
+            const drawerOverlay = document.getElementById('drawerOverlay');
+            const drawerPanel = document.getElementById('drawerPanel');
+            if (drawerOverlay) drawerOverlay.classList.remove('active');
+            if (drawerPanel) drawerPanel.classList.remove('active');
+          }
+
+          // 1. FMHY Modal
+          if (itemFmhy && fmhyModal) {
+            itemFmhy.addEventListener('click', () => {
+              closeDrawer();
+              fmhyModal.classList.add('active');
+            });
+          }
+          if (closeFmhyBtn && fmhyModal) {
+            closeFmhyBtn.addEventListener('click', () => fmhyModal.classList.remove('active'));
+            fmhyModal.addEventListener('click', (e) => { if (e.target === fmhyModal) fmhyModal.classList.remove('active'); });
+          }
+
+          // 2. Personal Web Links Modal
+          if (itemPersonalLinks && personalLinksModal) {
+            itemPersonalLinks.addEventListener('click', () => {
+              closeDrawer();
+              renderPersonalLinksCards();
+              personalLinksModal.classList.add('active');
+            });
+          }
+          if (closePersonalLinksBtn && personalLinksModal) {
+            closePersonalLinksBtn.addEventListener('click', () => personalLinksModal.classList.remove('active'));
+            personalLinksModal.addEventListener('click', (e) => { if (e.target === personalLinksModal) personalLinksModal.classList.remove('active'); });
+          }
+
+          // 3. Settings Modal
+          if (itemSettings && settingsModal) {
+            itemSettings.addEventListener('click', () => {
+              closeDrawer();
+              if (pluginList && window.FluxPlugins) {
+                const plugins = Array.from(window.FluxPlugins.plugins.values());
+                pluginList.innerHTML = plugins.map(p => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+                    <div>
+                      <div style="font-size:0.9rem; font-weight:700;">${p.name}</div>
+                      <div style="font-size:0.7rem; color:var(--text-muted);">v${p.version || '1.0.0'} • Provider ID: ${p.id}</div>
+                    </div>
+                    <span style="font-size:0.75rem; color:#4caf50; font-weight:700;">Enabled</span>
+                  </div>
+                `).join('');
+              }
+              renderSettingsPersonalLinks();
+              settingsModal.classList.add('active');
+            });
+          }
+          if (closeSettingsBtn && settingsModal) {
+            closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('active'));
+            settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('active'); });
+          }
+
+          // Add Personal Link Event
+          if (btnAddLink && nameInput && urlInput) {
+            btnAddLink.addEventListener('click', () => {
+              const name = nameInput.value.trim();
+              let url = urlInput.value.trim();
+
+              if (!name || !url) {
+                alert('Please enter both a site name and a web URL.');
+                return;
+              }
+              if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+              }
+
+              const links = getPersonalLinks();
+              links.push({ name, url });
+              savePersonalLinks(links);
+
+              nameInput.value = '';
+              urlInput.value = '';
+              alert(`Saved "${name}"! View it in Personal Web Links.`);
+            });
+          }
+
+          // 4. Clear Local Cache
+          if (itemClearCache) {
+            itemClearCache.addEventListener('click', async () => {
+              closeDrawer();
+              if (window.confirm('Clear all watch history, downloads queue, and personal links?')) {
+                if (window.FluxDB) await window.FluxDB.clearWatchHistory();
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('All data reset successfully.');
+                window.location.reload();
+              }
+            });
+          }
+
+          renderPersonalLinksCards();
+        });
+      })();
+    </script>
     <!-- END STEP 9 CODE -->
 
   </aside>
@@ -606,30 +893,108 @@
       <!-- Content Horizontal Rails -->
       <div class="content-area">
 
-        <!-- INSERT STEP 6 CODE HERE: Rails (Continue Watching, Trending, Series) -->
-        <section class="rail-section" id="railContinueWatching">
-          <div class="rail-header"><h2 class="rail-title">Continue Watching</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card">
-              <div class="poster-img-wrap"><span class="poster-placeholder-text">Resume Item</span></div>
-              <span class="poster-card-title">Sample Movie</span>
-            </div>
+        <!-- STEP 6: Rails (Continue Watching, Trending, Series) -->
+        <!-- Rail 1: Continue Watching (Hidden automatically if empty) -->
+        <section class="rail-section" id="railContinueWatching" style="display: none;">
+          <div class="rail-header">
+            <h2 class="rail-title">Continue Watching</h2>
           </div>
+          <div class="rail-scroller" id="scrollerContinueWatching"></div>
         </section>
 
+        <!-- Rail 2: Trending Movies -->
         <section class="rail-section" id="railTrendingMovies">
-          <div class="rail-header"><h2 class="rail-title">Trending Movies</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card">
-              <div class="poster-img-wrap"><span class="poster-badge">HD</span><span class="poster-placeholder-text">Slot 1</span></div>
-              <span class="poster-card-title">Sample Title 1</span>
-            </div>
-            <div class="poster-card">
-              <div class="poster-img-wrap"><span class="poster-badge">4K</span><span class="poster-placeholder-text">Slot 2</span></div>
-              <span class="poster-card-title">Sample Title 2</span>
-            </div>
+          <div class="rail-header">
+            <h2 class="rail-title">Trending Movies</h2>
           </div>
+          <div class="rail-scroller" id="scrollerTrendingMovies"></div>
         </section>
+
+        <!-- Rail 3: Popular Series -->
+        <section class="rail-section" id="railPopularSeries">
+          <div class="rail-header">
+            <h2 class="rail-title">Popular Series</h2>
+          </div>
+          <div class="rail-scroller" id="scrollerPopularSeries"></div>
+        </section>
+
+        <script>
+          (function() {
+            // Render the Continue Watching rail from FluxDB
+            async function updateContinueWatchingRail() {
+              const rail = document.getElementById('railContinueWatching');
+              const scroller = document.getElementById('scrollerContinueWatching');
+              if (!rail || !scroller || !window.FluxDB) return;
+
+              const items = await window.FluxDB.getAllWatchProgress();
+              if (items.length === 0) {
+                rail.style.display = 'none';
+                return;
+              }
+
+              rail.style.display = 'flex';
+              scroller.innerHTML = items.map(item => {
+                const progressPct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 0;
+                return `
+                  <div class="poster-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
+                    <div class="poster-img-wrap">
+                      ${item.poster ? `<img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">` : `<span class="poster-placeholder-text">${item.title}</span>`}
+                      <div style="position:absolute; bottom:0; left:0; right:0; height:4px; background:rgba(255,255,255,0.2);">
+                        <div style="width:${progressPct}%; height:100%; background:var(--accent);"></div>
+                      </div>
+                    </div>
+                    <span class="poster-card-title">${item.title}</span>
+                  </div>
+                `;
+              }).join('');
+            }
+
+            // Render Trending rails from FluxPlugins
+            // Render Trending rails from FluxPlugins
+            async function updateTrendingRails() {
+              const movieScroller = document.getElementById('scrollerTrendingMovies');
+              const seriesScroller = document.getElementById('scrollerPopularSeries');
+              if (!window.FluxPlugins) return;
+
+              // 1. Fetch Trending Movies
+              const movies = await window.FluxPlugins.getTrending('movies');
+              if (movieScroller && movies.length > 0) {
+                movieScroller.innerHTML = movies.map(item => `
+                  <div class="poster-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
+                    <div class="poster-img-wrap">
+                      ${item.badge ? `<span class="poster-badge">${item.badge}</span>` : ''}
+                      <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                    </div>
+                    <span class="poster-card-title">${item.title}</span>
+                  </div>
+                `).join('');
+              }
+
+              // 2. Fetch Popular Series
+              const series = await window.FluxPlugins.getTrending('series');
+              if (seriesScroller && series.length > 0) {
+                seriesScroller.innerHTML = series.map(item => `
+                  <div class="poster-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
+                    <div class="poster-img-wrap">
+                      ${item.badge ? `<span class="poster-badge">${item.badge}</span>` : ''}
+                      <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                    </div>
+                    <span class="poster-card-title">${item.title}</span>
+                  </div>
+                `).join('');
+              }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+              updateContinueWatchingRail();
+              updateTrendingRails();
+
+              // Refresh if watch history updates or plugins register
+              window.addEventListener('flux:history-updated', updateContinueWatchingRail);
+              window.addEventListener('flux:plugins-updated', updateTrendingRails);
+            });
+          })();
+        </script>
         <!-- END STEP 6 CODE -->
 
       </div>
@@ -637,12 +1002,170 @@
 
     <!-- VIEW 2: SEARCH -->
     <section class="view-container" id="view-search">
-      <!-- INSERT STEP 5 CODE HERE: Search Input & Results Grid -->
-      <div class="view-empty-state">
-        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <h3>Search Engine</h3>
-        <p>Instant multi-provider search results will appear here.</p>
+      <!-- STEP 5: Search Input & Results Grid -->
+      <style>
+        .search-bar-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          background: var(--surface);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 8px 14px;
+          margin-bottom: 20px;
+        }
+        .search-bar-wrap:focus-within {
+          border-color: rgba(255, 255, 255, 0.35);
+        }
+        .search-input {
+          flex: 1;
+          background: transparent;
+          border: none;
+          outline: none;
+          color: #fff;
+          font-size: 0.95rem;
+          margin-left: 10px;
+        }
+        .search-clear-btn {
+          background: transparent;
+          border: none;
+          color: var(--text-muted);
+          cursor: pointer;
+          display: none;
+          align-items: center;
+          justify-content: center;
+        }
+        .search-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+          gap: 14px;
+        }
+        .search-card {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          cursor: pointer;
+        }
+        .search-card-img {
+          width: 100%;
+          aspect-ratio: 2 / 3;
+          background: var(--surface-card);
+          border-radius: 8px;
+          overflow: hidden;
+          object-fit: cover;
+        }
+        .search-card-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .search-card-title {
+          font-size: 0.8rem;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .search-card-sub {
+          font-size: 0.7rem;
+          color: var(--text-muted);
+        }
+      </style>
+
+      <!-- Search Input Header -->
+      <div class="search-bar-wrap">
+        <svg class="icon" viewBox="0 0 24 24" style="stroke: var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search movies, shows, anime..." autocomplete="off">
+        <button id="searchClearBtn" class="search-clear-btn" aria-label="Clear search">
+          <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
+
+      <!-- Live Search Results Grid -->
+      <div id="searchResultsGrid" class="search-grid"></div>
+
+      <!-- State Indicator -->
+      <div id="searchStatusState" class="view-empty-state">
+        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <h3 id="searchStatusTitle">Explore Media</h3>
+        <p id="searchStatusDesc">Type in the box above to search across media providers.</p>
+      </div>
+
+      <script>
+        (function() {
+          let searchTimer = null;
+
+          document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClearBtn');
+            const grid = document.getElementById('searchResultsGrid');
+            const stateBox = document.getElementById('searchStatusState');
+            const stateTitle = document.getElementById('searchStatusTitle');
+            const stateDesc = document.getElementById('searchStatusDesc');
+
+            if (!input) return;
+
+            // Debounced Live Search
+            input.addEventListener('input', () => {
+              const query = input.value.trim();
+              clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+              clearTimeout(searchTimer);
+              if (query.length === 0) {
+                grid.innerHTML = '';
+                stateBox.style.display = 'flex';
+                stateTitle.textContent = 'Explore Media';
+                stateDesc.textContent = 'Type in the box above to search across media providers.';
+                return;
+              }
+
+              stateBox.style.display = 'flex';
+              stateTitle.textContent = 'Searching...';
+              stateDesc.textContent = `Looking up "${query}" across providers.`;
+
+              searchTimer = setTimeout(async () => {
+                if (window.FluxPlugins) {
+                  const results = await window.FluxPlugins.searchAll(query);
+                  renderResults(results, query);
+                }
+              }, 300);
+            });
+
+            // Clear Button
+            clearBtn.addEventListener('click', () => {
+              input.value = '';
+              input.focus();
+              clearBtn.style.display = 'none';
+              grid.innerHTML = '';
+              stateBox.style.display = 'flex';
+              stateTitle.textContent = 'Explore Media';
+              stateDesc.textContent = 'Type in the box above to search across media providers.';
+            });
+
+            // Render Results into Grid
+            function renderResults(items, query) {
+              if (!items || items.length === 0) {
+                grid.innerHTML = '';
+                stateBox.style.display = 'flex';
+                stateTitle.textContent = 'No Results Found';
+                stateDesc.textContent = `Nothing matched "${query}". Try another title.`;
+                return;
+              }
+
+              stateBox.style.display = 'none';
+              grid.innerHTML = items.map(item => `
+                <div class="search-card" onclick="window.dispatchEvent(new CustomEvent('flux:open-modal', { detail: ${JSON.stringify(item).replace(/"/g, '&quot;')} }))">
+                  <img class="search-card-img" src="${item.poster || ''}" alt="${item.title}" loading="lazy">
+                  <div class="search-card-info">
+                    <span class="search-card-title">${item.title}</span>
+                    <span class="search-card-sub">${item.year || ''} • ${item.type || 'Movie'}</span>
+                  </div>
+                </div>
+              `).join('');
+            }
+          });
+        })();
+      </script>
       <!-- END STEP 5 CODE -->
     </section>
 
@@ -821,14 +1344,162 @@
     </section>
 
     <!-- VIEW 4: DOWNLOADS -->
+    <!-- VIEW 4: DOWNLOADS -->
+    <!-- VIEW 4: DOWNLOADS -->
     <section class="view-container" id="view-downloads">
-      <!-- INSERT STEP 8 CODE HERE: Downloads Queue & 1DM Bridge -->
-      <div class="view-empty-state">
-        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        <h3>Downloads Queue</h3>
-        <p>1DM download manager queue monitor will appear here.</p>
+      <div class="downloads-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h2 style="font-size:1.25rem; font-weight:800;">Downloads</h2>
+          <span id="downloadCountBadge" style="background:var(--accent); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:999px; display:none;">0</span>
+        </div>
+        <button id="btnClearDownloads" style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; font-weight:600; cursor:pointer; display:none;">Clear All</button>
       </div>
-      <!-- END STEP 8 CODE -->
+
+      <!-- Active Downloads List -->
+      <div id="downloadsListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+      <!-- Empty State -->
+      <div id="downloadsEmptyState" class="view-empty-state">
+        <svg class="icon view-empty-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <h3>No Downloads</h3>
+        <p>Items you send to the downloader will be tracked here.</p>
+      </div>
+
+      <script>
+        (function () {
+          const STORAGE_KEY = 'flux_downloads_queue';
+
+          function getQueue() {
+            try {
+              return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch (e) {
+              return [];
+            }
+          }
+
+          function saveQueue(queue) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
+            renderDownloads();
+          }
+
+          function renderDownloads() {
+            const container = document.getElementById('downloadsListContainer');
+            const emptyState = document.getElementById('downloadsEmptyState');
+            const badge = document.getElementById('downloadCountBadge');
+            const btnClear = document.getElementById('btnClearDownloads');
+
+            if (!container || !emptyState) return;
+            const queue = getQueue();
+
+            if (queue.length === 0) {
+              container.innerHTML = '';
+              emptyState.style.display = 'flex';
+              if (badge) badge.style.display = 'none';
+              if (btnClear) btnClear.style.display = 'none';
+              return;
+            }
+
+            emptyState.style.display = 'none';
+            if (badge) {
+              badge.textContent = queue.length;
+              badge.style.display = 'inline-block';
+            }
+            if (btnClear) btnClear.style.display = 'block';
+
+            container.innerHTML = queue.map((item, index) => {
+              const isPaused = Boolean(item.paused);
+              const statusText = isPaused ? 'Paused' : 'Downloading';
+              const statusColor = isPaused ? '#ffb74d' : '#4caf50';
+
+              return `
+                <div style="display:flex; gap:12px; background:var(--surface); padding:12px; border-radius:10px; align-items:center;">
+                  <div style="width:60px; height:80px; background:var(--surface-card); border-radius:6px; overflow:hidden; flex-shrink:0;">
+                    ${item.poster ? `<img src="${item.poster}" alt="" style="width:100%; height:100%; object-fit:cover;">` : ''}
+                  </div>
+                  <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
+                    <h4 style="font-size:0.9rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
+                      <span style="color:var(--text-muted); font-weight:600;">${item.quality || 'HD'}</span>
+                      <span style="color:${statusColor}; font-weight:700;">${statusText}</span>
+                    </div>
+                    <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+                      <div style="width:100%; height:100%; background:${isPaused ? '#666' : 'var(--accent)'}; transition: background 0.3s;"></div>
+                    </div>
+                  </div>
+
+                  <!-- Play / Bold Pause Button -->
+                  <button onclick="window.toggleDownloadPause(${index})" style="background:rgba(255,255,255,0.08); border:none; color:#fff; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer;" aria-label="Pause or Resume">
+                    ${isPaused 
+                      ? `<svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; stroke:none; fill:#fff;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`
+                      : `<svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; stroke:none; fill:#fff;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>`
+                    }
+                  </button>
+
+                  <!-- Remove Button -->
+                  <button onclick="window.removeDownloadItem(${index})" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px;" aria-label="Remove download">
+                    <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+              `;
+            }).join('');
+          }
+
+          window.renderDownloads = renderDownloads;
+
+          // Toggle Play / Pause state
+          window.toggleDownloadPause = function (index) {
+            const queue = getQueue();
+            if (queue[index]) {
+              queue[index].paused = !queue[index].paused;
+              saveQueue(queue);
+            }
+          };
+
+          // Remove download item with confirmation
+          window.removeDownloadItem = function (index) {
+            const queue = getQueue();
+            const item = queue[index];
+            const title = item ? `"${item.title}"` : 'this download';
+            
+            if (window.confirm(`Cancel and remove ${title} from downloads?`)) {
+              queue.splice(index, 1);
+              saveQueue(queue);
+            }
+          };
+
+          // Hook into download trigger from Step 7
+          window.addEventListener('flux:download-added', (e) => {
+            if (!e.detail) return;
+            const queue = getQueue();
+            queue.unshift({
+              title: e.detail.title || 'Untitled',
+              poster: e.detail.poster || '',
+              quality: (e.detail.quality || 'HD').replace(/\s*\((m3u8|mp4|hls)\)/gi, '').trim(),
+              timestamp: Date.now()
+            });
+            saveQueue(queue);
+          });
+
+          // Safe initialization on load
+          document.addEventListener('DOMContentLoaded', () => {
+            const btnClear = document.getElementById('btnClearDownloads');
+            if (btnClear) {
+              btnClear.addEventListener('click', () => {
+                if (window.confirm('Cancel and clear all downloads in the queue?')) {
+                  saveQueue([]);
+                }
+              });
+            }
+
+            const downloadTab = document.querySelector('[data-target="view-downloads"]');
+            if (downloadTab) {
+              downloadTab.addEventListener('click', renderDownloads);
+            }
+
+            renderDownloads();
+          });
+        })();
+      </script>
     </section>
 
   </main>
@@ -866,13 +1537,328 @@
   <!-- ========================================================================
        8. NATIVE STREAM INSPECTION MODAL (PLACEHOLDER)
        ======================================================================== -->
-  <!-- INSERT STEP 7 CODE HERE: Stream Inspection Sheet -->
+  <!-- STEP 7: Stream Inspection Sheet & In-App Player -->
+  <style>
+    .stream-sheet-header {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      position: relative;
+    }
+    .stream-sheet-poster {
+      width: 60px;
+      height: 85px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--surface-card);
+      flex-shrink: 0;
+    }
+    .stream-sheet-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stream-sheet-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stream-sheet-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .stream-sheet-close {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      cursor: pointer;
+    }
+    .stream-quality-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .quality-opt-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .quality-opt-btn.selected {
+      background: rgba(229, 9, 20, 0.15);
+      border-color: var(--accent);
+    }
+    .quality-badge-tag {
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .sheet-action-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    /* Desktop Browser In-App Player Modal */
+    .desktop-player-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.96);
+      backdrop-filter: blur(8px);
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      padding: calc(var(--safe-top) + 12px) 16px calc(var(--safe-bottom) + 12px) 16px;
+    }
+    .desktop-player-overlay.active {
+      display: flex;
+    }
+    .desktop-player-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+    }
+    .desktop-player-frame {
+      flex: 1;
+      width: 100%;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  </style>
+
+  <!-- Inspection Sheet Modal -->
   <div class="stream-modal-overlay" id="streamModal">
-    <div class="stream-modal-sheet">
-      <h3>Stream Details</h3>
-      <p style="color: var(--text-muted); font-size: 0.85rem;">Parsed quality streams ready for ExoPlayer & Downloader.</p>
+    <div class="stream-modal-sheet" id="streamModalSheet">
+      <div class="stream-sheet-header">
+        <img id="modalPoster" class="stream-sheet-poster" src="" alt="">
+        <div class="stream-sheet-info">
+          <h3 id="modalTitle" class="stream-sheet-title">Media Title</h3>
+          <span id="modalMeta" class="stream-sheet-meta">Ready to stream</span>
+        </div>
+        <button class="stream-sheet-close" id="modalCloseBtn">
+          <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-top: 4px;">SELECT RESOLVER SOURCE</div>
+      <div class="stream-quality-list" id="modalQualityList"></div>
+
+      <div class="sheet-action-btns">
+        <button class="btn btn-primary" id="btnPlayExo" style="flex: 1.2;">
+          <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#000; width:18px; height:18px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Play Online</span>
+        </button>
+        <button class="btn btn-secondary" id="btnDownload1DM" style="flex: 1;">
+          <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Download</span>
+        </button>
+      </div>
     </div>
   </div>
+
+  <!-- In-Page Desktop Video Player Modal -->
+  <div class="desktop-player-overlay" id="desktopPlayerOverlay">
+    <div class="desktop-player-header">
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <span id="desktopPlayerTitle" style="font-size:1rem; font-weight:700;">Watching Stream</span>
+        <span id="desktopPlayerSource" style="font-size:0.75rem; color:var(--text-muted);">Resolver Stream</span>
+      </div>
+      <button class="drawer-close-btn" id="closeDesktopPlayerBtn" style="width:36px; height:36px; background:rgba(255,255,255,0.1); border-radius:50%;">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="desktop-player-frame">
+      <iframe id="desktopPlayerIframe" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let currentMedia = null;
+      let activeStreams = [];
+      let selectedStreamIndex = 0;
+
+      const modal = document.getElementById('streamModal');
+      const closeBtn = document.getElementById('modalCloseBtn');
+      const poster = document.getElementById('modalPoster');
+      const title = document.getElementById('modalTitle');
+      const meta = document.getElementById('modalMeta');
+      const qualityList = document.getElementById('modalQualityList');
+      const btnPlay = document.getElementById('btnPlayExo');
+      const btnDownload = document.getElementById('btnDownload1DM');
+
+      // Desktop Player Modal Elements
+      const playerOverlay = document.getElementById('desktopPlayerOverlay');
+      const playerIframe = document.getElementById('desktopPlayerIframe');
+      const playerTitle = document.getElementById('desktopPlayerTitle');
+      const playerSource = document.getElementById('desktopPlayerSource');
+      const closePlayerBtn = document.getElementById('closeDesktopPlayerBtn');
+
+      function closeModal() {
+        if (modal) modal.classList.remove('active');
+      }
+
+      function closeDesktopPlayer() {
+        if (playerOverlay) playerOverlay.classList.remove('active');
+        if (playerIframe) playerIframe.src = '';
+      }
+
+      if (closePlayerBtn) closePlayerBtn.addEventListener('click', closeDesktopPlayer);
+
+      async function openModalWithData(item) {
+        currentMedia = item;
+        selectedStreamIndex = 0;
+
+        title.textContent = item.title || 'Untitled';
+        meta.textContent = `${item.year || '2024'} • ${item.type || 'Movie'}`;
+        poster.src = item.poster || '';
+        poster.style.display = item.poster ? 'block' : 'none';
+
+        qualityList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Resolving live streams...</div>`;
+        modal.classList.add('active');
+
+        try {
+          if (window.FluxPlugins) {
+            activeStreams = await window.FluxPlugins.extractStreams(item.providerId || 'global-resolver', item.id, item);
+            renderStreams();
+          }
+        } catch (e) {
+          qualityList.innerHTML = `<div style="font-size:0.8rem; color:#ff5555; padding:10px 0;">No active streams found for this title.</div>`;
+        }
+      }
+
+      function renderStreams() {
+        if (!activeStreams || activeStreams.length === 0) {
+          qualityList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted);">No streams available.</div>`;
+          return;
+        }
+
+        qualityList.innerHTML = activeStreams.map((st, i) => `
+          <button class="quality-opt-btn ${i === selectedStreamIndex ? 'selected' : ''}" data-idx="${i}">
+            <span style="font-weight: 600;">${st.quality}</span>
+            <span class="quality-badge-tag">${st.source || 'STREAM'}</span>
+          </button>
+        `).join('');
+
+        qualityList.querySelectorAll('.quality-opt-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectedStreamIndex = parseInt(btn.getAttribute('data-idx'), 10);
+            renderStreams();
+          });
+        });
+      }
+
+      window.addEventListener('flux:open-modal', (e) => {
+        if (e.detail) openModalWithData(e.detail);
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+      }
+
+      // Handle Play Action: Native Shell vs Desktop Player Fallback
+      if (btnPlay) {
+        btnPlay.addEventListener('click', () => {
+          if (!activeStreams[selectedStreamIndex] || !currentMedia) return;
+          const chosen = activeStreams[selectedStreamIndex];
+
+          // 1. In Native Shell: invoke ExoPlayer
+          if (window.NativeAppBridge && window.NativeAppBridge.isNative()) {
+            window.NativeAppBridge.playMedia({
+              url: chosen.url,
+              title: currentMedia.title,
+              poster: currentMedia.poster,
+              position: currentMedia.position || 0
+            });
+          } else {
+            // 2. Desktop Browser Fallback: open clean in-app iframe player
+            if (playerOverlay && playerIframe) {
+              playerTitle.textContent = currentMedia.title;
+              playerSource.textContent = `${chosen.source} • ${chosen.quality}`;
+              playerIframe.src = chosen.url;
+              playerOverlay.classList.add('active');
+            }
+          }
+
+          // Register in Watch History
+          if (window.FluxDB) {
+            window.FluxDB.saveWatchProgress({
+              id: currentMedia.id || 'media-' + Date.now(),
+              title: currentMedia.title,
+              poster: currentMedia.poster,
+              url: chosen.url,
+              position: currentMedia.position || 10,
+              duration: 3600
+            });
+          }
+
+          closeModal();
+        });
+      }
+
+      // Handle 1DM Downloader Trigger
+      if (btnDownload) {
+        btnDownload.addEventListener('click', () => {
+          if (!activeStreams[selectedStreamIndex] || !currentMedia) return;
+          const chosen = activeStreams[selectedStreamIndex];
+
+          if (window.NativeAppBridge) {
+            window.NativeAppBridge.startDownload({
+              url: chosen.url,
+              title: currentMedia.title,
+              filename: `${currentMedia.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
+            });
+            window.NativeAppBridge.showToast(`Download link queued: ${currentMedia.title}`);
+          }
+
+          window.dispatchEvent(new CustomEvent('flux:download-added', {
+            detail: {
+              title: currentMedia.title,
+              url: chosen.url,
+              quality: chosen.source,
+              poster: currentMedia.poster
+            }
+          }));
+
+          closeModal();
+        });
+      }
+    })();
+  </script>
   <!-- END STEP 7 CODE -->
 
   <!-- ========================================================================
@@ -953,7 +1939,7 @@
     })();
   </script>
 
-  <!-- STEP 4: Plugins & Scraper Script Engine -->
+  <!-- STEP 4: Plugins & Scraper Script Engine (Global Media Resolver v1.1.0) -->
   <script>
     (function () {
       class PluginEngine {
@@ -962,52 +1948,36 @@
           this.manifestUrl = 'plugins.json';
         }
 
-        // Called by scraper scripts to register themselves into Flux
         register(plugin) {
-          if (!plugin || !plugin.id) {
-            console.error('[FluxPlugins] Invalid plugin schema:', plugin);
-            return;
-          }
-          this.plugins.set(plugin.id, {
-            enabled: true,
-            ...plugin
-          });
-          console.log(`%c[FluxPlugins] Registered: ${plugin.name} (v${plugin.version || '1.0'})`, 'color: #4caf50; font-weight: bold;');
+          if (!plugin || !plugin.id) return;
+          this.plugins.set(plugin.id, { enabled: true, ...plugin });
           window.dispatchEvent(new CustomEvent('flux:plugins-updated'));
         }
 
-        // Fetch manifest and dynamically inject scraper .js files
         async loadManifest(url = this.manifestUrl) {
           try {
             const res = await fetch(url);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const manifest = await res.json();
-
             if (Array.isArray(manifest.plugins)) {
               for (const entry of manifest.plugins) {
-                if (entry.url) this.injectScript(entry.url);
+                if (entry.url) {
+                  const s = document.createElement('script');
+                  s.src = entry.url;
+                  s.async = true;
+                  document.head.appendChild(s);
+                }
               }
             }
           } catch (err) {
-            console.warn('[FluxPlugins] Could not load external plugins.json manifest (using local scrapers):', err.message);
+            console.warn('[FluxPlugins] External manifest skipped:', err.message);
           }
         }
 
-        // Dynamically injects a remote or local plugin script
-        injectScript(scriptSrc) {
-          const script = document.createElement('script');
-          script.src = scriptSrc;
-          script.async = true;
-          script.onerror = () => console.error(`[FluxPlugins] Failed to load plugin script: ${scriptSrc}`);
-          document.head.appendChild(script);
-        }
-
-        // Returns all active and enabled plugins
         getEnabledPlugins() {
           return Array.from(this.plugins.values()).filter(p => p.enabled);
         }
 
-        // Parallel search across all enabled scrapers
         async searchAll(query) {
           const enabled = this.getEnabledPlugins();
           if (enabled.length === 0) return [];
@@ -1019,7 +1989,7 @@
                 return (results || []).map(item => ({ ...item, providerId: plugin.id, providerName: plugin.name }));
               }
             } catch (err) {
-              console.warn(`[FluxPlugins] Scraper ${plugin.id} search failed:`, err);
+              console.warn(`[FluxPlugins] Search error on ${plugin.id}:`, err);
             }
             return [];
           });
@@ -1028,7 +1998,6 @@
           return settled.flatMap(res => (res.status === 'fulfilled' ? res.value : []));
         }
 
-        // Parallel extraction of trending titles for home rails
         async getTrending(category = 'movies') {
           const enabled = this.getEnabledPlugins();
           for (const plugin of enabled) {
@@ -1038,63 +2007,147 @@
                 if (items && items.length > 0) return items;
               }
             } catch (err) {
-              console.warn(`[FluxPlugins] Trending fetch failed on ${plugin.id}:`, err);
+              console.warn(`[FluxPlugins] Trending error on ${plugin.id}:`, err);
             }
           }
           return [];
         }
 
-        // Extract direct video streams (.m3u8 / .mp4) from the selected provider
-        async extractStreams(providerId, mediaId, episodeInfo = {}) {
-          const plugin = this.plugins.get(providerId);
+        async extractStreams(providerId, mediaId, mediaInfo = {}) {
+          const plugin = this.plugins.get(providerId) || this.plugins.get('global-resolver');
           if (!plugin || typeof plugin.extractStreams !== 'function') {
-            throw new Error(`Provider "${providerId}" does not support stream extraction.`);
+            throw new Error(`Provider "${providerId}" stream extraction unavailable.`);
           }
-          return await plugin.extractStreams(mediaId, episodeInfo);
+          return await plugin.extractStreams(mediaId, mediaInfo);
         }
       }
 
       window.FluxPlugins = new PluginEngine();
 
       // ========================================================================
-      // BUILT-IN DEMO SCRAPER PROVIDER (For Testing & Fallback)
+      // GLOBAL MEDIA RESOLVER v1.1.0 (Live TMDB + Resilient Fallback)
       // ========================================================================
+      const TMDB_API_KEYS = [
+        'f6bd687ffa63cd282b6ff2c6877f2669',
+        '2a61185ef6a27f400fd92820ad9e8537'
+      ];
+
+      // Curated backup media cache with real TMDB IDs to guarantee instant loading
+      const FALLBACK_CATALOG = [
+        { id: '693134', tmdbId: 693134, title: 'Dune: Part Two', year: '2024', type: 'Movie', badge: '8.6 ★', poster: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
+        { id: '533535', tmdbId: 533535, title: 'Deadpool & Wolverine', year: '2024', type: 'Movie', badge: '7.8 ★', poster: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg' },
+        { id: '27205', tmdbId: 27205, title: 'Inception', year: '2010', type: 'Movie', badge: '8.4 ★', poster: 'https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg' },
+        { id: '157336', tmdbId: 157336, title: 'Interstellar', year: '2014', type: 'Movie', badge: '8.4 ★', poster: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg' },
+        { id: '872585', tmdbId: 872585, title: 'Oppenheimer', year: '2023', type: 'Movie', badge: '8.1 ★', poster: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg' },
+        { id: '94605', tmdbId: 94605, title: 'Arcane', year: '2021', type: 'Series', badge: '8.7 ★', poster: 'https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg' },
+        { id: '66732', tmdbId: 66732, title: 'Stranger Things', year: '2016', type: 'Series', badge: '8.6 ★', poster: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
+        { id: '1396', tmdbId: 1396, title: 'Breaking Bad', year: '2008', type: 'Series', badge: '8.9 ★', poster: 'https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg' },
+        { id: '100088', tmdbId: 100088, title: 'The Last of Us', year: '2023', type: 'Series', badge: '8.6 ★', poster: 'https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2V7JMrRI.jpg' },
+        { id: '76479', tmdbId: 76479, title: 'The Boys', year: '2019', type: 'Series', badge: '8.5 ★', poster: 'https://image.tmdb.org/t/p/w500/2ZmTMPrbzgq7vgTH9QMviq5qN5S.jpg' }
+      ];
+
+      async function fetchFromTMDB(endpoint) {
+        for (const key of TMDB_API_KEYS) {
+          try {
+            const sep = endpoint.includes('?') ? '&' : '?';
+            const res = await fetch(`https://api.themoviedb.org/3/${endpoint}${sep}api_key=${key}`);
+            if (res.ok) return await res.json();
+          } catch (e) {
+            // try next key
+          }
+        }
+        return null;
+      }
+
       window.FluxPlugins.register({
-        id: 'demo-source',
-        name: 'Demo Media Provider',
-        version: '1.0.0',
+        id: 'global-resolver',
+        name: 'Global Media Resolver',
+        version: '1.1.0',
+
+        // 1. Multi-Search across TMDB with instant fallback
         async search(query) {
-          const q = query.toLowerCase();
-          const mockDatabase = [
-            { id: 'sintel', title: 'Sintel (Open Movie)', year: '2010', type: 'movie', poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300' },
-            { id: 'tears-of-steel', title: 'Tears of Steel (Sci-Fi)', year: '2012', type: 'movie', poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300' },
-            { id: 'big-buck-bunny', title: 'Big Buck Bunny (Animation)', year: '2008', type: 'movie', poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300' }
-          ];
-          return mockDatabase.filter(item => item.title.toLowerCase().includes(q));
+          const q = (query || '').toLowerCase().trim();
+          const data = await fetchFromTMDB(`search/multi?query=${encodeURIComponent(query)}&include_adult=false`);
+
+          if (data && Array.isArray(data.results) && data.results.length > 0) {
+            return data.results
+              .filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path)
+              .map(item => ({
+                id: item.id.toString(),
+                tmdbId: item.id,
+                title: item.title || item.name || 'Untitled',
+                year: (item.release_date || item.first_air_date || '').substring(0, 4),
+                type: item.media_type === 'tv' ? 'Series' : 'Movie',
+                poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`
+              }));
+          }
+
+          // Fallback fuzzy search if TMDB is offline or rate-limited
+          return FALLBACK_CATALOG.filter(item => item.title.toLowerCase().includes(q));
         },
+
+        // 2. Trending Movies & TV Shows
         async getTrending(category) {
-          return [
-            { id: 'sintel', title: 'Sintel', badge: '1080p', type: 'movie', poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300' },
-            { id: 'tears-of-steel', title: 'Tears of Steel', badge: '4K', type: 'movie', poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300' },
-            { id: 'big-buck-bunny', title: 'Big Buck Bunny', badge: 'HD', type: 'movie', poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300' }
-          ];
+          const isSeries = category === 'series';
+          const type = isSeries ? 'tv' : 'movie';
+          const data = await fetchFromTMDB(`trending/${type}/day`);
+
+          if (data && Array.isArray(data.results) && data.results.length > 0) {
+            return data.results
+              .filter(item => item.poster_path)
+              .slice(0, 15)
+              .map(item => ({
+                id: item.id.toString(),
+                tmdbId: item.id,
+                title: item.title || item.name || 'Untitled',
+                badge: item.vote_average ? `${item.vote_average.toFixed(1)} ★` : 'HD',
+                type: isSeries ? 'Series' : 'Movie',
+                year: (item.release_date || item.first_air_date || '').substring(0, 4),
+                poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`
+              }));
+          }
+
+          // Fallback catalog filtered by category
+          return FALLBACK_CATALOG.filter(item => isSeries ? item.type === 'Series' : item.type === 'Movie');
         },
-        async extractStreams(mediaId) {
-          // Standard public test streams
-          const streams = {
-            'sintel': [
-              { quality: '1080p (m3u8)', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', format: 'm3u8' },
-              { quality: '720p (MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', format: 'mp4' }
-            ],
-            'tears-of-steel': [
-              { quality: '1080p (m3u8)', url: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8', format: 'm3u8' },
-              { quality: '720p (MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4', format: 'mp4' }
-            ],
-            'big-buck-bunny': [
-              { quality: '1080p (MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', format: 'mp4' }
-            ]
-          };
-          return streams[mediaId] || streams['sintel'];
+
+        // 3. Multi-Stream Resolver Links
+        async extractStreams(mediaId, mediaInfo = {}) {
+          const id = mediaInfo.tmdbId || mediaId || '693134';
+          const isTv = (mediaInfo.type || '').toLowerCase() === 'series' || (mediaInfo.type || '').toLowerCase() === 'tv';
+          const season = mediaInfo.season || 1;
+          const episode = mediaInfo.episode || 1;
+
+          return [
+            {
+              source: 'VidSrc Pro',
+              quality: 'VidSrc Pro (Fast)',
+              url: isTv 
+                ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}` 
+                : `https://vidsrc.me/embed/movie?tmdb=${id}`
+            },
+            {
+              source: 'AutoEmbed',
+              quality: 'AutoEmbed (Multi-Server)',
+              url: isTv 
+                ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}` 
+                : `https://player.autoembed.cc/embed/movie/${id}`
+            },
+            {
+              source: 'Embed.su',
+              quality: 'Embed.su (Full HD)',
+              url: isTv 
+                ? `https://embed.su/embed/tv/${id}/${season}/${episode}` 
+                : `https://embed.su/embed/movie/${id}`
+            },
+            {
+              source: '2Embed',
+              quality: '2Embed (Cloud)',
+              url: isTv 
+                ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}` 
+                : `https://www.2embed.cc/embed/${id}`
+            }
+          ];
         }
       });
     })();
@@ -1135,6 +2188,16 @@
         if (targetView) targetView.classList.add('active');
       });
     });
+  </script>
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('[PWA] Service worker registration bypassed:', err.message);
+        });
+      });
+    }
   </script>
 </body>
 </html>
