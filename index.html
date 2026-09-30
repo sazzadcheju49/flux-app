@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#141414">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -32,15 +32,18 @@
       margin: 0;
       padding: 0;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
       user-select: none;
+      -webkit-user-select: none;
     }
 
-    body {
+    html, body {
       background-color: var(--bg);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
+      overscroll-behavior-y: none;
       padding-bottom: calc(84px + var(--safe-bottom));
     }
 
@@ -360,6 +363,9 @@
 
     .poster-card {
       flex: 0 0 135px;
+      width: 135px;
+      min-width: 135px;
+      max-width: 135px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -379,14 +385,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
-    .poster-card-title {
+    .poster-card-title, .poster-title {
       font-size: 0.82rem;
       font-weight: 600;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
+      max-width: 100%;
+      word-break: break-word;
+      line-height: 1.25;
+      min-height: 2.5em;
     }
 
     /* ==========================================================================
@@ -400,7 +413,7 @@
       display: none;
       flex-direction: column;
       overflow-y: auto;
-      padding-top: var(--safe-top);
+      padding-top: 0;
       padding-bottom: calc(var(--safe-bottom) + 30px);
       touch-action: pan-y;
       transition: transform 0.28s cubic-bezier(0.1, 0.9, 0.2, 1);
@@ -409,38 +422,53 @@
       display: flex;
     }
 
+    /* Transparent edge-to-edge floating navigation over backdrop */
     .details-nav-bar {
-      position: sticky;
+      position: absolute;
       top: 0;
       left: 0;
       right: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 20px;
-      background: var(--glass-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-bottom: 1px solid var(--glass-border);
+      padding-top: calc(var(--safe-top) + 6px);
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 10px;
+      background: transparent;
+      border-bottom: none;
       z-index: 10;
+      pointer-events: auto;
     }
 
-    .swipe-pill-indicator {
-      width: 44px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 2px;
-      margin: 0 auto;
-    }
-
+    /* Extended backdrop into notch area with protective top gradient blend */
     .details-preview-wrap {
       position: relative;
       width: 100%;
-      height: 42vh;
-      min-height: 280px;
+      height: 46vh;
+      min-height: 310px;
       background: #222;
       background-size: cover;
-      background-position: center;
+      background-position: center top;
+    }
+    .details-preview-wrap::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--safe-top) + 70px);
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .details-preview-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(20, 20, 20, 0.85) 85%, var(--bg) 100%);
+      z-index: 1;
+      pointer-events: none;
     }
 
     .details-body {
@@ -745,17 +773,17 @@
       </div>
     </section>
 
-    <!-- Custom Glass History Wipe Confirmation Modal -->
-    <div class="glass-modal-overlay" id="wipeConfirmModal">
+    <!-- Re-Download Confirmation Glass Modal -->
+    <div class="glass-modal-overlay" id="redownloadConfirmModal">
       <div class="glass-sheet" style="align-items:center; text-align:center;">
         <div style="width:50px; height:50px; border-radius:50%; background:rgba(229,9,20,0.15); display:flex; align-items:center; justify-content:center;">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke:#ff5555; width:26px; height:26px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <svg class="icon" viewBox="0 0 24 24" style="stroke:var(--accent); width:26px; height:26px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         </div>
-        <h3 style="font-size:1.15rem; font-weight:800;">Wipe All Watch History?</h3>
-        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">This will permanently clear all saved progress and episode timestamps from IndexedDB. This cannot be undone.</p>
+        <h3 style="font-size:1.15rem; font-weight:800;">Already in Downloads</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">This title is already in your download queue. Do you want to download it again?</p>
         <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
-          <button class="btn btn-secondary" id="btnCancelWipe" style="flex:1;">Cancel</button>
-          <button class="btn btn-primary" id="btnConfirmWipe" style="flex:1; background:#ff4444; color:#fff;">Confirm Wipe</button>
+          <button class="btn btn-secondary" id="btnCancelRedownload" style="flex:1;">Cancel</button>
+          <button class="btn btn-primary" id="btnConfirmRedownload" style="flex:1;">Download Again</button>
         </div>
       </div>
     </div>
@@ -771,17 +799,22 @@
         const searchStateDesc = document.getElementById('searchStateDesc');
         const searchPills = document.getElementById('searchHistoryPills');
         let searchTimer = null;
+        let cachedTrendingResults = null;
 
-        // 1. Render Search History Pills
+        // 1. Render strictly the last 5 Search History Pills
         async function renderSearchHistory() {
           if (!window.NexusDB || !searchPills) return;
-          const items = await window.NexusDB.getRecentSearches();
+          const allItems = await window.NexusDB.getRecentSearches();
+          // Strictly take the last 5 search queries
+          const items = (allItems || []).slice(-5).reverse();
 
-          if (!items || items.length === 0) {
+          if (items.length === 0) {
             searchPills.innerHTML = '';
+            searchPills.style.display = 'none';
             return;
           }
 
+          searchPills.style.display = 'flex';
           searchPills.innerHTML = items.map(it => `
             <span style="background:var(--glass-card); border:1px solid var(--glass-border); padding:5px 12px; border-radius:999px; font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:8px; cursor:pointer;">
               <span class="pill-text">${it.query}</span>
@@ -806,22 +839,80 @@
           });
         }
 
-        // 2. Perform Live Debounced Search
-        async function triggerSearch(q) {
-          const query = (q || '').trim();
-          if (!query) {
+        // 2. Pre-Populate Search Body with Popular & Trending Grid
+        async function loadTrendingSearchGrid() {
+          if (!searchGrid) return;
+
+          if (cachedTrendingResults) {
+            renderSearchCards(cachedTrendingResults, false);
+            return;
+          }
+
+          try {
+            const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            cachedTrendingResults = (data.results || []).filter(it => it.poster_path);
+            renderSearchCards(cachedTrendingResults, false);
+          } catch (e) {
+            searchEmpty.style.display = 'flex';
+            searchStateTitle.textContent = 'Explore Media';
+            searchStateDesc.textContent = 'Type in the box above to find titles.';
+          }
+        }
+
+        function renderSearchCards(results, isSearchResult = true) {
+          if (!results || results.length === 0) {
             searchGrid.innerHTML = '';
             searchEmpty.style.display = 'flex';
-            searchStateTitle.textContent = 'Search TMDB';
-            searchStateDesc.textContent = 'Type titles above to search movies, series, and anime.';
+            searchStateTitle.textContent = 'No Results';
+            searchStateDesc.textContent = 'No matching titles found. Try another search.';
+            return;
+          }
+
+          searchEmpty.style.display = 'none';
+          searchGrid.innerHTML = results.map(item => {
+            const mediaItem = {
+              id: item.id,
+              title: item.title || item.name,
+              overview: item.overview || '',
+              poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+              backdrop: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
+              year: (item.release_date || item.first_air_date || '2026').substring(0, 4),
+              rating: item.vote_average ? item.vote_average.toFixed(1) : '8.0',
+              isTv: item.media_type === 'tv'
+            };
+
+            return `
+              <div class="poster-card" data-search='${JSON.stringify(mediaItem).replace(/'/g, "&apos;")}'>
+                <div class="poster-img-wrap">
+                  <span class="poster-badge">${item.vote_average ? item.vote_average.toFixed(1) + ' ★' : 'HD'}</span>
+                  <img src="${mediaItem.poster}" alt="${mediaItem.title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <span class="poster-card-title">${mediaItem.title}</span>
+              </div>
+            `;
+          }).join('');
+
+          searchGrid.querySelectorAll('.poster-card').forEach(card => {
+            card.addEventListener('click', () => {
+              const media = JSON.parse(card.getAttribute('data-search'));
+              if (typeof window.openDetailsView === 'function') window.openDetailsView(media);
+            });
+          });
+        }
+
+        // 3. Live Search with Debounce & Fallback to Trending Grid
+        async function triggerSearch(q) {
+          const query = (q || '').trim();
+
+          if (!query) {
             searchClearBtn.style.display = 'none';
+            loadTrendingSearchGrid();
             return;
           }
 
           searchClearBtn.style.display = 'block';
-          searchEmpty.style.display = 'flex';
-          searchStateTitle.textContent = 'Searching...';
-          searchStateDesc.textContent = `Looking up "${query}" on TMDB`;
 
           if (window.NexusDB) await window.NexusDB.saveSearchQuery(query);
           renderSearchHistory();
@@ -832,46 +923,12 @@
               const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=f6bd687ffa63cd282b6ff2c6877f2669&query=${encodeURIComponent(query)}&include_adult=false`);
               if (!res.ok) throw new Error();
               const data = await res.json();
-
               const results = (data.results || []).filter(it => it.poster_path);
-              if (results.length === 0) {
-                searchGrid.innerHTML = '';
-                searchEmpty.style.display = 'flex';
-                searchStateTitle.textContent = 'No Results';
-                searchStateDesc.textContent = `No matches found for "${query}".`;
-                return;
-              }
-
-              searchEmpty.style.display = 'none';
-              searchGrid.innerHTML = results.map(item => `
-                <div class="poster-card" data-search='${JSON.stringify({
-                  id: item.id,
-                  title: item.title || item.name,
-                  overview: item.overview,
-                  poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-                  backdrop: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
-                  year: (item.release_date || item.first_air_date || '2026').substring(0, 4),
-                  rating: item.vote_average ? item.vote_average.toFixed(1) : '8.0',
-                  isTv: item.media_type === 'tv'
-                }).replace(/'/g, "&apos;")}'>
-                  <div class="poster-img-wrap">
-                    <span class="poster-badge">${item.vote_average ? item.vote_average.toFixed(1) + ' ★' : 'HD'}</span>
-                    <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
-                  </div>
-                  <span class="poster-card-title">${item.title || item.name}</span>
-                </div>
-              `).join('');
-
-              searchGrid.querySelectorAll('.poster-card').forEach(card => {
-                card.addEventListener('click', () => {
-                  const media = JSON.parse(card.getAttribute('data-search'));
-                  if (typeof window.openDetailsView === 'function') window.openDetailsView(media);
-                });
-              });
+              renderSearchCards(results, true);
             } catch (e) {
               searchEmpty.style.display = 'flex';
               searchStateTitle.textContent = 'Search Error';
-              searchStateDesc.textContent = 'Could not load search results. Check connection.';
+              searchStateDesc.textContent = 'Could not load search results. Check network connection.';
             }
           }, 300);
         }
@@ -880,6 +937,7 @@
         searchClearBtn?.addEventListener('click', () => {
           searchInput.value = '';
           triggerSearch('');
+          searchInput.focus();
         });
 
         // 3. Render Watch History View
@@ -928,9 +986,11 @@
 
         // Safe tab activation hooks
         document.querySelector('[data-target="view-search"]')?.addEventListener('click', () => {
-          renderSearchHistory();
-          searchInput?.focus();
-        });
+       renderSearchHistory();
+       if (!searchInput.value.trim()) {
+         loadTrendingSearchGrid();
+       }
+     });
         document.querySelector('[data-target="view-history"]')?.addEventListener('click', renderHistoryView);
         window.addEventListener('nexus:history-updated', renderHistoryView);
 
@@ -938,10 +998,10 @@
         document.addEventListener('DOMContentLoaded', () => {
           renderSearchHistory();
           renderHistoryView();
+          loadTrendingSearchGrid();
         });
       })();
     </script>
-
     <!-- ========================================================================
          STEP 8: DOWNLOADS QUEUE MONITOR & 1DM BRIDGE
          ======================================================================== -->
@@ -1065,20 +1125,20 @@
             }
           };
 
-          // Hook into download trigger
-          window.addEventListener('nexus:download-added', (e) => {
-            if (!e.detail) return;
-            const queue = getQueue();
-            const current = window.currentDetailsItem || window.featuredHeroItem || {};
-            queue.unshift({
-              title: e.detail.title || current.title || 'Untitled',
-              poster: current.poster || '',
-              quality: e.detail.quality || '1080p',
-              timestamp: Date.now()
+          // Hook into download trigger with composite key
+            window.addEventListener('nexus:download-added', (e) => {
+              if (!e.detail) return;
+              const queue = getQueue();
+              queue.unshift({
+                id: e.detail.id,
+                tmdbId: e.detail.tmdbId,
+                title: e.detail.title || 'Untitled',
+                poster: e.detail.poster || '',
+                quality: e.detail.quality || '1080p',
+                timestamp: Date.now()
+              });
+              saveQueue(queue);
             });
-            saveQueue(queue);
-          });
-
           // Safe initialization on load
           document.addEventListener('DOMContentLoaded', () => {
             const btnClear = document.getElementById('btnClearDownloads');
@@ -1334,46 +1394,98 @@
       });
 
       // Fetch TV Seasons and dynamic episode list
+      // Fetch TMDB TV Seasons dynamically & render episode cards
       async function loadSeasonsAndEpisodes(tvId) {
-        seasonSelect.innerHTML = '<option value="1">Season 1</option><option value="2">Season 2</option><option value="3">Season 3</option>';
+        seasonSelect.innerHTML = '<option value="">Loading seasons...</option>';
+        episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Loading episodes...</div>';
 
-        async function fetchSeasonEpisodes(sNum) {
-          episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Loading episodes...</div>';
-          try {
-            const res = await fetch(`https://api.themoviedb.org/3/tv/${tvId}/season/${sNum}?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
+        try {
+          // 1. Fetch TV series details to extract all real seasons
+          const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${tvId}?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
+          if (!tvRes.ok) throw new Error('Failed to fetch TV details');
+          const tvData = await tvRes.json();
 
-            if (data && data.episodes) {
-              episodesList.innerHTML = data.episodes.map(ep => `
-                <div class="episode-card" data-ep="${ep.episode_number}">
-                  <div class="episode-thumb-wrap">
-                    <img src="${ep.still_path ? 'https://image.tmdb.org/t/p/w300' + ep.still_path : currentItem.backdrop}" alt="" loading="lazy">
-                    <span class="watched-check">✓</span>
-                  </div>
-                  <div style="flex:1; min-width:0;">
-                    <div style="font-size:0.85rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">E${ep.episode_number} - ${ep.name}</div>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">${ep.air_date || ''} • ${ep.runtime ? ep.runtime + 'm' : '45m'}</div>
-                  </div>
-                </div>
-              `).join('');
-
-              episodesList.querySelectorAll('.episode-card').forEach(card => {
-                card.addEventListener('click', () => {
-                  const epNum = card.getAttribute('data-ep');
-                  window.dispatchEvent(new CustomEvent('nexus:trigger-stream', {
-                    detail: { item: currentItem, season: sNum, episode: epNum }
-                  }));
-                });
-              });
-            }
-          } catch (e) {
-            episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">Episodes unavailable for this season.</div>';
+          // 2. Filter out specials (season 0) unless it's the only season
+          let seasons = (tvData.seasons || []).filter(s => s.season_number > 0 && s.episode_count > 0);
+          if (seasons.length === 0 && tvData.seasons && tvData.seasons.length > 0) {
+            seasons = tvData.seasons;
           }
-        }
 
-        seasonSelect.onchange = () => fetchSeasonEpisodes(seasonSelect.value);
-        fetchSeasonEpisodes(1);
+          if (seasons.length === 0) {
+            seasonSelect.innerHTML = '<option value="1">Season 1</option>';
+            fetchSeasonEpisodes(1);
+            return;
+          }
+
+          // 3. Build dynamic season dropdown options
+          seasonSelect.innerHTML = seasons.map(s => `
+            <option value="${s.season_number}">
+              ${s.name || `Season ${s.season_number}`} (${s.episode_count} eps)
+            </option>
+          `).join('');
+
+          // 4. Fetch episodes for a given season number
+          async function fetchSeasonEpisodes(sNum) {
+            episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Loading episodes for Season ' + sNum + '...</div>';
+            try {
+              const res = await fetch(`https://api.themoviedb.org/3/tv/${tvId}/season/${sNum}?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
+              if (!res.ok) throw new Error('Season fetch failed');
+              const data = await res.json();
+
+              if (data && Array.isArray(data.episodes) && data.episodes.length > 0) {
+                episodesList.innerHTML = data.episodes.map(ep => {
+                  const stillUrl = ep.still_path
+                    ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
+                    : (currentItem.backdrop || currentItem.poster);
+
+                  return `
+                    <div class="episode-card" data-ep="${ep.episode_number}" data-season="${sNum}">
+                      <div class="episode-thumb-wrap">
+                        <img src="${stillUrl}" alt="E${ep.episode_number}" loading="lazy">
+                        <span class="watched-check">✓</span>
+                      </div>
+                      <div style="flex:1; min-width:0;">
+                        <div style="font-size:0.85rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                          E${ep.episode_number} - ${ep.name || `Episode ${ep.episode_number}`}
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                          ${ep.air_date || ''} ${ep.runtime ? '• ' + ep.runtime + 'm' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('');
+
+                // Click listener to launch stream for specific episode
+                episodesList.querySelectorAll('.episode-card').forEach(card => {
+                  card.addEventListener('click', () => {
+                    const epNum = parseInt(card.getAttribute('data-ep'), 10) || 1;
+                    const seasonNumber = parseInt(card.getAttribute('data-season'), 10) || 1;
+
+                    if (typeof window.triggerStreamModal === 'function') {
+                      window.triggerStreamModal(currentItem, seasonNumber, epNum);
+                    } else {
+                      window.dispatchEvent(new CustomEvent('nexus:trigger-stream', {
+                        detail: { item: currentItem, season: seasonNumber, episode: epNum }
+                      }));
+                    }
+                  });
+                });
+              } else {
+                episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">No episode details available for this season.</div>';
+              }
+            } catch (err) {
+              episodesList.innerHTML = '<div style="font-size:0.8rem; color:#ff5555;">Could not load episodes. Check network connection.</div>';
+            }
+          }
+
+          seasonSelect.onchange = () => fetchSeasonEpisodes(seasonSelect.value);
+          // Auto-load first available season
+          fetchSeasonEpisodes(seasons[0].season_number);
+        } catch (e) {
+          seasonSelect.innerHTML = '<option value="1">Season 1</option>';
+          episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">Could not fetch series details.</div>';
+        }
       }
 
       // Fetch Similar Suggestions
@@ -1538,12 +1650,42 @@
         }
 
         async saveWatchProgress(item) {
-          await this.ready;
-          if (!this.db) return;
-          const tx = this.db.transaction('watch_progress', 'readwrite');
-          tx.objectStore('watch_progress').put({ ...item, updatedAt: Date.now() });
-          window.dispatchEvent(new CustomEvent('nexus:history-updated'));
-        }
+       await this.ready;
+       if (!this.db) return;
+
+       // 1. Generate strict composite key (tmdbId for movies, tmdbId_sX_eY for TV episodes)
+       const rawId = String(item.tmdbId || item.id || '').replace(/^media_/, '');
+       const tmdbId = rawId.split('_')[0];
+       const isTv = Boolean(item.isTv || (item.seasonInfo && item.seasonInfo.startsWith('S')) || item.season);
+       const season = item.season || (item.seasonInfo?.match(/S(\d+)/i)?.[1]) || 1;
+       const episode = item.episode || (item.seasonInfo?.match(/E(\d+)/i)?.[1]) || 1;
+       const recordKey = isTv ? `${tmdbId}_s${season}_e${episode}` : `${tmdbId}`;
+
+       const tx = this.db.transaction('watch_progress', 'readwrite');
+       const store = tx.objectStore('watch_progress');
+
+       // 2. Read existing record to merge progress without duplicates
+       const existing = await new Promise(res => {
+         const req = store.get(recordKey);
+         req.onsuccess = () => res(req.result || null);
+         req.onerror = () => res(null);
+       });
+
+       const mergedRecord = {
+         ...(existing || {}),
+         ...item,
+         id: recordKey,
+         tmdbId: String(tmdbId),
+         isTv,
+         season: isTv ? parseInt(season, 10) : undefined,
+         episode: isTv ? parseInt(episode, 10) : undefined,
+         seasonInfo: isTv ? `S${String(season).padStart(2, '0')}E${String(episode).padStart(2, '0')}` : 'Movie',
+         updatedAt: Date.now()
+       };
+
+       store.put(mergedRecord);
+       window.dispatchEvent(new CustomEvent('nexus:history-updated'));
+     }
 
         async getAllWatchProgress() {
           await this.ready;
@@ -1701,16 +1843,17 @@
         rail.style.display = 'flex';
         scroller.innerHTML = items.map(item => {
           const pct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 15;
-          return `
-            <div class="poster-card" data-media='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
-              <div class="poster-img-wrap">
-                <span class="poster-badge">${item.seasonInfo || 'Resume'}</span>
-                <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">
-                <div class="resume-progress-bar"><div class="resume-progress-fill" style="width:${pct}%"></div></div>
-              </div>
-              <span class="poster-card-title">${item.title}</span>
-            </div>
-          `;
+          const resumeBadge = item.isTv ? `Resume ${item.seasonInfo}` : 'Resume Movie';
+       return `
+         <div class="poster-card" data-media='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+           <div class="poster-img-wrap">
+             <span class="poster-badge">${resumeBadge}</span>
+             <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">
+             <div class="resume-progress-bar"><div class="resume-progress-fill" style="width:${pct}%"></div></div>
+           </div>
+           <span class="poster-card-title">${item.title}</span>
+         </div>
+       `;
         }).join('');
 
         scroller.querySelectorAll('.poster-card').forEach(card => {
@@ -1776,44 +1919,9 @@
     })();
   </script>
   <!-- ========================================================================
-       STEP 6: STREAM MODAL & FULLSCREEN PLAYER (UNIVERSAL ENGINE)
+       STEP 4/6: SILENT WATERFALL PLAYBACK ENGINE & NATIVE BRIDGE DISPATCHER
        ======================================================================== -->
   <style>
-    /* Glass Modal Sheet for Streams */
-    .glass-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.82);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.25s, visibility 0.25s;
-      z-index: 400;
-    }
-    .glass-modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .glass-sheet {
-      background: var(--glass-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-top: 1px solid var(--glass-border);
-      border-radius: 20px 20px 0 0;
-      width: 100%;
-      max-width: 520px;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 22px 20px calc(var(--safe-bottom) + 20px) 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
     /* In-Page Desktop Video Player */
     .desktop-player-overlay {
       position: fixed;
@@ -1826,38 +1934,55 @@
     .desktop-player-overlay.active {
       display: flex;
     }
-    .stream-opt-btn {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      background: var(--glass-card);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
+
+    /* Subtle Waterfall Connection Toast */
+    .waterfall-status-toast {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 80px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-light);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
       color: #fff;
-      cursor: pointer;
-      text-align: left;
-      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 450;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s, opacity 0.25s;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     }
-    .stream-opt-btn:active {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: var(--glass-border-light);
+    .waterfall-status-toast.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .waterfall-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: wfSpin 0.7s linear infinite;
+    }
+    @keyframes wfSpin {
+      to { transform: rotate(360deg); }
     }
   </style>
 
-  <!-- Resolver Selection Modal -->
-  <div class="glass-modal-overlay" id="streamModal">
-    <div class="glass-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:1.1rem; font-weight:800;">Available Streams</h3>
-        <button class="glass-btn" id="closeStreamModalBtn" style="width:32px; height:32px;">✕</button>
-      </div>
-      <p style="font-size:0.75rem; color:var(--text-muted);">Decoupled health checker pre-pings active servers:</p>
-      <div id="streamSourcesList" style="display:flex; flex-direction:column; gap:8px;"></div>
-    </div>
+  <!-- Waterfall Status Indicator Toast -->
+  <div class="waterfall-status-toast" id="waterfallToast">
+    <div class="waterfall-spinner"></div>
+    <span id="waterfallToastText">Connecting to stream...</span>
   </div>
 
-  <!-- In-Page Fullscreen Stream Player -->
+  <!-- In-Page Fullscreen Stream Player (Browser Fallback) -->
   <div class="desktop-player-overlay" id="desktopPlayerOverlay">
     <div style="display:flex; justify-content:space-between; align-items:center; padding:calc(var(--safe-top) + 10px) 16px 10px 16px; background:#141414;">
       <span id="desktopPlayerTitle" style="font-weight:700; font-size:0.95rem;">Playing Stream</span>
@@ -1866,162 +1991,232 @@
     <iframe id="desktopPlayerIframe" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen" style="width:100%; height:100%; border:none;"></iframe>
   </div>
 
-  <!-- Stream & Playback Engine (Universal: Local file:// and HTTPS compatible) -->
-  <script>
-    (function () {
-      // 1. Built-in Multi-Resolver Definition
-      const PROVIDERS = [
-        {
-          id: 'vidsrc-pro',
-          name: 'VidSrc Pro',
-          serverType: 'Fast CDN',
-          badge: '1080p',
-          buildUrl: (id, isTv, s, e) => isTv ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}` : `https://vidsrc.me/embed/movie?tmdb=${id}`
-        },
-        {
-          id: 'autoembed',
-          name: 'AutoEmbed',
-          serverType: 'Multi-Cloud',
-          badge: 'Auto',
-          buildUrl: (id, isTv, s, e) => isTv ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}` : `https://player.autoembed.cc/embed/movie/${id}`
-        },
-        {
-          id: 'embed-su',
-          name: 'Embed.su',
-          serverType: 'Direct HLS',
-          badge: 'HD',
-          buildUrl: (id, isTv, s, e) => isTv ? `https://embed.su/embed/tv/${id}/${s}/${e}` : `https://embed.su/embed/movie/${id}`
-        },
-        {
-          id: '2embed',
-          name: '2Embed Cloud',
-          serverType: 'Mirror Server',
-          badge: '720p',
-          buildUrl: (id, isTv, s, e) => isTv ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}` : `https://www.2embed.cc/embed/${id}`
-        },
-        {
-          id: 'smashy-stream',
-          name: 'SmashyStream',
-          serverType: 'Fast Stream',
-          badge: '1080p',
-          buildUrl: (id, isTv, s, e) => isTv ? `https://player.smashystream.com/tv/${id}?s=${s}&e=${e}` : `https://player.smashystream.com/movie/${id}`
-        }
-      ];
+  <!-- Waterfall Engine Script -->
+  <script type="module">
+    import { getWaterfallStream } from './sources.js';
 
-      async function resolveStreams(tmdbId, isTv, season, episode) {
-        return PROVIDERS.map(p => ({
-          name: p.name,
-          serverType: p.serverType,
-          badge: p.badge,
-          status: 'active',
-          url: p.buildUrl(tmdbId, isTv, season, episode)
-        }));
-      }
-
-      const streamModal = document.getElementById('streamModal');
-      const sourcesList = document.getElementById('streamSourcesList');
-      const closeStreamBtn = document.getElementById('closeStreamModalBtn');
-      const playerOverlay = document.getElementById('desktopPlayerOverlay');
-      const playerIframe = document.getElementById('desktopPlayerIframe');
-      const playerTitle = document.getElementById('desktopPlayerTitle');
-      const closePlayerBtn = document.getElementById('closeDesktopPlayerBtn');
-
-      // 2. Open Stream Modal Function
-      window.triggerStreamModal = async function (item, season = 1, episode = 1) {
-        if (!item) return;
-
-        streamModal.classList.add('active');
-        sourcesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Pre-checking servers...</div>';
-
-        const streams = await resolveStreams(item.id, item.isTv, season, episode);
-
-        sourcesList.innerHTML = streams.map((st, i) => `
-          <button class="stream-opt-btn" data-idx="${i}">
-            <div>
-              <div style="font-weight:700; font-size:0.9rem;">${st.name}</div>
-              <div style="font-size:0.7rem; color:var(--text-muted);">${st.serverType} • Status: <span style="color:#4caf50; font-weight:700;">active</span></div>
-            </div>
-            <span style="background:rgba(255,255,255,0.12); padding:3px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">${st.badge}</span>
-          </button>
-        `).join('');
-
-        sourcesList.querySelectorAll('.stream-opt-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const chosen = streams[btn.getAttribute('data-idx')];
-            streamModal.classList.remove('active');
-
-            // Launch Player (Native Shell vs Desktop Browser)
-            if (window.NativeAppBridge && window.NativeAppBridge.isNative()) {
-              window.NativeAppBridge.playMedia({
-                url: chosen.url,
-                title: item.title,
-                poster: item.poster,
-                season,
-                episode
-              });
-            } else {
-              playerTitle.textContent = `${item.title} (${chosen.name})`;
-              playerIframe.src = chosen.url;
-              playerOverlay.classList.add('active');
-            }
-
-            // Save Progress to IndexedDB
-            if (window.NexusDB) {
-              window.NexusDB.saveWatchProgress({
-                id: `media_${item.id}`,
-                title: item.title,
-                poster: item.poster,
-                seasonInfo: item.isTv ? `S${season}E${episode}` : 'Movie',
-                position: 120,
-                duration: 3600
-              });
-            }
-          });
-        });
+    // Ensure NativeAppBridge supports playStream directly
+    if (window.NativeAppBridge && !window.NativeAppBridge.playStream) {
+      window.NativeAppBridge.playStream = function (payload) {
+        const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        window.NativeAppBridge.send('PLAY_STREAM', data);
       };
+    }
 
-      // 3. Wire Play Online Button
-      document.getElementById('btnDetailsPlay')?.addEventListener('click', () => {
-        const item = window.currentDetailsItem || window.featuredHeroItem;
-        if (!item) return;
+    const toast = document.getElementById('waterfallToast');
+    const toastText = document.getElementById('waterfallToastText');
+    const playerOverlay = document.getElementById('desktopPlayerOverlay');
+    const playerIframe = document.getElementById('desktopPlayerIframe');
+    const playerTitle = document.getElementById('desktopPlayerTitle');
+    const closePlayerBtn = document.getElementById('closeDesktopPlayerBtn');
 
-        const isTv = Boolean(item.isTv);
-        const seasonEl = document.getElementById('seasonSelect');
-        const sNum = (isTv && seasonEl) ? parseInt(seasonEl.value, 10) || 1 : 1;
+    function showWaterfallToast(msg, duration = 3000) {
+      if (!toast || !toastText) return;
+      toastText.textContent = msg;
+      toast.classList.add('active');
+      clearTimeout(window._wfToastTimer);
+      if (duration > 0) {
+        window._wfToastTimer = setTimeout(() => toast.classList.remove('active'), duration);
+      }
+    }
 
-        window.triggerStreamModal(item, sNum, 1);
-      });
+    function hideWaterfallToast() {
+      if (toast) toast.classList.remove('active');
+    }
 
-      // 4. Wire Modal & Player Close Buttons
-      closeStreamBtn?.addEventListener('click', () => streamModal.classList.remove('active'));
-      streamModal?.addEventListener('click', (e) => {
-        if (e.target === streamModal) streamModal.classList.remove('active');
-      });
+    // 1. Core Silent Waterfall Playback Execution
+    window.playMediaWaterfall = async function (mediaItem, season = 1, episode = 1, sourceIndex = 0) {
+      if (!mediaItem) return;
 
-      closePlayerBtn?.addEventListener('click', () => {
-        playerOverlay.classList.remove('active');
-        playerIframe.src = '';
-      });
+      const isTv = Boolean(mediaItem.isTv);
+      const isFailover = sourceIndex > 0;
+      showWaterfallToast(isFailover ? `Switching to backup server (${sourceIndex + 1})...` : 'Resolving stream...', 0);
 
-      // 5. Wire Download Button
-      document.getElementById('btnDetailsDownload')?.addEventListener('click', () => {
-        const item = window.currentDetailsItem || window.featuredHeroItem;
-        if (!item) return;
+      try {
+        // Resolve candidate stream and tracks via sources.js
+        const candidate = await getWaterfallStream({
+          tmdbId: mediaItem.id,
+          mediaType: isTv ? 'tv' : 'movie',
+          season,
+          episode,
+          sourceIndex
+        });
 
-        if (window.NativeAppBridge) {
-          window.NativeAppBridge.startDownload({
-            url: `https://vidsrc.me/embed/movie?tmdb=${item.id}`,
-            title: item.title,
-            filename: `${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
-          });
-          window.NativeAppBridge.showToast(`Queued for download: ${item.title}`);
+        // Store active session for failover listener
+        window.currentPlaybackSession = {
+          mediaItem,
+          season,
+          episode,
+          sourceIndex: candidate.currentIndex,
+          hasMore: candidate.hasMore
+        };
+
+        // Construct Rich Native Bridge Contract Payload
+        const nativePayload = {
+          tmdbId: String(mediaItem.id),
+          title: mediaItem.title || mediaItem.name || 'Untitled',
+          streamUrl: candidate.streamUrl,
+          headers: {
+            "Referer": candidate.referrerUrl,
+            "User-Agent": navigator.userAgent || 'Mozilla/5.0 (Linux; Android 14) Flux/1.0'
+          },
+          subtitles: candidate.subtitles || [],
+          audioTracks: candidate.audioTracks || ['Original Audio'],
+          startPositionMs: 0
+        };
+
+        hideWaterfallToast();
+
+        // 2. Dispatch: Native Shell vs Desktop Browser Fallback
+        if (window.NativeAppBridge && window.NativeAppBridge.isNative()) {
+          window.NativeAppBridge.playStream(JSON.stringify(nativePayload));
+        } else {
+          // In-browser fallback
+          playerTitle.textContent = `${nativePayload.title} (${candidate.providerName})`;
+          playerIframe.src = candidate.streamUrl;
+          playerOverlay.classList.add('active');
         }
 
-        window.dispatchEvent(new CustomEvent('nexus:download-added', {
-          detail: { title: item.title, quality: '1080p' }
-        }));
-      });
-    })();
+        // 3. Save deduplicated progress record to IndexedDB
+       if (window.NexusDB) {
+         window.NexusDB.saveWatchProgress({
+           tmdbId: String(mediaItem.id),
+           id: mediaItem.id,
+           isTv,
+           season,
+           episode,
+           title: nativePayload.title,
+           poster: mediaItem.poster || '',
+           streamUrl: candidate.streamUrl,
+           position: 120,
+           duration: 3600
+         });
+       }
+      } catch (err) {
+        console.error('[Waterfall] Resolution error:', err);
+        showWaterfallToast('Stream resolution failed. Retrying next source...', 2500);
+
+        if (sourceIndex < 4) {
+          setTimeout(() => window.playMediaWaterfall(mediaItem, season, episode, sourceIndex + 1), 800);
+        } else {
+          showWaterfallToast('All stream servers unavailable.', 4000);
+        }
+      }
+    };
+
+    // 4. Inbound Telemetry Failover Listener (STREAM_FAILED from Native Shell)
+    const handleStreamFailure = (eventData) => {
+      try {
+        const data = typeof eventData === 'string' ? JSON.parse(eventData) : eventData;
+        if (data?.type === 'STREAM_FAILED' && window.currentPlaybackSession) {
+          const { mediaItem, season, episode, sourceIndex, hasMore } = window.currentPlaybackSession;
+          if (hasMore) {
+            console.warn(`[Native Bridge] Stream failed on server ${sourceIndex + 1}. Auto-triggering next source...`);
+            window.playMediaWaterfall(mediaItem, season, episode, sourceIndex + 1);
+          } else {
+            showWaterfallToast('All available stream mirrors exhausted.', 4000);
+          }
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener('message', (e) => handleStreamFailure(e.data));
+    document.addEventListener('message', (e) => handleStreamFailure(e.data));
+
+    // Download Safeguard & Re-Download Confirmation Controller
+   let pendingDownloadData = null;
+   const redownloadModal = document.getElementById('redownloadConfirmModal');
+   const btnCancelRedownload = document.getElementById('btnCancelRedownload');
+   const btnConfirmRedownload = document.getElementById('btnConfirmRedownload');
+
+   function executeDownload(item, season = 1, episode = 1) {
+     const isTv = Boolean(item.isTv);
+     const tmdbId = String(item.tmdbId || item.id);
+     const downloadKey = isTv ? `${tmdbId}_s${season}_e${episode}` : `${tmdbId}`;
+     const downloadTitle = isTv ? `${item.title} S${String(season).padStart(2, '0')}E${String(episode).padStart(2, '0')}` : item.title;
+     const streamUrl = isTv
+       ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
+       : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
+
+     // 1. Dispatch to Native Bridge
+     if (window.NativeAppBridge) {
+       window.NativeAppBridge.startDownload({
+         url: streamUrl,
+         title: downloadTitle,
+         filename: `${downloadTitle.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
+       });
+       window.NativeAppBridge.showToast(`Queued for download: ${downloadTitle}`);
+     }
+
+     // 2. Dispatch to Downloads tab
+     window.dispatchEvent(new CustomEvent('nexus:download-added', {
+       detail: {
+         id: downloadKey,
+         tmdbId,
+         isTv,
+         season,
+         episode,
+         title: downloadTitle,
+         poster: item.poster || '',
+         quality: '1080p',
+         streamUrl
+       }
+     }));
+   }
+
+   document.getElementById('btnDetailsDownload')?.addEventListener('click', () => {
+     const item = window.currentDetailsItem || window.featuredHeroItem;
+     if (!item) return;
+
+     const isTv = Boolean(item.isTv);
+     const seasonEl = document.getElementById('seasonSelect');
+     const season = (isTv && seasonEl) ? parseInt(seasonEl.value, 10) || 1 : 1;
+     const episode = 1;
+     const tmdbId = String(item.tmdbId || item.id);
+     const downloadKey = isTv ? `${tmdbId}_s${season}_e${episode}` : `${tmdbId}`;
+
+     // Read active queue to check for duplicate
+     let currentQueue = [];
+     try {
+       currentQueue = JSON.parse(localStorage.getItem('nexus_downloads_queue')) || [];
+     } catch (e) {}
+
+     const isAlreadyInQueue = currentQueue.some(d => d.id === downloadKey || (d.tmdbId === tmdbId && !isTv));
+
+     if (isAlreadyInQueue) {
+       // Trigger Glass Confirmation Modal
+       pendingDownloadData = { item, season, episode };
+       if (redownloadModal) redownloadModal.classList.add('active');
+     } else {
+       executeDownload(item, season, episode);
+     }
+   });
+
+   btnCancelRedownload?.addEventListener('click', () => {
+     if (redownloadModal) redownloadModal.classList.remove('active');
+     pendingDownloadData = null;
+   });
+
+   btnConfirmRedownload?.addEventListener('click', () => {
+     if (redownloadModal) redownloadModal.classList.remove('active');
+     if (pendingDownloadData) {
+       executeDownload(pendingDownloadData.item, pendingDownloadData.season, pendingDownloadData.episode);
+       pendingDownloadData = null;
+     }
+   });
+
+    // 6. Connect Episode Card Clicks to Waterfall
+    window.addEventListener('nexus:trigger-stream', (e) => {
+      if (e.detail?.item) {
+        window.playMediaWaterfall(e.detail.item, e.detail.season || 1, e.detail.episode || 1, 0);
+      }
+    });
+
+    // Close in-page desktop player
+    closePlayerBtn?.addEventListener('click', () => {
+      playerOverlay.classList.remove('active');
+      playerIframe.src = '';
+    });
   </script>
   <!-- ========================================================================
        STEP 9: MODALS, NETWORK TOAST & ADVANCED UTILITIES
