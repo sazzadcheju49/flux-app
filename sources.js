@@ -1,17 +1,14 @@
 /**
- * Nexus PWA - Decoupled Multi-Source Resolver & Health Checker
- * ES Module: scrapers/sources.js
+ * Nexus / Flex PWA - Silent Waterfall Stream Resolver & Track Bundler
+ * File: sources.js
  */
 
-const CORS_TIMEOUT_MS = 2500;
-
-// Embed Resolvers Definition
-const RESOLVER_PROVIDERS = [
+// 1. Waterfall Provider Hierarchy
+const WATERFALL_PROVIDERS = [
   {
     id: 'vidsrc-pro',
     name: 'VidSrc Pro',
-    serverType: 'Fast CDN',
-    badge: '1080p',
+    referrer: 'https://vidsrc.me/',
     buildUrl(id, isTv, season, episode) {
       return isTv
         ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`
@@ -21,8 +18,7 @@ const RESOLVER_PROVIDERS = [
   {
     id: 'autoembed',
     name: 'AutoEmbed',
-    serverType: 'Multi-Cloud',
-    badge: 'Auto',
+    referrer: 'https://player.autoembed.cc/',
     buildUrl(id, isTv, season, episode) {
       return isTv
         ? `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`
@@ -32,8 +28,7 @@ const RESOLVER_PROVIDERS = [
   {
     id: 'embed-su',
     name: 'Embed.su',
-    serverType: 'Direct HLS',
-    badge: 'HD',
+    referrer: 'https://embed.su/',
     buildUrl(id, isTv, season, episode) {
       return isTv
         ? `https://embed.su/embed/tv/${id}/${season}/${episode}`
@@ -43,8 +38,7 @@ const RESOLVER_PROVIDERS = [
   {
     id: '2embed',
     name: '2Embed Cloud',
-    serverType: 'Mirror Server',
-    badge: '720p',
+    referrer: 'https://www.2embed.cc/',
     buildUrl(id, isTv, season, episode) {
       return isTv
         ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
@@ -54,8 +48,7 @@ const RESOLVER_PROVIDERS = [
   {
     id: 'smashy-stream',
     name: 'SmashyStream',
-    serverType: 'Fast Stream',
-    badge: '1080p',
+    referrer: 'https://player.smashystream.com/',
     buildUrl(id, isTv, season, episode) {
       return isTv
         ? `https://player.smashystream.com/tv/${id}?s=${season}&e=${episode}`
@@ -64,76 +57,73 @@ const RESOLVER_PROVIDERS = [
   }
 ];
 
-/**
- * Non-blocking CORS-safe health ping
- * In no-cors mode, reaching the server resolves with an opaque response (type: 'opaque').
- * Network or DNS failures reject with an error.
- */
-async function checkStreamHealth(url) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), CORS_TIMEOUT_MS);
-
-  try {
-    const res = await fetch(url, {
-      method: 'HEAD',
-      mode: 'no-cors',
-      cache: 'no-store',
-      signal: controller.signal
-    });
-    clearTimeout(timer);
-    return res.type === 'opaque' || res.ok ? 'active' : 'degraded';
-  } catch (err) {
-    clearTimeout(timer);
-    return 'fallback';
+// 2. Native Bridge Fetch Proxy with Browser Fallback
+export async function secureFetch(url, customHeaders = {}) {
+  if (typeof window !== 'undefined' && window.NativeAppBridge?.fetch) {
+    try {
+      const response = await window.NativeAppBridge.fetch(url, {
+        method: 'GET',
+        headers: {
+          'Referer': customHeaders.Referer || 'https://vidsrc.me/',
+          'User-Agent': navigator.userAgent || 'Mozilla/5.0 (Linux; Android 14) Flux/1.0',
+          ...customHeaders
+        }
+      });
+      return typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+    } catch (err) {
+      console.warn('[sources.js] Native bridge fetch failed, using browser fetch fallback:', err);
+    }
   }
+
+  const res = await fetch(url, { headers: customHeaders });
+  return res.json();
 }
 
-/**
- * Generates stream sources and performs non-blocking concurrent health checks
- */
-export async function getAvailableStreams({ tmdbId, mediaType = 'movie', season = 1, episode = 1 }) {
-  if (!tmdbId) return [];
+// 3. Subtitle & Audio Track Sourcing
+export async function getMediaTracks({ tmdbId, season = 1, episode = 1 }) {
+  const subtitles = [
+    { language: 'English', url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/en.vtt` },
+    { language: 'Spanish', url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/es.vtt` },
+    { language: 'Bengali', url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/bn.vtt` },
+    { language: 'Hindi', url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/hi.vtt` },
+    { language: 'French', url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/fr.vtt` }
+  ];
+
+  const audioTracks = ['Original Audio', 'English Dub', 'Hindi Dub', 'Spanish Dub'];
+
+  return { subtitles, audioTracks };
+}
+
+// 4. Silent Waterfall Source Resolver
+export async function getWaterfallStream({ tmdbId, mediaType = 'movie', season = 1, episode = 1, sourceIndex = 0 }) {
+  if (!tmdbId) throw new Error('Missing tmdbId for stream resolution');
 
   const isTv = (mediaType || '').toLowerCase() === 'tv' || (mediaType || '').toLowerCase() === 'series';
+  const index = Math.max(0, Math.min(sourceIndex, WATERFALL_PROVIDERS.length - 1));
+  const provider = WATERFALL_PROVIDERS[index];
 
-  // 1. Build stream options across all resolvers
-  const initialSources = RESOLVER_PROVIDERS.map((provider) => ({
-    id: provider.id,
-    name: provider.name,
-    serverType: provider.serverType,
-    badge: provider.badge,
-    url: provider.buildUrl(tmdbId, isTv, season, episode),
-    status: 'checking'
-  }));
+  const streamUrl = provider.buildUrl(tmdbId, isTv, season, episode);
+  const { subtitles, audioTracks } = await getMediaTracks({ tmdbId, season, episode });
 
-  // 2. Perform parallel health pre-checks without blocking initial delivery
-  const healthPromises = initialSources.map(async (src) => {
-    const health = await checkStreamHealth(src.url);
-    return { ...src, status: health };
-  });
-
-  const checkedSources = await Promise.all(healthPromises);
-
-  // 3. Sort verified active servers to the top
-  checkedSources.sort((a, b) => {
-    if (a.status === 'active' && b.status !== 'active') return -1;
-    if (a.status !== 'active' && b.status === 'active') return 1;
-    return 0;
-  });
-
-  return checkedSources;
+  return {
+    providerId: provider.id,
+    providerName: provider.name,
+    streamUrl,
+    referrerUrl: provider.referrer,
+    subtitles,
+    audioTracks,
+    currentIndex: index,
+    nextIndex: index + 1,
+    hasMore: index + 1 < WATERFALL_PROVIDERS.length
+  };
 }
 
-/**
- * Dual Subtitle & Audio Track Resolver
- * Resolves standard embedded tracks & VTT mirrors
- */
-export async function getSubtitleTracks({ tmdbId, mediaType = 'movie', season = 1, episode = 1, language = 'en' }) {
-  return [
-    { label: 'English [CC]', lang: 'en', default: true, url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/en.vtt` },
-    { label: 'Spanish', lang: 'es', default: false, url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/es.vtt` },
-    { label: 'Bengali', lang: 'bn', default: false, url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/bn.vtt` },
-    { label: 'Hindi', lang: 'hi', default: false, url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/hi.vtt` },
-    { label: 'French', lang: 'fr', default: false, url: `https://subtitles.wyzie.ru/vtt/${tmdbId}/${season}/${episode}/fr.vtt` }
-  ];
+// Universal Global Attachment for compatibility
+if (typeof window !== 'undefined') {
+  window.NexusSources = {
+    WATERFALL_PROVIDERS,
+    secureFetch,
+    getMediaTracks,
+    getWaterfallStream
+  };
 }
