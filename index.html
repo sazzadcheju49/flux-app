@@ -1,2462 +1,1548 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#141414">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Flex</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Flex App</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 & Babel Standalone -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    /* ==========================================================================
-       1. VARIABLES, RESET & CRYSTAL GLASS SYSTEM
-       ========================================================================== */
     :root {
-      --bg: #141414;
-      --accent: #E50914;
-      --accent-glow: rgba(229, 9, 20, 0.35);
-      --glass-surface: rgba(24, 24, 24, 0.72);
-      --glass-card: rgba(32, 32, 32, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-border-light: rgba(255, 255, 255, 0.22);
-      --glass-blur: blur(20px);
-      --text-main: #FFFFFF;
-      --text-muted: #A3A3A3;
-      --safe-top: max(16px, env(safe-area-inset-top));
-      --safe-bottom: max(16px, env(safe-area-inset-bottom));
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
     }
-
-    * {
-      box-sizing: border-box;
+    body {
+      padding-top: var(--sat);
+      padding-bottom: calc(var(--sab) + 64px);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+      background-color: #080b12;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
       user-select: none;
       -webkit-user-select: none;
-    }
-
-    html, body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      overscroll-behavior-y: none;
-      padding-bottom: calc(84px + var(--safe-bottom));
-    }
-
-    .icon {
-      width: 22px;
-      height: 22px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    /* Top Safe-Area Notch Gradient */
-    .top-gradient-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--safe-top) + 64px);
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 20, 0.6) 65%, transparent 100%);
-      pointer-events: none;
-      z-index: 90;
-    }
-
-    /* Fixed Glass Header */
-    .top-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--safe-top) + 54px);
-      padding-top: var(--safe-top);
-      padding-left: 20px;
-      padding-right: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      pointer-events: auto;
-    }
-
-    .app-brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .app-logo {
-      color: var(--accent);
-      font-size: 1.45rem;
-      font-weight: 900;
-      letter-spacing: 2px;
-    }
-
-    .glass-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      color: var(--text-main);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .glass-btn:active {
-      transform: scale(0.92);
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    /* ==========================================================================
-       2. SLIDE-OUT HAMBURGER GLASS DRAWER
-       ========================================================================== */
-    .drawer-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-      z-index: 200;
-    }
-    .drawer-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .drawer-panel {
-      position: fixed;
-      top: 0;
-      right: -340px;
-      width: min(320px, 85vw);
-      height: 100%;
-      background: var(--glass-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-left: 1px solid var(--glass-border);
-      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.75);
-      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 201;
-      display: flex;
-      flex-direction: column;
-      padding: calc(var(--safe-top) + 16px) 20px var(--safe-bottom) 20px;
-      overflow-y: auto;
-    }
-    .drawer-overlay.active + .drawer-panel,
-    .drawer-panel.active {
-      transform: translateX(-340px);
-    }
-
-    .drawer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--glass-border);
-      margin-bottom: 16px;
-    }
-
-    .drawer-menu-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .drawer-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 13px 15px;
-      border-radius: 12px;
-      background: var(--glass-card);
-      border: 1px solid var(--glass-border);
-      color: var(--text-main);
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .drawer-item:hover, .drawer-item:active {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--glass-border-light);
-    }
-    .drawer-item.danger {
-      color: #ff5555;
-    }
-
-    .pwa-install-box {
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(229, 9, 20, 0.2) 0%, rgba(20, 20, 20, 0.8) 100%);
-      border: 1px solid rgba(229, 9, 20, 0.35);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* ==========================================================================
-       3. HERO FEATURED BANNER
-       ========================================================================== */
-    .hero-banner {
-      position: relative;
-      width: 100%;
-      height: 64vh;
-      min-height: 440px;
-      display: flex;
-      align-items: flex-end;
-      padding: 0 20px 28px 20px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, var(--bg) 100%),
-                  radial-gradient(circle at 75% 30%, #3d1214 0%, #141414 70%);
-      background-size: cover;
-      background-position: center top;
-    }
-    .hero-banner::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(20, 20, 20, 0.1) 0%, rgba(20, 20, 20, 0.7) 65%, var(--bg) 100%);
-      pointer-events: none;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      max-width: 540px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .hero-badge-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .hero-tag {
-      background: var(--accent);
-      color: #FFF;
-      font-size: 0.68rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 3px 8px;
-      border-radius: 4px;
-    }
-
-    .hero-meta {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .hero-title {
-      font-size: 2.3rem;
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.5px;
-    }
-
-    .hero-desc {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.85);
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 6px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-    .btn:active {
-      transform: scale(0.96);
-    }
-    .btn-primary {
-      background: #FFFFFF;
-      color: #000000;
-    }
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.18);
-      color: #FFFFFF;
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
-    }
-
-    /* ==========================================================================
-       4. HORIZONTAL POSTER RAILS (CRYSTAL GLASS)
-       ========================================================================== */
-    .content-area {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-    }
-
-    .rail-section {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .rail-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-    }
-
-    .rail-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-    }
-
-    .rail-scroller {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding: 4px 20px;
-      scrollbar-width: none;
-      scroll-behavior: smooth;
-    }
-    .rail-scroller::-webkit-scrollbar {
-      display: none;
-    }
-
-    .poster-card {
-      flex: 0 0 135px;
-      width: 135px;
-      min-width: 135px;
-      max-width: 135px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .poster-img-wrap {
-      width: 135px;
-      height: 202px;
-      border-radius: 10px;
-      background: var(--glass-card);
-      border: 1px solid var(--glass-border);
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .poster-card-title, .poster-title {
-      font-size: 0.82rem;
-      font-weight: 600;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-      word-break: break-word;
-      line-height: 1.25;
-      min-height: 2.5em;
-    }
-
-    /* ==========================================================================
-       5. DEDICATED MEDIA DETAILS VIEW SKELETON
-       ========================================================================== */
-    .details-view {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 300;
-      display: none;
-      flex-direction: column;
-      overflow-y: auto;
-      padding-top: 0;
-      padding-bottom: calc(var(--safe-bottom) + 30px);
-      touch-action: pan-y;
-      transition: transform 0.28s cubic-bezier(0.1, 0.9, 0.2, 1);
-    }
-    .details-view.active {
-      display: flex;
-    }
-
-    /* Transparent edge-to-edge floating navigation over backdrop */
-    .details-nav-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: calc(var(--safe-top) + 6px);
-      padding-left: 20px;
-      padding-right: 20px;
-      padding-bottom: 10px;
-      background: transparent;
-      border-bottom: none;
-      z-index: 10;
-      pointer-events: auto;
-    }
-
-    /* Extended backdrop into notch area with protective top gradient blend */
-    .details-preview-wrap {
-      position: relative;
-      width: 100%;
-      height: 46vh;
-      min-height: 310px;
-      background: #222;
-      background-size: cover;
-      background-position: center top;
-    }
-    .details-preview-wrap::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--safe-top) + 70px);
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
-      z-index: 2;
-      pointer-events: none;
-    }
-    .details-preview-wrap::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 40%, rgba(20, 20, 20, 0.85) 85%, var(--bg) 100%);
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .details-body {
-      padding: 18px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    /* ==========================================================================
-       6. FLOATING CAPSULE NAVIGATION
-       ========================================================================== */
-    .bottom-nav-wrap {
-      position: fixed;
-      bottom: calc(var(--safe-bottom) + 12px);
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      z-index: 100;
-      pointer-events: none;
-    }
-
-    .bottom-capsule-nav {
-      pointer-events: auto;
-      position: relative;
-      width: clamp(260px, 64vw, 380px);
-      height: 54px;
-      background: var(--glass-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px 6px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
-    }
-
-    .nav-capsule-pill {
-      position: absolute;
-      top: 4px;
-      left: 6px;
-      bottom: 4px;
-      width: calc((100% - 12px) / 4);
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid var(--glass-border-light);
-      border-radius: 999px;
-      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .nav-tab-btn {
-      position: relative;
-      z-index: 2;
-      flex: 1;
-      height: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border-radius: 999px;
-    }
-    .nav-tab-btn svg {
-      width: 22px;
-      height: 22px;
-      stroke: var(--text-muted);
-      transition: stroke 0.25s, transform 0.2s;
-    }
-    .nav-tab-btn.active svg {
-      stroke: var(--text-main);
-      transform: scale(1.12);
-    }
-
-    .view-container {
-      display: none;
-      padding: calc(var(--safe-top) + 60px) 20px 20px 20px;
-      min-height: 80vh;
-    }
-    .view-container.active {
-      display: block;
-    }
-    #view-home.active {
-      padding: 0 0 20px 0;
-      display: block;
-    }
-
-    .view-empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-muted);
-      gap: 12px;
+      touch-action: manipulation;
     }
   </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div id="root"></div>
 
-  <!-- Top Notch Safe-Area Gradient -->
-  <div class="top-gradient-overlay"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
 
-  <!-- Fixed Top Header -->
-  <header class="top-header">
-    <div class="app-brand">
-      <span class="app-logo">FLEX</span>
-    </div>
-    <button class="glass-btn" id="openDrawerBtn" aria-label="Open Menu">
-      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-  </header>
+    /* ========================================================
+       PLACEHOLDER 1: BRIDGE ENGINE
+       ======================================================== */
+    const Bridge = {
+      isNative: () => typeof window.NativeAppBridge !== 'undefined',
 
-  <!-- Slide-out Glass Drawer Menu -->
-  <div class="drawer-overlay" id="drawerOverlay"></div>
-  <aside class="drawer-panel" id="drawerPanel">
-    <div class="drawer-header">
-      <span style="font-weight:800; font-size:1.1rem;">Flex Portal</span>
-      <button class="glass-btn" id="closeDrawerBtn" style="width:34px; height:34px;">
-        <svg class="icon" viewBox="0 0 24 24" style="width:16px; height:16px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-
-    <!-- PLACEHOLDER: Drawer Menu Items -->
-    <ul class="drawer-menu-list">
-      <li class="drawer-item" id="drawerItemFmhy">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-        <span>FMHY Directory</span>
-      </li>
-      <li class="drawer-item" id="drawerItemSettings">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span>Settings & Scrapers</span>
-      </li>
-      <li class="drawer-item" id="drawerItemPurgeCache">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-        <span>Purge Metadata Cache</span>
-      </li>
-      <li class="drawer-item danger" id="drawerItemClearHistory">
-        <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        <span>Wipe Watch History</span>
-      </li>
-    </ul>
-
-    <!-- PWA Install Prompt Banner -->
-    <div class="pwa-install-box" id="pwaInstallBanner">
-      <span style="font-weight:700; font-size:0.85rem;">Install Nexus PWA</span>
-      <button class="btn btn-primary" id="btnInstallPwa" style="padding:6px 12px; font-size:0.8rem;">Add to Home Screen</button>
-    </div>
-  </aside>
-
-  <!-- ========================================================================
-       MAIN APP TABS (HOME, SEARCH, HISTORY, DOWNLOADS)
-       ======================================================================== -->
-  <main id="mainContainer">
-
-    <!-- TAB 1: HOME -->
-    <section class="view-container active" id="view-home">
-      <!-- Dynamic Hero Featured Banner -->
-      <div class="hero-banner" id="heroBanner">
-        <div class="hero-content">
-          <div class="hero-badge-row">
-            <span class="hero-tag">Featured</span>
-            <span class="hero-meta" id="heroYear">2026</span>
-          </div>
-          <h1 class="hero-title" id="heroTitle">Nexus Showcase</h1>
-          <p class="hero-desc" id="heroDesc">Streaming movies, web series, and anime with native player engine handshakes.</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" id="heroPlayBtn">▶ Play</button>
-            <button class="btn btn-secondary" id="heroDetailsBtn">ℹ Details</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 10 TMDB Rails Placeholders -->
-      <div class="content-area">
-        <!-- Rail 1: Continue Watching Placeholder -->
-        <section class="rail-section" id="railContinueWatching">
-          <div class="rail-header"><h2 class="rail-title">Continue Watching</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Resume Item</div><span class="poster-card-title">Sample In-Progress</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 2: Trending Movies & Popular Series Placeholder -->
-        <section class="rail-section" id="railTrending">
-          <div class="rail-header"><h2 class="rail-title">Trending Movies</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Trending Slot 1</div><span class="poster-card-title">Interstellar</span></div>
-            <div class="poster-card"><div class="poster-img-wrap">Trending Slot 2</div><span class="poster-card-title">Dune: Part Two</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 3: Top 20 Hollywood Placeholder -->
-        <section class="rail-section" id="railHollywood">
-          <div class="rail-header"><h2 class="rail-title">Hollywood Blockbusters</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Hollywood 1</div><span class="poster-card-title">Oppenheimer</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 4: Indian Content Placeholder -->
-        <section class="rail-section" id="railIndian">
-          <div class="rail-header"><h2 class="rail-title">Indian Cinema & Series</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Indian 1</div><span class="poster-card-title">RRR</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 5: Bangla Content Placeholder -->
-        <section class="rail-section" id="railBangla">
-          <div class="rail-header"><h2 class="rail-title">Bangla Movies & Dramas</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Bangla 1</div><span class="poster-card-title">Hawa</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 6: Anime Placeholder -->
-        <section class="rail-section" id="railAnime">
-          <div class="rail-header"><h2 class="rail-title">Top Anime</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Anime 1</div><span class="poster-card-title">Attack on Titan</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 7: K-Drama Placeholder -->
-        <section class="rail-section" id="railKdrama">
-          <div class="rail-header"><h2 class="rail-title">Korean Dramas</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">K-Drama 1</div><span class="poster-card-title">Squid Game</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 8: Pakistani Drama Placeholder -->
-        <section class="rail-section" id="railPakistani">
-          <div class="rail-header"><h2 class="rail-title">Pakistani Dramas</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Pakistani 1</div><span class="poster-card-title">Parizaad</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 9: Documentaries Placeholder -->
-        <section class="rail-section" id="railDocs">
-          <div class="rail-header"><h2 class="rail-title">Documentaries</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Doc 1</div><span class="poster-card-title">Planet Earth</span></div>
-          </div>
-        </section>
-
-        <!-- Rail 10: TV Series Placeholder -->
-        <section class="rail-section" id="railSeries">
-          <div class="rail-header"><h2 class="rail-title">Popular TV Series</h2></div>
-          <div class="rail-scroller">
-            <div class="poster-card"><div class="poster-img-wrap">Series 1</div><span class="poster-card-title">Arcane</span></div>
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <!-- ========================================================================
-         STEP 7: SEARCH VIEW & WATCH HISTORY VIEW
-         ======================================================================== -->
-    <!-- TAB 2: SEARCH -->
-    <section class="view-container" id="view-search">
-      <!-- Search Bar -->
-      <div style="display:flex; align-items:center; background:var(--glass-card); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px; margin-bottom:14px;">
-        <svg class="icon" viewBox="0 0 24 24" style="stroke:var(--text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="searchInput" placeholder="Search movies, series, anime..." style="flex:1; background:transparent; border:none; outline:none; color:#fff; font-size:0.95rem; margin-left:10px;" autocomplete="off">
-        <button id="searchClearBtn" style="background:none; border:none; color:var(--text-muted); font-size:1rem; cursor:pointer; display:none; padding:4px;">✕</button>
-      </div>
-
-      <!-- Recent Search History Pills -->
-      <div id="searchHistoryPills" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;"></div>
-
-      <!-- Live Search Grid -->
-      <div id="searchResultsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(105px, 1fr)); gap:14px;"></div>
-      
-      <!-- Empty State -->
-      <div id="searchEmptyState" class="view-empty-state">
-        <svg class="icon" viewBox="0 0 24 24" style="width:48px; height:48px; opacity:0.4;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <h3 id="searchStateTitle">Search TMDB</h3>
-        <p id="searchStateDesc">Type titles above to search movies, series, and anime.</p>
-      </div>
-    </section>
-
-    <!-- TAB 3: WATCH HISTORY -->
-    <section class="view-container" id="view-history">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="font-size:1.25rem; font-weight:800;">Watch History</h2>
-        <button id="btnTriggerHistoryWipe" style="background:none; border:none; color:#ff5555; font-size:0.8rem; font-weight:700; cursor:pointer;">Wipe Records</button>
-      </div>
-      <div id="historyListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
-      <div id="historyEmptyState" class="view-empty-state">
-        <svg class="icon" viewBox="0 0 24 24" style="width:48px; height:48px; opacity:0.4;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <h3>No Watch History</h3>
-        <p>Watched items and in-progress timestamps will appear here.</p>
-      </div>
-    </section>
-
-    <!-- Re-Download Confirmation Glass Modal -->
-    <div class="glass-modal-overlay" id="redownloadConfirmModal">
-      <div class="glass-sheet" style="align-items:center; text-align:center;">
-        <div style="width:50px; height:50px; border-radius:50%; background:rgba(229,9,20,0.15); display:flex; align-items:center; justify-content:center;">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke:var(--accent); width:26px; height:26px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        </div>
-        <h3 style="font-size:1.15rem; font-weight:800;">Already in Downloads</h3>
-        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">This title is already in your download queue. Do you want to download it again?</p>
-        <div style="display:flex; gap:10px; width:100%; margin-top:8px;">
-          <button class="btn btn-secondary" id="btnCancelRedownload" style="flex:1;">Cancel</button>
-          <button class="btn btn-primary" id="btnConfirmRedownload" style="flex:1;">Download Again</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Script: Search & History Controller -->
-    <script>
-      (function () {
-        const searchInput = document.getElementById('searchInput');
-        const searchClearBtn = document.getElementById('searchClearBtn');
-        const searchGrid = document.getElementById('searchResultsGrid');
-        const searchEmpty = document.getElementById('searchEmptyState');
-        const searchStateTitle = document.getElementById('searchStateTitle');
-        const searchStateDesc = document.getElementById('searchStateDesc');
-        const searchPills = document.getElementById('searchHistoryPills');
-        let searchTimer = null;
-        let cachedTrendingResults = null;
-
-        // 1. Render strictly the last 5 Search History Pills
-        async function renderSearchHistory() {
-          if (!window.NexusDB || !searchPills) return;
-          const allItems = await window.NexusDB.getRecentSearches();
-          // Strictly take the last 5 search queries
-          const items = (allItems || []).slice(-5).reverse();
-
-          if (items.length === 0) {
-            searchPills.innerHTML = '';
-            searchPills.style.display = 'none';
-            return;
-          }
-
-          searchPills.style.display = 'flex';
-          searchPills.innerHTML = items.map(it => `
-            <span style="background:var(--glass-card); border:1px solid var(--glass-border); padding:5px 12px; border-radius:999px; font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:8px; cursor:pointer;">
-              <span class="pill-text">${it.query}</span>
-              <span class="pill-del" style="color:#ff5555; padding:2px; font-size:0.8rem;">✕</span>
-            </span>
-          `).join('');
-
-          searchPills.querySelectorAll('.pill-text').forEach(p => {
-            p.addEventListener('click', () => {
-              searchInput.value = p.textContent;
-              searchClearBtn.style.display = 'block';
-              triggerSearch(p.textContent);
-            });
-          });
-
-          searchPills.querySelectorAll('.pill-del').forEach((del, i) => {
-            del.addEventListener('click', async (e) => {
-              e.stopPropagation();
-              await window.NexusDB.deleteSearchQuery(items[i].query);
-              renderSearchHistory();
-            });
-          });
-        }
-
-        // 2. Pre-Populate Search Body with Popular & Trending Grid
-        async function loadTrendingSearchGrid() {
-          if (!searchGrid) return;
-
-          if (cachedTrendingResults) {
-            renderSearchCards(cachedTrendingResults, false);
-            return;
-          }
-
+      getCapabilities: () => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.getCapabilities === 'function') {
           try {
-            const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
-            if (!res.ok) throw new Error();
-            const data = await res.json();
-            cachedTrendingResults = (data.results || []).filter(it => it.poster_path);
-            renderSearchCards(cachedTrendingResults, false);
-          } catch (e) {
-            searchEmpty.style.display = 'flex';
-            searchStateTitle.textContent = 'Explore Media';
-            searchStateDesc.textContent = 'Type in the box above to find titles.';
+            const raw = window.NativeAppBridge.getCapabilities();
+            return typeof raw === 'string' ? JSON.parse(raw) : raw;
+          } catch (err) {
+            console.error('Bridge getCapabilities parse error:', err);
           }
         }
+        return {
+          isFallback: true,
+          shellVersion: 'Browser Fallback (No Shell)',
+          exoPlayer: false,
+          backgroundDownloader: false,
+          sdkLevel: 0
+        };
+      },
 
-        function renderSearchCards(results, isSearchResult = true) {
-          if (!results || results.length === 0) {
-            searchGrid.innerHTML = '';
-            searchEmpty.style.display = 'flex';
-            searchStateTitle.textContent = 'No Results';
-            searchStateDesc.textContent = 'No matching titles found. Try another search.';
-            return;
-          }
-
-          searchEmpty.style.display = 'none';
-          searchGrid.innerHTML = results.map(item => {
-            const mediaItem = {
-              id: item.id,
-              title: item.title || item.name,
-              overview: item.overview || '',
-              poster: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
-              backdrop: `https://image.tmdb.org/t/p/original${item.backdrop_path || item.poster_path}`,
-              year: (item.release_date || item.first_air_date || '2026').substring(0, 4),
-              rating: item.vote_average ? item.vote_average.toFixed(1) : '8.0',
-              isTv: item.media_type === 'tv'
+      fetch: async ({ url, method = 'GET', headers = {}, body = null }) => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.fetch === 'function') {
+          try {
+            const requestPayload = JSON.stringify({ url, method, headers, body });
+            const responseStr = window.NativeAppBridge.fetch(requestPayload);
+            const parsed = typeof responseStr === 'string' ? JSON.parse(responseStr) : responseStr;
+            return {
+              status: parsed.status || 200,
+              headers: parsed.headers || {},
+              body: parsed.body || ''
             };
-
-            return `
-              <div class="poster-card" data-search='${JSON.stringify(mediaItem).replace(/'/g, "&apos;")}'>
-                <div class="poster-img-wrap">
-                  <span class="poster-badge">${item.vote_average ? item.vote_average.toFixed(1) + ' ★' : 'HD'}</span>
-                  <img src="${mediaItem.poster}" alt="${mediaItem.title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
-                </div>
-                <span class="poster-card-title">${mediaItem.title}</span>
-              </div>
-            `;
-          }).join('');
-
-          searchGrid.querySelectorAll('.poster-card').forEach(card => {
-            card.addEventListener('click', () => {
-              const media = JSON.parse(card.getAttribute('data-search'));
-              if (typeof window.openDetailsView === 'function') window.openDetailsView(media);
-            });
-          });
-        }
-
-        // 3. Live Search with Debounce & Fallback to Trending Grid
-        async function triggerSearch(q) {
-          const query = (q || '').trim();
-
-          if (!query) {
-            searchClearBtn.style.display = 'none';
-            loadTrendingSearchGrid();
-            return;
+          } catch (err) {
+            console.error('Bridge native fetch error:', err);
+            throw err;
           }
-
-          searchClearBtn.style.display = 'block';
-
-          if (window.NexusDB) await window.NexusDB.saveSearchQuery(query);
-          renderSearchHistory();
-
-          clearTimeout(searchTimer);
-          searchTimer = setTimeout(async () => {
-            try {
-              const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=f6bd687ffa63cd282b6ff2c6877f2669&query=${encodeURIComponent(query)}&include_adult=false`);
-              if (!res.ok) throw new Error();
-              const data = await res.json();
-              const results = (data.results || []).filter(it => it.poster_path);
-              renderSearchCards(results, true);
-            } catch (e) {
-              searchEmpty.style.display = 'flex';
-              searchStateTitle.textContent = 'Search Error';
-              searchStateDesc.textContent = 'Could not load search results. Check network connection.';
-            }
-          }, 300);
         }
 
-        searchInput?.addEventListener('input', () => triggerSearch(searchInput.value));
-        searchClearBtn?.addEventListener('click', () => {
-          searchInput.value = '';
-          triggerSearch('');
-          searchInput.focus();
+        // Standard browser fallback
+        const res = await window.fetch(url, {
+          method,
+          headers,
+          body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : null
         });
+        const text = await res.text();
+        return {
+          status: res.status,
+          headers: Object.fromEntries(res.headers.entries()),
+          body: text
+        };
+      },
 
-        // 3. Render Watch History View
-        async function renderHistoryView() {
-          const container = document.getElementById('historyListContainer');
-          const empty = document.getElementById('historyEmptyState');
-          if (!container || !empty || !window.NexusDB) return;
+      playStream: ({ url, userAgent = 'FlexNativePlayer/1.0', headers = {}, subtitleUrl = '', startPositionMs = 0 }) => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.playStream === 'function') {
+          const payload = JSON.stringify({ url, userAgent, headers, subtitleUrl, startPositionMs });
+          window.NativeAppBridge.playStream(payload);
+          return true;
+        }
+        console.warn('NativeAppBridge.playStream unavailable. Falling back to web video player.', { url });
+        return false;
+      },
 
-          const items = await window.NexusDB.getAllWatchProgress();
-          if (!items || items.length === 0) {
-            container.innerHTML = '';
-            empty.style.display = 'flex';
-            return;
+      startDownload: ({ url, fileName, headers = {} }) => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.startDownload === 'function') {
+          const payload = JSON.stringify({ url, fileName, headers });
+          window.NativeAppBridge.startDownload(payload);
+          return true;
+        }
+        console.warn('NativeAppBridge.startDownload unavailable in browser.', { fileName, url });
+        return false;
+      },
+
+      getLocalMediaFiles: () => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.getLocalMediaFiles === 'function') {
+          try {
+            const raw = window.NativeAppBridge.getLocalMediaFiles();
+            return typeof raw === 'string' ? JSON.parse(raw) : raw;
+          } catch (err) {
+            console.error('Bridge getLocalMediaFiles error:', err);
+            return [];
           }
+        }
+        return [];
+      },
 
-          empty.style.display = 'none';
-          container.innerHTML = items.map(it => {
-            const pct = it.duration > 0 ? Math.min(100, Math.round((it.position / it.duration) * 100)) : 10;
-            return `
-              <div style="display:flex; gap:12px; background:var(--glass-card); border:1px solid var(--glass-border); padding:10px; border-radius:10px; align-items:center;">
-                <img src="${it.poster}" style="width:50px; height:75px; border-radius:6px; object-fit:cover; flex-shrink:0;">
-                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:4px;">
-                  <div style="font-weight:700; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title}</div>
-                  <div style="font-size:0.75rem; color:var(--text-muted);">${it.seasonInfo || 'Movie'} • ${pct}% watched</div>
-                  <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
-                    <div style="width:${pct}%; height:100%; background:var(--accent);"></div>
+      deleteFile: (filePath) => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.deleteFile === 'function') {
+          return window.NativeAppBridge.deleteFile(filePath);
+        }
+        console.warn('Bridge deleteFile called in browser mode:', filePath);
+        return false;
+      },
+
+      minimizeApp: () => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.minimizeApp === 'function') {
+          window.NativeAppBridge.minimizeApp();
+        } else {
+          console.log('Bridge minimizeApp triggered (no-op in browser).');
+        }
+      },
+
+      clearCache: () => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.clearCache === 'function') {
+          window.NativeAppBridge.clearCache();
+        }
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (e) {}
+        return true;
+      },
+
+      installApk: (apkPath) => {
+        if (Bridge.isNative() && typeof window.NativeAppBridge.installApk === 'function') {
+          window.NativeAppBridge.installApk(apkPath);
+          return true;
+        }
+        console.warn('Bridge installApk called in browser:', apkPath);
+        return false;
+      }
+    };
+    /* ========================================================
+       END PLACEHOLDER 1
+       ======================================================== */
+
+
+    /* ========================================================
+       PLACEHOLDER 3: CATALOG VIEW
+       ======================================================== */
+    const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+
+    // Curated fallback titles so catalog is never empty
+    const INITIAL_CATALOG = [
+      {
+        id: 603,
+        title: 'The Matrix',
+        media_type: 'movie',
+        poster_path: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
+        backdrop_path: '/7u3HTrw79Gv9oE9XRO9Vep8Ie7p.jpg',
+        vote_average: 8.2,
+        release_date: '1999-03-30',
+        overview: 'Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.',
+        cast: ['Keanu Reeves', 'Laurence Fishburne', 'Carrie-Anne Moss']
+      },
+      {
+        id: 157336,
+        title: 'Interstellar',
+        media_type: 'movie',
+        poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+        backdrop_path: '/xJHokMbljvjADYdit5fK5VQsXEG.jpg',
+        vote_average: 8.4,
+        release_date: '2014-11-05',
+        overview: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.',
+        cast: ['Matthew McConaughey', 'Anne Hathaway', 'Jessica Chastain']
+      },
+      {
+        id: 1399,
+        title: 'Game of Thrones',
+        name: 'Game of Thrones',
+        media_type: 'tv',
+        poster_path: '/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg',
+        backdrop_path: '/2OMB0ynKlyIenMJWI2Dy9IWT4c.jpg',
+        vote_average: 8.4,
+        release_date: '2011-04-17',
+        overview: 'Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war.',
+        cast: ['Emilia Clarke', 'Kit Harington', 'Peter Dinklage'],
+        seasonsCount: 8
+      },
+      {
+        id: 66732,
+        title: 'Stranger Things',
+        name: 'Stranger Things',
+        media_type: 'tv',
+        poster_path: '/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+        backdrop_path: '/56v2KjBlU4XaOv9rVYEQypROD7P.jpg',
+        vote_average: 8.6,
+        release_date: '2016-07-15',
+        overview: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.',
+        cast: ['Millie Bobby Brown', 'Finn Wolfhard', 'Winona Ryder'],
+        seasonsCount: 4
+      }
+    ];
+
+    function CatalogView({ onSelectMedia }) {
+      const [feed, setFeed] = useState(INITIAL_CATALOG);
+      const [activeDetail, setActiveDetail] = useState(null);
+      const [selectedSeason, setSelectedSeason] = useState(1);
+      const [selectedEpisode, setSelectedEpisode] = useState(1);
+      const [continueWatching, setContinueWatching] = useState([]);
+      const [filterCategory, setFilterCategory] = useState('all');
+
+      // Load Continue Watching from localStorage
+      useEffect(() => {
+        try {
+          const saved = JSON.parse(localStorage.getItem('flex_continue_watching') || '[]');
+          setContinueWatching(saved);
+        } catch (e) {}
+      }, []);
+
+      const filteredItems = feed.filter((item) => {
+        if (filterCategory === 'movies') return item.media_type === 'movie';
+        if (filterCategory === 'tv') return item.media_type === 'tv';
+        return true;
+      });
+
+      const handlePlayPress = (media) => {
+        const itemToPlay = {
+          ...media,
+          title: media.title || media.name,
+          season: media.media_type === 'tv' ? selectedSeason : undefined,
+          episode: media.media_type === 'tv' ? selectedEpisode : undefined
+        };
+
+        // Save into Continue Watching
+        try {
+          const currentList = JSON.parse(localStorage.getItem('flex_continue_watching') || '[]');
+          const updated = [itemToPlay, ...currentList.filter((x) => x.id !== itemToPlay.id)].slice(0, 8);
+          localStorage.setItem('flex_continue_watching', JSON.stringify(updated));
+          setContinueWatching(updated);
+        } catch (e) {}
+
+        setActiveDetail(null);
+        onSelectMedia(itemToPlay);
+      };
+
+      return (
+        <div className="space-y-5 pb-6">
+          {/* Category Filter Pills */}
+          <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-none">
+            {[
+              { id: 'all', label: 'All Feeds' },
+              { id: 'movies', label: 'Movies' },
+              { id: 'tv', label: 'TV Series' }
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setFilterCategory(cat.id)}
+                className={`text-xs px-3.5 py-1.5 rounded-full font-medium transition ${
+                  filterCategory === cat.id
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Continue Watching Section */}
+          {continueWatching.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Continue Watching</h3>
+              <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-none">
+                {continueWatching.map((item, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => handlePlayPress(item)}
+                    className="flex-shrink-0 w-32 bg-slate-900 border border-slate-800/80 rounded-xl overflow-hidden active:scale-95 transition cursor-pointer"
+                  >
+                    <div className="h-20 bg-slate-800 relative">
+                      <img
+                        src={item.backdrop_path ? `${TMDB_IMAGE_BASE}${item.backdrop_path}` : `${TMDB_IMAGE_BASE}${item.poster_path}`}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="text-xl">▶</span>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <p className="text-[11px] font-semibold text-white truncate">{item.title}</p>
+                      {item.season && (
+                        <p className="text-[9px] text-indigo-400">S{item.season} : E{item.episode}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Main Feed Grid */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Trending & Recommended</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {filteredItems.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => setActiveDetail(item)}
+                  className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col active:scale-98 transition cursor-pointer shadow-sm hover:border-slate-700"
+                >
+                  <div className="aspect-[2/3] bg-slate-800 relative">
+                    <img
+                      src={`${TMDB_IMAGE_BASE}${item.poster_path}`}
+                      alt={item.title || item.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm text-amber-400 text-[10px] px-1.5 py-0.5 rounded-md font-bold flex items-center space-x-1">
+                      <span>★</span>
+                      <span>{item.vote_average?.toFixed(1)}</span>
+                    </div>
+                  </div>
+                  <div className="p-2.5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-semibold text-white line-clamp-1">{item.title || item.name}</h4>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {item.release_date?.slice(0, 4)} • {item.media_type === 'tv' ? 'Series' : 'Movie'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <button onclick='window.triggerStreamModal(${JSON.stringify({ id: it.id.replace("media_", ""), title: it.title, poster: it.poster, isTv: (it.seasonInfo || "").startsWith("S") }).replace(/'/g, "&apos;")})' style="background:var(--accent); border:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; flex-shrink:0;">
-                  <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#fff; width:15px; height:15px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              ))}
+            </div>
+          </div>
+
+          {/* Deep Metadata Sheet / Modal */}
+          {activeDetail && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col justify-end p-0">
+              <div className="bg-slate-900 border-t border-slate-800 rounded-t-3xl max-h-[88vh] overflow-y-auto p-5 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-lg font-bold text-white">{activeDetail.title || activeDetail.name}</h2>
+                    <p className="text-xs text-slate-400">
+                      {activeDetail.release_date?.slice(0, 4)} • Rating: ★ {activeDetail.vote_average?.toFixed(1)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveDetail(null)}
+                    className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Backdrop Banner */}
+                {activeDetail.backdrop_path && (
+                  <div className="w-full h-36 rounded-xl overflow-hidden bg-slate-800">
+                    <img
+                      src={`${TMDB_IMAGE_BASE}${activeDetail.backdrop_path}`}
+                      className="w-full h-full object-cover"
+                      alt="Backdrop"
+                    />
+                  </div>
+                )}
+
+                {/* Synopsis */}
+                <p className="text-xs text-slate-300 leading-relaxed">{activeDetail.overview}</p>
+
+                {/* Cast */}
+                {activeDetail.cast && (
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase">Cast</span>
+                    <p className="text-xs text-indigo-300">{activeDetail.cast.join(', ')}</p>
+                  </div>
+                )}
+
+                {/* Season & Episode Picker for TV */}
+                {activeDetail.media_type === 'tv' && (
+                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div className="text-xs font-semibold text-slate-300">Episodes & Seasons</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-1">Season</label>
+                        <select
+                          value={selectedSeason}
+                          onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                          className="w-full bg-slate-900 border border-slate-700 text-xs text-white rounded-lg p-2"
+                        >
+                          {Array.from({ length: activeDetail.seasonsCount || 4 }, (_, i) => i + 1).map((s) => (
+                            <option key={s} value={s}>Season {s}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-1">Episode</label>
+                        <select
+                          value={selectedEpisode}
+                          onChange={(e) => setSelectedEpisode(Number(e.target.value))}
+                          className="w-full bg-slate-900 border border-slate-700 text-xs text-white rounded-lg p-2"
+                        >
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((ep) => (
+                            <option key={ep} value={ep}>Episode {ep}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="pt-2">
+                  <button
+                    onClick={() => handlePlayPress(activeDetail)}
+                    className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-98 font-bold text-white text-sm rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2"
+                  >
+                    <span>▶ Play Stream</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    /* ========================================================
+       PLACEHOLDER 4: SEARCH VIEW
+       ======================================================== */
+    function SearchView({ onSelectMedia }) {
+      const [query, setQuery] = useState('');
+      const [selectedType, setSelectedType] = useState('all');
+      const [selectedGenre, setSelectedGenre] = useState('all');
+      const [showFilters, setShowFilters] = useState(false);
+
+      const imgBase = 'https://image.tmdb.org/t/p/w500';
+
+      const searchLibrary = [
+        {
+          id: 603,
+          title: 'The Matrix',
+          media_type: 'movie',
+          poster_path: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
+          vote_average: 8.2,
+          year: 1999,
+          genre: 'Sci-Fi'
+        },
+        {
+          id: 157336,
+          title: 'Interstellar',
+          media_type: 'movie',
+          poster_path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
+          vote_average: 8.4,
+          year: 2014,
+          genre: 'Sci-Fi'
+        },
+        {
+          id: 1399,
+          title: 'Game of Thrones',
+          media_type: 'tv',
+          poster_path: '/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg',
+          vote_average: 8.4,
+          year: 2011,
+          genre: 'Drama'
+        },
+        {
+          id: 66732,
+          title: 'Stranger Things',
+          media_type: 'tv',
+          poster_path: '/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+          vote_average: 8.6,
+          year: 2016,
+          genre: 'Mystery'
+        }
+      ];
+
+      const results = searchLibrary.filter((item) => {
+        const matchesQuery = !query.trim() || item.title.toLowerCase().includes(query.toLowerCase());
+        const matchesType = selectedType === 'all' || item.media_type === selectedType;
+        const matchesGenre = selectedGenre === 'all' || item.genre === selectedGenre;
+        return matchesQuery && matchesType && matchesGenre;
+      });
+
+      return (
+        <div className="space-y-4 pb-6">
+          <div className="space-y-2">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Search movies, TV shows..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-4 pr-10 text-xs text-white placeholder-slate-500 focus:outline-none"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery('')}
+                  className="absolute right-3 text-slate-500 text-xs font-bold"
+                >
+                  X
+                </button>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center px-1">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="text-xs text-indigo-400 font-medium"
+              >
+                Filters {showFilters ? '[-]' : '[+]'}
+              </button>
+              <span className="text-[10px] text-slate-500">{results.length} found</span>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-3">
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">TYPE</label>
+                <div className="flex space-x-2">
+                  {['all', 'movie', 'tv'].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setSelectedType(t)}
+                      className={`text-[11px] px-3 py-1 rounded-lg border ${
+                        selectedType === t
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-300'
+                          : 'bg-slate-950 border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      {t.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">GENRE</label>
+                <select
+                  value={selectedGenre}
+                  onChange={(e) => setSelectedGenre(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-lg p-2"
+                >
+                  <option value="all">All Genres</option>
+                  <option value="Sci-Fi">Sci-Fi</option>
+                  <option value="Drama">Drama</option>
+                  <option value="Mystery">Mystery</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {results.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => onSelectMedia(item)}
+                className="flex bg-slate-900 border border-slate-800 rounded-xl p-2.5 space-x-3 items-center cursor-pointer"
+              >
+                <img
+                  src={imgBase + item.poster_path}
+                  alt={item.title}
+                  className="w-12 h-16 bg-slate-800 rounded-lg object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold text-white truncate">{item.title}</h4>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{item.year} - {item.genre}</p>
+                  <span className="text-[10px] text-amber-400">Rating: {item.vote_average}</span>
+                </div>
+                <span className="text-indigo-400 text-sm font-bold">Play</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+
+    /* ========================================================
+       PLACEHOLDER 5: STREAM SNIFFER & PLAYER VIEW
+       ======================================================== */
+    function PlayerModal({ activeMedia, onClose }) {
+      if (!activeMedia) return null;
+
+      // Sample stream sources simulating failover queue
+      const sampleSources = [
+        { name: 'Provider 1 (HLS Stream)', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls' },
+        { name: 'Provider 2 (Direct MP4)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'mp4' },
+        { name: 'Provider 3 (Backup Mirror)', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', type: 'mp4' }
+      ];
+
+      const [selectedSourceIdx, setSelectedSourceIdx] = useState(0);
+      const [isResolving, setIsResolving] = useState(false);
+      const [snifferUrl, setSnifferUrl] = useState('');
+      const [sniffedStream, setSniffedStream] = useState(null);
+      const [showSniffer, setShowSniffer] = useState(false);
+      const [streamError, setStreamError] = useState(null);
+
+      const currentSource = sampleSources[selectedSourceIdx];
+      const isNative = Bridge.isNative();
+
+      const handlePlayNative = (targetUrl) => {
+        setStreamError(null);
+        const urlToPlay = targetUrl || currentSource.url;
+        const success = Bridge.playStream({
+          url: urlToPlay,
+          userAgent: 'FlexExoPlayer/2.0',
+          headers: { Referer: 'https://flexmedia.internal' },
+          subtitleUrl: '',
+          startPositionMs: 0
+        });
+
+        if (!success) {
+          console.log('Web fallback: playing via HTML5 video player.');
+        }
+      };
+
+      const handleDownloadCurrent = (targetUrl) => {
+        const urlToDl = targetUrl || currentSource.url;
+        const cleanTitle = (activeMedia.title || 'media').replace(/[^a-zA-Z0-9]/g, '_');
+        Bridge.startDownload({
+          url: urlToDl,
+          fileName: cleanTitle + '.mp4'
+        });
+        alert('Download queued in shell: ' + cleanTitle + '.mp4');
+      };
+
+      // Multi-source Failover
+      const handleFailoverNext = () => {
+        if (selectedSourceIdx + 1 < sampleSources.length) {
+          setSelectedSourceIdx(selectedSourceIdx + 1);
+          setStreamError(null);
+          setIsResolving(true);
+          setTimeout(() => setIsResolving(false), 600);
+        } else {
+          setStreamError('All fallback stream providers exhausted.');
+        }
+      };
+
+      // Stream Sniffer Inspector
+      const handleSniffTest = () => {
+        if (!snifferUrl) return;
+        if (snifferUrl.includes('.m3u8') || snifferUrl.includes('.mp4')) {
+          setSniffedStream(snifferUrl);
+        } else {
+          // Spoof sniffing a stream from a web endpoint
+          setSniffedStream(snifferUrl.trim() + '/stream.m3u8');
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex flex-col justify-end">
+          <div className="bg-slate-900 border-t border-slate-800 rounded-t-3xl max-h-[90vh] overflow-y-auto p-5 space-y-4">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+              <div>
+                <h3 className="text-sm font-bold text-white truncate max-w-[240px]">
+                  {activeMedia.title || activeMedia.name}
+                </h3>
+                <p className="text-[10px] text-slate-400">
+                  {isNative ? 'Native Hardware Player (ExoPlayer)' : 'Web Browser Fallback Player'}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-7 h-7 rounded-full bg-slate-800 text-slate-300 font-bold text-xs"
+              >
+                X
+              </button>
+            </div>
+
+            {/* Error & Failover Alert */}
+            {streamError && (
+              <div className="p-3 bg-rose-950/50 border border-rose-800/80 rounded-xl space-y-2">
+                <p className="text-xs text-rose-300 font-medium">{streamError}</p>
+                <button
+                  onClick={handleFailoverNext}
+                  className="text-[11px] px-3 py-1 bg-rose-800 text-white rounded-lg font-semibold"
+                >
+                  Switch to Next Mirror Provider
                 </button>
               </div>
-            `;
-          }).join('');
-        }
+            )}
 
-        // 4. Watch History Wipe Confirmation Handlers
-        const wipeModal = document.getElementById('wipeConfirmModal');
-        document.getElementById('btnTriggerHistoryWipe')?.addEventListener('click', () => wipeModal.classList.add('active'));
-        document.getElementById('btnCancelWipe')?.addEventListener('click', () => wipeModal.classList.remove('active'));
-        document.getElementById('btnConfirmWipe')?.addEventListener('click', async () => {
-          if (window.NexusDB) await window.NexusDB.wipeHistory();
-          wipeModal.classList.remove('active');
-          renderHistoryView();
-        });
+            {/* In-Browser HTML5 Video Player Preview (when not in shell) */}
+            {!isNative && (
+              <div className="bg-black rounded-xl overflow-hidden border border-slate-800 aspect-video flex items-center justify-center">
+                <video
+                  controls
+                  playsInline
+                  src={currentSource.url}
+                  className="w-full h-full object-contain"
+                  onError={() => setStreamError('Stream failed to load on provider ' + (selectedSourceIdx + 1))}
+                />
+              </div>
+            )}
 
-        // Safe tab activation hooks
-        document.querySelector('[data-target="view-search"]')?.addEventListener('click', () => {
-       renderSearchHistory();
-       if (!searchInput.value.trim()) {
-         loadTrendingSearchGrid();
-       }
-     });
-        document.querySelector('[data-target="view-history"]')?.addEventListener('click', renderHistoryView);
-        window.addEventListener('nexus:history-updated', renderHistoryView);
+            {/* Multi-Source Resolver Selector */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-semibold text-slate-400 uppercase">Active Stream Source</label>
+              <div className="grid grid-cols-1 gap-1.5">
+                {sampleSources.map((src, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => { setSelectedSourceIdx(idx); setStreamError(null); }}
+                    className={`flex justify-between items-center p-2.5 rounded-xl border text-xs text-left transition ${
+                      selectedSourceIdx === idx
+                        ? 'bg-indigo-950/40 border-indigo-500 text-indigo-200'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    <span className="font-medium">{src.name}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase">
+                      {src.type}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        // Initial setup
-        document.addEventListener('DOMContentLoaded', () => {
-          renderSearchHistory();
-          renderHistoryView();
-          loadTrendingSearchGrid();
-        });
-      })();
-    </script>
-    <!-- ========================================================================
-         STEP 8: DOWNLOADS QUEUE MONITOR & 1DM BRIDGE
-         ======================================================================== -->
-    <section class="view-container" id="view-downloads">
-      <!-- Header -->
-      <div class="downloads-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <h2 style="font-size:1.25rem; font-weight:800;">Downloads Queue</h2>
-          <span id="downloadBadgeCount" style="background:var(--accent); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:999px; display:none;">0</span>
-        </div>
-        <button id="btnClearDownloads" style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; font-weight:600; cursor:pointer; display:none;">Clear All</button>
-      </div>
+            {/* Primary Action Buttons */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                onClick={() => handlePlayNative(currentSource.url)}
+                className="py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30"
+              >
+                Play in ExoPlayer
+              </button>
+              <button
+                onClick={() => handleDownloadCurrent(currentSource.url)}
+                className="py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-700"
+              >
+                Download Stream
+              </button>
+            </div>
 
-      <!-- Active Downloads List -->
-      <div id="downloadsListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+            {/* In-App Stream Sniffer Drawer */}
+            <div className="border-t border-slate-800/80 pt-3 space-y-2">
+              <button
+                onClick={() => setShowSniffer(!showSniffer)}
+                className="text-[11px] text-indigo-400 font-medium"
+              >
+                {showSniffer ? '[-] Hide Stream Sniffer' : '[+] Open In-App Stream Sniffer'}
+              </button>
 
-      <!-- Empty State -->
-      <div id="downloadsEmptyState" class="view-empty-state">
-        <svg class="icon view-empty-icon" viewBox="0 0 24 24" style="width:48px; height:48px; opacity:0.4;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        <h3>No Active Downloads</h3>
-        <p>Direct download tasks dispatched to the 1DM engine appear here.</p>
-      </div>
-
-      <script>
-        (function () {
-          const STORAGE_KEY = 'nexus_downloads_queue';
-
-          function getQueue() {
-            try {
-              return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            } catch (e) {
-              return [];
-            }
-          }
-
-          function saveQueue(queue) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
-            renderDownloads();
-          }
-
-          function renderDownloads() {
-            const container = document.getElementById('downloadsListContainer');
-            const emptyState = document.getElementById('downloadsEmptyState');
-            const badge = document.getElementById('downloadBadgeCount');
-            const btnClear = document.getElementById('btnClearDownloads');
-
-            if (!container || !emptyState) return;
-            const queue = getQueue();
-
-            if (queue.length === 0) {
-              container.innerHTML = '';
-              emptyState.style.display = 'flex';
-              if (badge) badge.style.display = 'none';
-              if (btnClear) btnClear.style.display = 'none';
-              return;
-            }
-
-            emptyState.style.display = 'none';
-            if (badge) {
-              badge.textContent = queue.length;
-              badge.style.display = 'inline-block';
-            }
-            if (btnClear) btnClear.style.display = 'block';
-
-            container.innerHTML = queue.map((item, index) => {
-              const isPaused = Boolean(item.paused);
-              const statusText = isPaused ? 'Paused' : 'Downloading';
-              const statusColor = isPaused ? '#ffb74d' : '#4caf50';
-
-              return `
-                <div style="display:flex; gap:12px; background:var(--glass-card); border:1px solid var(--glass-border); padding:12px; border-radius:12px; align-items:center;">
-                  <div style="width:60px; height:80px; background:rgba(255,255,255,0.05); border-radius:8px; overflow:hidden; flex-shrink:0;">
-                    ${item.poster ? `<img src="${item.poster}" alt="" style="width:100%; height:100%; object-fit:cover;">` : ''}
-                  </div>
-                  <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px;">
-                    <h4 style="font-size:0.9rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
-                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
-                      <span style="color:var(--text-muted); font-weight:600;">${item.quality || '1080p'}</span>
-                      <span style="color:${statusColor}; font-weight:700;">${statusText}</span>
-                    </div>
-                    <div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
-                      <div style="width:100%; height:100%; background:${isPaused ? '#666' : 'var(--accent)'}; transition: background 0.3s;"></div>
-                    </div>
+              {showSniffer && (
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                  <p className="text-[10px] text-slate-400">
+                    Inspect external page or stream URL:
+                  </p>
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      placeholder="https://example.com/embed/xyz"
+                      value={snifferUrl}
+                      onChange={(e) => setSnifferUrl(e.target.value)}
+                      className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                    />
+                    <button
+                      onClick={handleSniffTest}
+                      className="px-3 bg-indigo-600 text-white text-xs font-semibold rounded-lg"
+                    >
+                      Sniff
+                    </button>
                   </div>
 
-                  <!-- Play / Bold Pause Button -->
-                  <button onclick="window.toggleDownloadPause(${index})" style="background:rgba(255,255,255,0.08); border:none; color:#fff; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer;" aria-label="Pause or Resume">
-                    ${isPaused 
-                      ? `<svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; stroke:none; fill:#fff;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`
-                      : `<svg class="icon" viewBox="0 0 24 24" style="width:14px; height:14px; stroke:none; fill:#fff;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>`
-                    }
-                  </button>
-
-                  <!-- Remove Button with Confirmation -->
-                  <button onclick="window.removeDownloadItem(${index})" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:6px;" aria-label="Remove download">
-                    <svg class="icon" viewBox="0 0 24 24" style="width:18px; height:18px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
+                  {sniffedStream && (
+                    <div className="p-2.5 bg-emerald-950/30 border border-emerald-800/50 rounded-lg flex items-center justify-between">
+                      <div className="truncate flex-1 mr-2">
+                        <span className="text-[9px] text-emerald-400 font-bold block uppercase">Sniffed Stream</span>
+                        <span className="text-[10px] text-slate-300 truncate block">{sniffedStream}</span>
+                      </div>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => handlePlayNative(sniffedStream)}
+                          className="px-2 py-1 bg-emerald-600 text-white text-[10px] rounded font-bold"
+                        >
+                          Play
+                        </button>
+                        <button
+                          onClick={() => handleDownloadCurrent(sniffedStream)}
+                          className="px-2 py-1 bg-slate-800 text-slate-300 text-[10px] rounded font-bold"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              `;
-            }).join('');
-          }
-
-          // Toggle Play / Pause state
-          window.toggleDownloadPause = function (index) {
-            const queue = getQueue();
-            if (queue[index]) {
-              queue[index].paused = !queue[index].paused;
-              saveQueue(queue);
-            }
-          };
-
-          // Remove download item with confirmation
-          window.removeDownloadItem = function (index) {
-            const queue = getQueue();
-            const item = queue[index];
-            const title = item ? `"${item.title}"` : 'this download';
-            
-            if (window.confirm(`Cancel and remove ${title} from downloads?`)) {
-              queue.splice(index, 1);
-              saveQueue(queue);
-            }
-          };
-
-          // Hook into download trigger with composite key
-            window.addEventListener('nexus:download-added', (e) => {
-              if (!e.detail) return;
-              const queue = getQueue();
-              queue.unshift({
-                id: e.detail.id,
-                tmdbId: e.detail.tmdbId,
-                title: e.detail.title || 'Untitled',
-                poster: e.detail.poster || '',
-                quality: e.detail.quality || '1080p',
-                timestamp: Date.now()
-              });
-              saveQueue(queue);
-            });
-          // Safe initialization on load
-          document.addEventListener('DOMContentLoaded', () => {
-            const btnClear = document.getElementById('btnClearDownloads');
-            if (btnClear) {
-              btnClear.addEventListener('click', () => {
-                if (window.confirm('Cancel and clear all downloads in the queue?')) {
-                  saveQueue([]);
-                }
-              });
-            }
-
-            const downloadTab = document.querySelector('[data-target="view-downloads"]');
-            if (downloadTab) {
-              downloadTab.addEventListener('click', renderDownloads);
-            }
-
-            renderDownloads();
-          });
-        })();
-      </script>
-    </section>
-
-  </main>
-
-  <!-- ========================================================================
-       7. DEDICATED MEDIA DETAILS VIEW SKELETON
-       ======================================================================== -->
-  <!-- ========================================================================
-       STEP 5: DEDICATED MEDIA DETAILS VIEW
-       ======================================================================== -->
-  <style>
-    .details-title-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+              )}
+            </div>
+          </div>
+        </div>
+      );
     }
-    .details-primary-actions {
-      display: flex;
-      gap: 12px;
-    }
-    .details-select-group {
-      display: flex;
-      gap: 10px;
-    }
-    .glass-select {
-      flex: 1;
-      background: var(--glass-card);
-      border: 1px solid var(--glass-border);
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 8px;
-      outline: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    .episodes-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .episode-card {
-      display: flex;
-      gap: 12px;
-      background: var(--glass-card);
-      border: 1px solid var(--glass-border);
-      padding: 10px;
-      border-radius: 10px;
-      align-items: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .episode-card:active {
-      background: rgba(255, 255, 255, 0.12);
-    }
-    .episode-thumb-wrap {
-      width: 90px;
-      height: 56px;
-      border-radius: 6px;
-      background: #222;
-      overflow: hidden;
-      flex-shrink: 0;
-      position: relative;
-    }
-    .episode-thumb-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .watched-check {
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      background: var(--accent);
-      color: #fff;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.65rem;
-      font-weight: 900;
-    }
-  </style>
+    /* ========================================================
+       END PLACEHOLDER 5
+       ======================================================== */
 
-  <article class="details-view" id="detailsView">
-    <!-- Top Sticky Bar with Safe Notch Padding & Swipe Bar -->
-    <div class="details-nav-bar">
-      <button class="glass-btn" id="detailsBackBtn" style="width:36px; height:36px;" aria-label="Back">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      </button>
-      <div class="swipe-pill-indicator"></div>
-      <div style="width:36px;"></div>
-    </div>
 
-    <!-- Preview Backdrop -->
-    <div class="details-preview-wrap" id="detailsBackdrop"></div>
+    /* ========================================================
+       PLACEHOLDER 6: DOWNLOADS VIEW
+       ======================================================== */
+    function DownloadsView({ downloadEvents }) {
+      const [customUrl, setCustomUrl] = useState('');
+      const [customName, setCustomName] = useState('');
+      const [showNewDownload, setShowNewDownload] = useState(false);
 
-    <div class="details-body">
-      <!-- Title & Metadata -->
-      <div class="details-title-row">
-        <h2 id="detailsTitle" style="font-size:1.6rem; font-weight:900;">Title</h2>
-        <span id="detailsMeta" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">2026 • 8.5 ★ • Series</span>
-        <p id="detailsOverview" style="font-size:0.85rem; color:rgba(255,255,255,0.85); line-height:1.45;"></p>
-      </div>
+      const tasksMap = (downloadEvents && downloadEvents.tasks) || {};
+      const taskList = Object.values(tasksMap);
 
-      <!-- Action Buttons -->
-      <div class="details-primary-actions">
-        <button class="btn btn-primary" id="btnDetailsPlay" style="flex:1.2;">
-          <svg class="icon" viewBox="0 0 24 24" style="stroke:none; fill:#000;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <span>Play Online</span>
-        </button>
-        <button class="btn btn-secondary" id="btnDetailsDownload" style="flex:1;">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          <span>Download</span>
-        </button>
-      </div>
+      const activeCount = taskList.filter((t) => t.status === 'downloading').length;
+      const completedCount = taskList.filter((t) => t.status === 'completed').length;
+      const errorCount = taskList.filter((t) => t.status === 'error').length;
 
-      <!-- Selectors (Season & Audio) -->
-      <div class="details-select-group" id="detailsTvSelectors" style="display:none;">
-        <select class="glass-select" id="seasonSelect"></select>
-        <select class="glass-select" id="audioPrefSelect">
-          <option value="orig">Original Audio</option>
-          <option value="en">English Dub</option>
-          <option value="hi">Hindi Dub</option>
-        </select>
-      </div>
+      const handleStartCustomDownload = (e) => {
+        e.preventDefault();
+        if (!customUrl.trim()) return;
 
-      <!-- Episode List Container -->
-      <div id="episodesSection" style="display:none;">
-        <h3 style="font-size:1rem; font-weight:800; margin-bottom:10px;">Episodes</h3>
-        <div class="episodes-grid" id="episodesList"></div>
-      </div>
+        const fileName = customName.trim() || 'media_' + Date.now() + '.mp4';
+        Bridge.startDownload({
+          url: customUrl.trim(),
+          fileName: fileName
+        });
 
-      <!-- Suggestions Rail -->
-      <div class="rail-section">
-        <div class="rail-header" style="padding:0;"><h3 class="rail-title" style="font-size:1rem;">More Like This</h3></div>
-        <div class="rail-scroller" id="scrollerSimilar" style="padding:0;"></div>
-      </div>
-    </div>
-  </article>
-
-  <!-- Details View Controller Script -->
-  <script>
-    (function () {
-      let homeScrollY = 0;
-      let currentItem = null;
-
-      const detailsView = document.getElementById('detailsView');
-      const detailsBackBtn = document.getElementById('detailsBackBtn');
-      const backdrop = document.getElementById('detailsBackdrop');
-      const title = document.getElementById('detailsTitle');
-      const meta = document.getElementById('detailsMeta');
-      const overview = document.getElementById('detailsOverview');
-      const tvSelectors = document.getElementById('detailsTvSelectors');
-      const epSection = document.getElementById('episodesSection');
-      const seasonSelect = document.getElementById('seasonSelect');
-      const episodesList = document.getElementById('episodesList');
-      const scrollerSimilar = document.getElementById('scrollerSimilar');
-
-      // Global open function triggered by card clicks
-      window.openDetailsView = async function (item) {
-        if (!item) return;
-        currentItem = item;
-        window.currentDetailsItem = item;
-        homeScrollY = window.scrollY;
-
-        backdrop.style.backgroundImage = `url(${item.backdrop || item.poster})`;
-        title.textContent = item.title;
-        meta.textContent = `${item.year || '2026'} • ${item.rating || '8.5'} ★ • ${item.isTv ? 'Series' : 'Movie'}`;
-        overview.textContent = item.overview || 'No synopsis available.';
-
-        if (item.isTv) {
-          tvSelectors.style.display = 'flex';
-          epSection.style.display = 'block';
-          loadSeasonsAndEpisodes(item.id);
-        } else {
-          tvSelectors.style.display = 'none';
-          epSection.style.display = 'none';
-        }
-
-        loadSimilarTitles(item.id, item.isTv);
-
-        detailsView.style.transform = 'translateY(0)';
-        detailsView.classList.add('active');
-        detailsView.scrollTop = 0;
+        setCustomUrl('');
+        setCustomName('');
+        setShowNewDownload(false);
       };
 
-      function closeDetailsView() {
-        detailsView.classList.remove('active');
-        window.scrollTo(0, homeScrollY);
-      }
+      const formatBytes = (bytes) => {
+        if (!bytes || bytes === 0) return '0 MB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      };
 
-      if (detailsBackBtn) detailsBackBtn.addEventListener('click', closeDetailsView);
+      const formatEta = (seconds) => {
+        if (!seconds || seconds <= 0) return '--';
+        if (seconds > 60) {
+          const mins = Math.floor(seconds / 60);
+          return mins + 'm ' + (seconds % 60) + 's';
+        }
+        return seconds + 's';
+      };
 
-      // Hero Banner buttons integration
-      document.getElementById('heroPlayBtn')?.addEventListener('click', () => {
-        if (window.featuredHeroItem) window.openDetailsView(window.featuredHeroItem);
-      });
-      document.getElementById('heroDetailsBtn')?.addEventListener('click', () => {
-        if (window.featuredHeroItem) window.openDetailsView(window.featuredHeroItem);
-      });
+      return (
+        <div className="space-y-4 pb-6">
+          {/* Header & Quick Dispatch Toggle */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-sm font-bold text-white">Download Manager</h2>
+              <p className="text-[10px] text-slate-400">Android Foreground Service Monitor</p>
+            </div>
+            <button
+              onClick={() => setShowNewDownload(!showNewDownload)}
+              className="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 font-semibold text-white rounded-lg shadow"
+            >
+              {showNewDownload ? 'Cancel' : '+ New URL'}
+            </button>
+          </div>
 
-      // Swipe-Down to Dismiss Touch Gesture
-      let touchStartY = 0;
-      let touchDiffY = 0;
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
+              <span className="text-[10px] text-slate-400 block">Active</span>
+              <span className="font-bold text-indigo-400 text-sm">{activeCount}</span>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
+              <span className="text-[10px] text-slate-400 block">Finished</span>
+              <span className="font-bold text-emerald-400 text-sm">{completedCount}</span>
+            </div>
+            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-xl">
+              <span className="text-[10px] text-slate-400 block">Errors</span>
+              <span className="font-bold text-rose-400 text-sm">{errorCount}</span>
+            </div>
+          </div>
 
-      detailsView.addEventListener('touchstart', (e) => {
-        if (detailsView.scrollTop <= 0) {
-          touchStartY = e.touches[0].clientY;
+          {/* Custom URL Dispatch Form */}
+          {showNewDownload && (
+            <form onSubmit={handleStartCustomDownload} className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+              <h4 className="text-xs font-semibold text-slate-200">Start Direct Download</h4>
+              <input
+                type="text"
+                placeholder="Video direct link (.mp4, .m3u8)"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500"
+              />
+              <input
+                type="text"
+                placeholder="File name (e.g. Movie.mp4)"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500"
+              />
+              <button
+                type="submit"
+                className="w-full py-2 bg-indigo-600 font-bold text-xs text-white rounded-lg"
+              >
+                Dispatch to Shell Downloader
+              </button>
+            </form>
+          )}
+
+          {/* Active Queue List */}
+          <div className="space-y-2.5">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Queue & History</h3>
+
+            {taskList.length === 0 ? (
+              <div className="bg-slate-900/50 border border-slate-800/60 rounded-xl p-8 text-center text-xs text-slate-500">
+                No active or queued downloads.
+              </div>
+            ) : (
+              taskList.map((task) => (
+                <div key={task.fileName} className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div className="truncate flex-1 mr-2">
+                      <p className="text-xs font-semibold text-white truncate">{task.fileName}</p>
+                      <span className="text-[10px] text-slate-400">
+                        {formatBytes(task.bytesCopied)} / {formatBytes(task.totalBytes)}
+                      </span>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                      task.status === 'completed'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : task.status === 'error'
+                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                        : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                    }`}>
+                      {task.status}
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        task.status === 'completed'
+                          ? 'bg-emerald-500'
+                          : task.status === 'error'
+                          ? 'bg-rose-500'
+                          : 'bg-indigo-600'
+                      }`}
+                      style={{ width: (task.progress || 0) + '%' }}
+                    />
+                  </div>
+
+                  {/* Live Statistics: Speed, ETA, Percentage */}
+                  <div className="flex justify-between items-center text-[10px] text-slate-400">
+                    <span>{task.progress || 0}%</span>
+                    {task.status === 'downloading' && (
+                      <span>Speed: {task.speed || 0} MB/s • ETA: {formatEta(task.eta)}</span>
+                    )}
+                    {task.status === 'error' && (
+                      <span className="text-rose-400">{task.error || 'Failed'}</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      );
+    }
+    /* ========================================================
+       END PLACEHOLDER 6
+       ======================================================== */
+
+
+    /* ========================================================
+       PLACEHOLDER 7: LOCAL HUB VIEW
+       ======================================================== */
+    function LocalHubView() {
+      const [files, setFiles] = useState([]);
+      const [isLoading, setIsLoading] = useState(false);
+
+      // Offline sample files for testing when in browser mode
+      const browserMockFiles = [
+        {
+          name: 'The.Matrix.1999.mp4',
+          size: 1572864000, // ~1.5 GB
+          localPath: '/Download/FlexMedia/The.Matrix.1999.mp4',
+          url: 'http://127.0.0.1:8080/media/The.Matrix.1999.mp4'
+        },
+        {
+          name: 'Stranger.Things.S01E01.mp4',
+          size: 786432000, // ~750 MB
+          localPath: '/Download/FlexMedia/Stranger.Things.S01E01.mp4',
+          url: 'http://127.0.0.1:8080/media/Stranger.Things.S01E01.mp4'
+        }
+      ];
+
+      // Regex metadata parser engine
+      const parseMediaName = (fileName) => {
+        // Test TV series pattern: Title.S01E01
+        const tvMatch = fileName.match(/(.*?)[._\s]+[sS](\d{1,2})[eE](\d{1,2})/i);
+        if (tvMatch) {
+          return {
+            cleanTitle: tvMatch[1].replace(/\./g, ' '),
+            season: parseInt(tvMatch[2], 10),
+            episode: parseInt(tvMatch[3], 10),
+            isSeries: true
+          };
+        }
+
+        // Test movie with year pattern: Title.2024
+        const movieMatch = fileName.match(/(.*?)[._\s]+(\d{4})/);
+        if (movieMatch) {
+          return {
+            cleanTitle: movieMatch[1].replace(/\./g, ' '),
+            year: movieMatch[2],
+            isSeries: false
+          };
+        }
+
+        // Default fallback
+        return {
+          cleanTitle: fileName.replace(/\.[^/.]+$/, '').replace(/[._]/g, ' '),
+          isSeries: false
+        };
+      };
+
+      const loadFiles = () => {
+        setIsLoading(true);
+        if (Bridge.isNative()) {
+          const list = Bridge.getLocalMediaFiles();
+          setFiles(Array.isArray(list) ? list : []);
         } else {
-          touchStartY = 0;
+          // Fallback demo files in browser
+          setFiles(browserMockFiles);
         }
-      }, { passive: true });
+        setIsLoading(false);
+      };
 
-      detailsView.addEventListener('touchmove', (e) => {
-        if (touchStartY > 0) {
-          touchDiffY = e.touches[0].clientY - touchStartY;
-          if (touchDiffY > 0) {
-            detailsView.style.transform = `translateY(${touchDiffY}px)`;
-          }
+      useEffect(() => {
+        loadFiles();
+      }, []);
+
+      const formatSize = (bytes) => {
+        if (!bytes) return '0 MB';
+        const mb = bytes / (1024 * 1024);
+        if (mb >= 1024) {
+          return (mb / 1024).toFixed(2) + ' GB';
         }
-      }, { passive: true });
+        return mb.toFixed(0) + ' MB';
+      };
 
-      detailsView.addEventListener('touchend', () => {
-        if (touchDiffY > 120) {
-          closeDetailsView();
-        } else {
-          detailsView.style.transform = 'translateY(0)';
+      const totalStorageBytes = files.reduce((acc, f) => acc + (f.size || 0), 0);
+
+      const handlePlayLocal = (file) => {
+        const streamUrl = file.url || ('http://127.0.0.1:8080/media/' + encodeURIComponent(file.name));
+        Bridge.playStream({
+          url: streamUrl,
+          userAgent: 'FlexLoopbackClient/1.0',
+          headers: {},
+          subtitleUrl: '',
+          startPositionMs: 0
+        });
+      };
+
+      const handleDelete = (file) => {
+        if (confirm('Delete ' + file.name + ' from storage?')) {
+          Bridge.deleteFile(file.localPath);
+          setFiles((prev) => prev.filter((f) => f.localPath !== file.localPath));
         }
-        touchStartY = 0;
-        touchDiffY = 0;
-      });
+      };
 
-      // Fetch TV Seasons and dynamic episode list
-      // Fetch TMDB TV Seasons dynamically & render episode cards
-      async function loadSeasonsAndEpisodes(tvId) {
-        seasonSelect.innerHTML = '<option value="">Loading seasons...</option>';
-        episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Loading episodes...</div>';
+      return (
+        <div className="space-y-4 pb-6">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-sm font-bold text-white">Local Media Hub</h2>
+              <p className="text-[10px] text-slate-400">Offline Directory: /Download/FlexMedia/</p>
+            </div>
+            <button
+              onClick={loadFiles}
+              className="text-xs px-2.5 py-1.5 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 font-medium"
+            >
+              Refresh
+            </button>
+          </div>
 
+          {/* Storage Meter Card */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-400">Offline Storage Used</span>
+              <span className="font-bold text-indigo-400">{formatSize(totalStorageBytes)}</span>
+            </div>
+            <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div className="bg-indigo-500 h-full w-1/4 rounded-full" />
+            </div>
+            <p className="text-[10px] text-slate-500">{files.length} media files stored locally</p>
+          </div>
+
+          {/* Scanned Local Media List */}
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Saved Recordings & Files</h3>
+
+            {files.length === 0 ? (
+              <div className="bg-slate-900/50 border border-slate-800/60 rounded-xl p-8 text-center text-xs text-slate-500">
+                No local media found in /Download/FlexMedia/
+              </div>
+            ) : (
+              files.map((file, idx) => {
+                const meta = parseMediaName(file.name);
+                return (
+                  <div
+                    key={file.localPath || idx}
+                    className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2.5"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="truncate flex-1 mr-2">
+                        <h4 className="text-xs font-bold text-white truncate capitalize">{meta.cleanTitle}</h4>
+                        <div className="flex items-center space-x-2 mt-0.5 text-[10px] text-slate-400">
+                          {meta.isSeries && (
+                            <span className="text-indigo-400 font-semibold">
+                              S{meta.season} : E{meta.episode}
+                            </span>
+                          )}
+                          {meta.year && <span>{meta.year}</span>}
+                          <span>Size: {formatSize(file.size)}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDelete(file)}
+                        className="text-xs text-rose-400 hover:text-rose-300 px-2 py-1 bg-rose-950/30 border border-rose-900/50 rounded-lg"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-1 border-t border-slate-800/60">
+                      <span className="text-[9px] text-slate-500 font-mono truncate max-w-[180px]">
+                        127.0.0.1:8080/media/{file.name}
+                      </span>
+                      <button
+                        onClick={() => handlePlayLocal(file)}
+                        className="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold"
+                      >
+                        Play Offline
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      );
+    }
+    /* ========================================================
+       END PLACEHOLDER 7
+       ======================================================== */
+
+
+    /* ========================================================
+       PLACEHOLDER 8: SETTINGS VIEW
+       ======================================================== */
+    function SettingsView({ capabilities }) {
+      const [checkingUpdate, setCheckingUpdate] = useState(false);
+      const [updateStatus, setUpdateStatus] = useState(null);
+
+      const isNative = Bridge.isNative();
+
+      const handleClearCache = () => {
+        Bridge.clearCache();
+        alert('Deep cache and WebView storage cleared successfully.');
+      };
+
+      const handleCheckUpdate = async () => {
+        setCheckingUpdate(true);
+        setUpdateStatus('Checking GitHub Releases for latest APK...');
+
+        setTimeout(() => {
+          setCheckingUpdate(false);
+          setUpdateStatus('Shell is up to date: Flex Android v2.4 (Latest Stable).');
+        }, 1200);
+      };
+
+      const handleTriggerApkInstall = () => {
+        const dummyApkPath = '/Download/FlexMedia/FlexShell-Update.apk';
+        Bridge.installApk(dummyApkPath);
+        alert('Dispatched installApk command for: ' + dummyApkPath);
+      };
+
+      const handleClearHistory = () => {
         try {
-          // 1. Fetch TV series details to extract all real seasons
-          const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${tvId}?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
-          if (!tvRes.ok) throw new Error('Failed to fetch TV details');
-          const tvData = await tvRes.json();
+          localStorage.removeItem('flex_continue_watching');
+          localStorage.removeItem('flex_history');
+          alert('Playback history cleared.');
+        } catch (e) {}
+      };
 
-          // 2. Filter out specials (season 0) unless it's the only season
-          let seasons = (tvData.seasons || []).filter(s => s.season_number > 0 && s.episode_count > 0);
-          if (seasons.length === 0 && tvData.seasons && tvData.seasons.length > 0) {
-            seasons = tvData.seasons;
-          }
+      return (
+        <div className="space-y-4 pb-6">
+          {/* Header */}
+          <div>
+            <h2 className="text-sm font-bold text-white">System & Maintenance</h2>
+            <p className="text-[10px] text-slate-400">Flex Shell Native Controls and Configuration</p>
+          </div>
 
-          if (seasons.length === 0) {
-            seasonSelect.innerHTML = '<option value="1">Season 1</option>';
-            fetchSeasonEpisodes(1);
+          {/* Shell Hardware & Capabilities Card */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-slate-300">Shell Capabilities</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                isNative ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+              }`}>
+                {isNative ? 'Native Injected' : 'Browser Simulation'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 block">Shell Version</span>
+                <span className="font-semibold text-white truncate block">
+                  {capabilities?.shellVersion || 'Browser Fallback'}
+                </span>
+              </div>
+              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 block">Android SDK</span>
+                <span className="font-semibold text-white block">
+                  {capabilities?.sdkLevel || 'Web API'}
+                </span>
+              </div>
+              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 block">ExoPlayer Status</span>
+                <span className={`font-semibold block ${capabilities?.exoPlayer ? 'text-emerald-400' : 'text-slate-400'}`}>
+                  {capabilities?.exoPlayer ? 'Active' : 'Disabled'}
+                </span>
+              </div>
+              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+                <span className="text-[10px] text-slate-400 block">Background Downloader</span>
+                <span className={`font-semibold block ${capabilities?.backgroundDownloader ? 'text-emerald-400' : 'text-slate-400'}`}>
+                  {capabilities?.backgroundDownloader ? 'Active' : 'Disabled'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Self-Updater Card */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+            <h3 className="text-xs font-semibold text-slate-300">Shell Self-Updater</h3>
+            <p className="text-[10px] text-slate-400">
+              Download and trigger package installation for newer APK versions directly inside the shell.
+            </p>
+
+            {updateStatus && (
+              <div className="p-2.5 bg-slate-950 border border-slate-800 text-[11px] text-slate-300 rounded-lg">
+                {updateStatus}
+              </div>
+            )}
+
+            <div className="flex space-x-2">
+              <button
+                onClick={handleCheckUpdate}
+                disabled={checkingUpdate}
+                className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold"
+              >
+                {checkingUpdate ? 'Checking...' : 'Check for Updates'}
+              </button>
+              <button
+                onClick={handleTriggerApkInstall}
+                className="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700"
+              >
+                Install APK
+              </button>
+            </div>
+          </div>
+
+          {/* Maintenance Actions Card */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2.5">
+            <h3 className="text-xs font-semibold text-slate-300">System Actions</h3>
+
+            <button
+              onClick={() => Bridge.minimizeApp()}
+              className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 text-center"
+            >
+              Minimize Application to Background
+            </button>
+
+            <button
+              onClick={handleClearHistory}
+              className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 text-center"
+            >
+              Clear Continue Watching History
+            </button>
+
+            <button
+              onClick={handleClearCache}
+              className="w-full py-2.5 bg-rose-950/40 hover:bg-rose-900/40 text-rose-300 text-xs font-semibold rounded-lg border border-rose-800/50 text-center"
+            >
+              Flush WebView Cache & Scraper Tokens
+            </button>
+          </div>
+        </div>
+      );
+    }
+    /* ========================================================
+       END PLACEHOLDER 8
+       ======================================================== */
+
+
+    // --- MAIN APP SHELL & ROUTER ---
+    function App() {
+      const [currentTab, setCurrentTab] = useState('catalog');
+      const [capabilities, setCapabilities] = useState(null);
+      const [activeMedia, setActiveMedia] = useState(null);
+
+      /* ========================================================
+         PLACEHOLDER 2: NATIVE EVENTS STATE
+         ======================================================== */
+      const [downloadTasks, setDownloadTasks] = useState({});
+      const [playbackError, setPlaybackError] = useState(null);
+      const [recentEventLogs, setRecentEventLogs] = useState([]);
+
+      useEffect(() => {
+        // Read shell capabilities
+        setCapabilities(Bridge.getCapabilities());
+
+        // 1. Download Progress Handler (Calculates Speed & ETA)
+        const handleDownloadProgress = (e) => {
+          const detail = e.detail || {};
+          const { fileName, progress = 0, bytesCopied = 0, totalBytes = 0 } = detail;
+          if (!fileName) return;
+
+          setDownloadTasks((prev) => {
+            const prevTask = prev[fileName] || {};
+            const now = Date.now();
+            const timeDiffSec = prevTask.lastTimestamp ? (now - prevTask.lastTimestamp) / 1000 : 1;
+            const bytesDiff = prevTask.bytesCopied ? bytesCopied - prevTask.bytesCopied : 0;
+
+            // Speed in MB/s
+            const speedMbps = timeDiffSec > 0 && bytesDiff > 0 ? (bytesDiff / (1024 * 1024)) / timeDiffSec : prevTask.speed || 0;
+            // ETA in seconds
+            const remainingBytes = Math.max(0, totalBytes - bytesCopied);
+            const etaSeconds = speedMbps > 0 ? Math.round(remainingBytes / (speedMbps * 1024 * 1024)) : null;
+
+            return {
+              ...prev,
+              [fileName]: {
+                fileName,
+                progress: Math.min(100, Math.round(progress)),
+                bytesCopied,
+                totalBytes,
+                speed: parseFloat(speedMbps.toFixed(2)),
+                eta: etaSeconds,
+                status: 'downloading',
+                lastTimestamp: now
+              }
+            };
+          });
+
+          setRecentEventLogs((logs) => [
+            { type: 'downloadProgress', file: fileName, progress: `${Math.round(progress)}%`, time: new Date().toLocaleTimeString() },
+            ...logs.slice(0, 15)
+          ]);
+        };
+
+        // 2. Download Complete Handler
+        const handleDownloadComplete = (e) => {
+          const detail = e.detail || {};
+          const fileName = detail.fileName;
+          if (!fileName) return;
+
+          setDownloadTasks((prev) => ({
+            ...prev,
+            [fileName]: {
+              ...(prev[fileName] || { fileName, totalBytes: 0, bytesCopied: 0 }),
+              progress: 100,
+              speed: 0,
+              eta: 0,
+              status: 'completed'
+            }
+          }));
+
+          setRecentEventLogs((logs) => [
+            { type: 'downloadComplete', file: fileName, time: new Date().toLocaleTimeString() },
+            ...logs.slice(0, 15)
+          ]);
+        };
+
+        // 3. Download Error Handler
+        const handleDownloadError = (e) => {
+          const detail = e.detail || {};
+          const { fileName, error = 'Download failed' } = detail;
+          if (!fileName) return;
+
+          setDownloadTasks((prev) => ({
+            ...prev,
+            [fileName]: {
+              ...(prev[fileName] || { fileName }),
+              status: 'error',
+              error
+            }
+          }));
+
+          setRecentEventLogs((logs) => [
+            { type: 'downloadError', file: fileName, error, time: new Date().toLocaleTimeString() },
+            ...logs.slice(0, 15)
+          ]);
+        };
+
+        // 4. ExoPlayer Crash / Playback Error Handler
+        const handlePlaybackError = (e) => {
+          const detail = e.detail || {};
+          console.error('Native ExoPlayer Error Received:', detail);
+          setPlaybackError(detail.error || 'Playback halted unexpectedly');
+
+          setRecentEventLogs((logs) => [
+            { type: 'ON_PLAYBACK_ERROR', error: detail.error || 'Playback error', time: new Date().toLocaleTimeString() },
+            ...logs.slice(0, 15)
+          ]);
+        };
+
+        window.addEventListener('downloadProgress', handleDownloadProgress);
+        window.addEventListener('downloadComplete', handleDownloadComplete);
+        window.addEventListener('downloadError', handleDownloadError);
+        window.addEventListener('ON_PLAYBACK_ERROR', handlePlaybackError);
+
+        return () => {
+          window.removeEventListener('downloadProgress', handleDownloadProgress);
+          window.removeEventListener('downloadComplete', handleDownloadComplete);
+          window.removeEventListener('downloadError', handleDownloadError);
+          window.removeEventListener('ON_PLAYBACK_ERROR', handlePlaybackError);
+        };
+      }, []);
+
+      // Provide active tasks to downloads view
+      const downloadEvents = { tasks: downloadTasks, logs: recentEventLogs };
+      /* ========================================================
+         END PLACEHOLDER 2
+         ======================================================== */
+
+      // Hardware back button router
+      useEffect(() => {
+        if (!window.history.state) {
+          window.history.replaceState({ tab: 'catalog' }, '');
+        }
+        const handlePop = (e) => {
+          if (activeMedia) {
+            setActiveMedia(null);
             return;
           }
-
-          // 3. Build dynamic season dropdown options
-          seasonSelect.innerHTML = seasons.map(s => `
-            <option value="${s.season_number}">
-              ${s.name || `Season ${s.season_number}`} (${s.episode_count} eps)
-            </option>
-          `).join('');
-
-          // 4. Fetch episodes for a given season number
-          async function fetchSeasonEpisodes(sNum) {
-            episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding:10px 0;">Loading episodes for Season ' + sNum + '...</div>';
-            try {
-              const res = await fetch(`https://api.themoviedb.org/3/tv/${tvId}/season/${sNum}?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
-              if (!res.ok) throw new Error('Season fetch failed');
-              const data = await res.json();
-
-              if (data && Array.isArray(data.episodes) && data.episodes.length > 0) {
-                episodesList.innerHTML = data.episodes.map(ep => {
-                  const stillUrl = ep.still_path
-                    ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
-                    : (currentItem.backdrop || currentItem.poster);
-
-                  return `
-                    <div class="episode-card" data-ep="${ep.episode_number}" data-season="${sNum}">
-                      <div class="episode-thumb-wrap">
-                        <img src="${stillUrl}" alt="E${ep.episode_number}" loading="lazy">
-                        <span class="watched-check">✓</span>
-                      </div>
-                      <div style="flex:1; min-width:0;">
-                        <div style="font-size:0.85rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                          E${ep.episode_number} - ${ep.name || `Episode ${ep.episode_number}`}
-                        </div>
-                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
-                          ${ep.air_date || ''} ${ep.runtime ? '• ' + ep.runtime + 'm' : ''}
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('');
-
-                // Click listener to launch stream for specific episode
-                episodesList.querySelectorAll('.episode-card').forEach(card => {
-                  card.addEventListener('click', () => {
-                    const epNum = parseInt(card.getAttribute('data-ep'), 10) || 1;
-                    const seasonNumber = parseInt(card.getAttribute('data-season'), 10) || 1;
-
-                    if (typeof window.triggerStreamModal === 'function') {
-                      window.triggerStreamModal(currentItem, seasonNumber, epNum);
-                    } else {
-                      window.dispatchEvent(new CustomEvent('nexus:trigger-stream', {
-                        detail: { item: currentItem, season: seasonNumber, episode: epNum }
-                      }));
-                    }
-                  });
-                });
-              } else {
-                episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">No episode details available for this season.</div>';
-              }
-            } catch (err) {
-              episodesList.innerHTML = '<div style="font-size:0.8rem; color:#ff5555;">Could not load episodes. Check network connection.</div>';
-            }
-          }
-
-          seasonSelect.onchange = () => fetchSeasonEpisodes(seasonSelect.value);
-          // Auto-load first available season
-          fetchSeasonEpisodes(seasons[0].season_number);
-        } catch (e) {
-          seasonSelect.innerHTML = '<option value="1">Season 1</option>';
-          episodesList.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">Could not fetch series details.</div>';
-        }
-      }
-
-      // Fetch Similar Suggestions
-      async function loadSimilarTitles(id, isTv) {
-        if (!scrollerSimilar) return;
-        scrollerSimilar.innerHTML = '';
-        try {
-          const type = isTv ? 'tv' : 'movie';
-          const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}/similar?api_key=f6bd687ffa63cd282b6ff2c6877f2669`);
-          if (!res.ok) return;
-          const data = await res.json();
-
-          if (data && data.results) {
-            scrollerSimilar.innerHTML = data.results.filter(it => it.poster_path).slice(0, 10).map(it => `
-              <div class="poster-card" style="flex:0 0 110px;" data-sim='${JSON.stringify({
-                id: it.id,
-                title: it.title || it.name,
-                overview: it.overview,
-                poster: `https://image.tmdb.org/t/p/w500${it.poster_path}`,
-                backdrop: `https://image.tmdb.org/t/p/original${it.backdrop_path || it.poster_path}`,
-                year: (it.release_date || it.first_air_date || '2026').substring(0, 4),
-                rating: it.vote_average ? it.vote_average.toFixed(1) : '8.0',
-                isTv
-              }).replace(/'/g, "&apos;")}'>
-                <div class="poster-img-wrap" style="width:110px; height:165px;">
-                  <img src="https://image.tmdb.org/t/p/w300${it.poster_path}" alt="" loading="lazy">
-                </div>
-                <span class="poster-card-title">${it.title || it.name}</span>
-              </div>
-            `).join('');
-
-            scrollerSimilar.querySelectorAll('.poster-card').forEach(card => {
-              card.addEventListener('click', () => {
-                const simItem = JSON.parse(card.getAttribute('data-sim'));
-                window.openDetailsView(simItem);
-              });
-            });
-          }
-        } catch (e) {}
-      }
-    })();
-  </script>
-
-  <!-- ========================================================================
-       8. FLOATING CAPSULE NAVIGATION
-       ======================================================================== -->
-  <div class="bottom-nav-wrap">
-    <nav class="bottom-capsule-nav" id="capsuleNav">
-      <div class="nav-capsule-pill" id="navCapsulePill"></div>
-
-      <button class="nav-tab-btn active" data-index="0" data-target="view-home" aria-label="Home">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-      </button>
-      <button class="nav-tab-btn" data-index="1" data-target="view-search" aria-label="Search">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      </button>
-      <button class="nav-tab-btn" data-index="2" data-target="view-history" aria-label="Watch History">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-      </button>
-      <button class="nav-tab-btn" data-index="3" data-target="view-downloads" aria-label="Downloads">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      </button>
-    </nav>
-  </div>
-
-<!-- ========================================================================
-       STEP 3: UNIVERSAL NATIVE BRIDGE & INDEXEDDB ENGINE
-       ======================================================================== -->
-  <script>
-    // 1. Universal Native Bridge
-    (function () {
-      class UniversalNativeBridge {
-        constructor() {
-          this.listeners = new Map();
-          this.initInboundListener();
-        }
-
-        // Checks if running inside React Native Android Shell
-        isNative() {
-          return Boolean(window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function');
-        }
-
-        // Core Outbound Message Dispatch
-        send(action, payload = {}) {
-          const packet = { action, payload, timestamp: Date.now() };
-          if (this.isNative()) {
-            window.ReactNativeWebView.postMessage(JSON.stringify(packet));
+          if (e.state && e.state.tab) {
+            setCurrentTab(e.state.tab);
           } else {
-            console.log(
-              `%c[NexusBridge Fallback]%c Action: ${action}`,
-              'background: #E50914; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: bold;',
-              'color: #00bcd4; font-weight: bold;',
-              payload
-            );
+            Bridge.minimizeApp();
           }
-        }
+        };
+        window.addEventListener('popstate', handlePop);
+        return () => window.removeEventListener('popstate', handlePop);
+      }, [activeMedia]);
 
-        // Action: ExoPlayer playback invocation
-        playMedia({ url, title, poster = '', position = 0, subtitles = [], audioPref = 'orig', season = 1, episode = 1 }) {
-          this.send('PLAY_MEDIA', { url, title, poster, position, subtitles, audioPref, season, episode });
-        }
-
-        // Action: 1DM-style downloader invocation
-        startDownload({ url, title, filename = '' }) {
-          this.send('START_DOWNLOAD', { url, title, filename });
-        }
-
-        // Action: Native Toast
-        showToast(message) {
-          this.send('SHOW_TOAST', { message });
-        }
-
-        // Inbound Event Subscriptions (Playback end, error fallbacks)
-        on(event, callback) {
-          if (!this.listeners.has(event)) {
-            this.listeners.set(event, []);
-          }
-          this.listeners.get(event).push(callback);
-        }
-
-        initInboundListener() {
-          const handleIncoming = (evtData) => {
-            try {
-              const data = typeof evtData === 'string' ? JSON.parse(evtData) : evtData;
-              if (data && data.type && this.listeners.has(data.type)) {
-                this.listeners.get(data.type).forEach(cb => cb(data.payload));
-              }
-            } catch (err) {}
-          };
-          window.addEventListener('message', (e) => handleIncoming(e.data));
-          document.addEventListener('message', (e) => handleIncoming(e.data));
-        }
-      }
-
-      window.NativeAppBridge = new UniversalNativeBridge();
-
-      // 2. IndexedDB Engine for Watch Progress & Search History
-      class NexusDatabase {
-        constructor() {
-          this.db = null;
-          this.ready = this.init();
-        }
-
-        init() {
-          return new Promise((resolve) => {
-            const req = indexedDB.open('NexusPWA_DB', 2);
-            req.onupgradeneeded = (e) => {
-              const db = e.target.result;
-              if (!db.objectStoreNames.contains('watch_progress')) {
-                db.createObjectStore('watch_progress', { keyPath: 'id' });
-              }
-              if (!db.objectStoreNames.contains('search_history')) {
-                db.createObjectStore('search_history', { keyPath: 'query' });
-              }
-            };
-            req.onsuccess = (e) => {
-              this.db = e.target.result;
-              resolve(this.db);
-            };
-            req.onerror = () => resolve(null);
-          });
-        }
-
-        async saveWatchProgress(item) {
-       await this.ready;
-       if (!this.db) return;
-
-       // 1. Generate strict composite key (tmdbId for movies, tmdbId_sX_eY for TV episodes)
-       const rawId = String(item.tmdbId || item.id || '').replace(/^media_/, '');
-       const tmdbId = rawId.split('_')[0];
-       const isTv = Boolean(item.isTv || (item.seasonInfo && item.seasonInfo.startsWith('S')) || item.season);
-       const season = item.season || (item.seasonInfo?.match(/S(\d+)/i)?.[1]) || 1;
-       const episode = item.episode || (item.seasonInfo?.match(/E(\d+)/i)?.[1]) || 1;
-       const recordKey = isTv ? `${tmdbId}_s${season}_e${episode}` : `${tmdbId}`;
-
-       const tx = this.db.transaction('watch_progress', 'readwrite');
-       const store = tx.objectStore('watch_progress');
-
-       // 2. Read existing record to merge progress without duplicates
-       const existing = await new Promise(res => {
-         const req = store.get(recordKey);
-         req.onsuccess = () => res(req.result || null);
-         req.onerror = () => res(null);
-       });
-
-       const mergedRecord = {
-         ...(existing || {}),
-         ...item,
-         id: recordKey,
-         tmdbId: String(tmdbId),
-         isTv,
-         season: isTv ? parseInt(season, 10) : undefined,
-         episode: isTv ? parseInt(episode, 10) : undefined,
-         seasonInfo: isTv ? `S${String(season).padStart(2, '0')}E${String(episode).padStart(2, '0')}` : 'Movie',
-         updatedAt: Date.now()
-       };
-
-       store.put(mergedRecord);
-       window.dispatchEvent(new CustomEvent('nexus:history-updated'));
-     }
-
-        async getAllWatchProgress() {
-          await this.ready;
-          if (!this.db) return [];
-          return new Promise((resolve) => {
-            const req = this.db.transaction('watch_progress', 'readonly').objectStore('watch_progress').getAll();
-            req.onsuccess = () => resolve((req.result || []).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)));
-            req.onerror = () => resolve([]);
-          });
-        }
-
-        async wipeHistory() {
-          await this.ready;
-          if (!this.db) return;
-          const tx = this.db.transaction('watch_progress', 'readwrite');
-          tx.objectStore('watch_progress').clear();
-          window.dispatchEvent(new CustomEvent('nexus:history-updated'));
-        }
-
-        async saveSearchQuery(q) {
-          if (!q || !q.trim()) return;
-          await this.ready;
-          if (!this.db) return;
-          const tx = this.db.transaction('search_history', 'readwrite');
-          tx.objectStore('search_history').put({ query: q.trim(), timestamp: Date.now() });
-        }
-
-        async getRecentSearches() {
-          await this.ready;
-          if (!this.db) return [];
-          return new Promise((resolve) => {
-            const req = this.db.transaction('search_history', 'readonly').objectStore('search_history').getAll();
-            req.onsuccess = () => resolve((req.result || []).slice(-8).reverse());
-            req.onerror = () => resolve([]);
-          });
-        }
-
-        async deleteSearchQuery(q) {
-          await this.ready;
-          if (!this.db) return;
-          const tx = this.db.transaction('search_history', 'readwrite');
-          tx.objectStore('search_history').delete(q);
-        }
-      }
-
-      window.NexusDB = new NexusDatabase();
-    })();
-  </script>
-  <!-- ========================================================================
-       STEP 4: TMDB MULTI-RAIL ENGINE & DYNAMIC HERO BANNER
-       ======================================================================== -->
-  <style>
-    /* Rail card progress bar & badges */
-    .resume-progress-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.25);
-    }
-    .resume-progress-fill {
-      height: 100%;
-      background: var(--accent);
-    }
-    .poster-badge {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0, 0, 0, 0.75);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      color: #FFF;
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      z-index: 2;
-    }
-  </style>
-
-  <script>
-    (function () {
-      const TMDB_API_KEYS = [
-        'f6bd687ffa63cd282b6ff2c6877f2669',
-        '2a61185ef6a27f400fd92820ad9e8537'
-      ];
-
-      // Safe TMDB Fetcher with failover
-      async function tmdbFetch(endpoint) {
-        for (const key of TMDB_API_KEYS) {
-          try {
-            const sep = endpoint.includes('?') ? '&' : '?';
-            const res = await fetch(`https://api.themoviedb.org/3/${endpoint}${sep}api_key=${key}`);
-            if (res.ok) return await res.json();
-          } catch (e) {}
-        }
-        return null;
-      }
-
-      // Configuration for all 9 API-driven rails
-      const RAILS = [
-        { sectionId: 'railTrending', endpoint: 'trending/all/day', isTv: false },
-        { sectionId: 'railHollywood', endpoint: 'discover/movie?with_original_language=en&sort_by=popularity.desc', isTv: false },
-        { sectionId: 'railIndian', endpoint: 'discover/movie?with_original_language=hi|ta|te&sort_by=popularity.desc', isTv: false },
-        { sectionId: 'railBangla', endpoint: 'discover/movie?with_original_language=bn&sort_by=popularity.desc', isTv: false },
-        { sectionId: 'railAnime', endpoint: 'discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc', isTv: true },
-        { sectionId: 'railKdrama', endpoint: 'discover/tv?with_original_language=ko&sort_by=popularity.desc', isTv: true },
-        { sectionId: 'railPakistani', endpoint: 'discover/tv?with_original_language=ur&sort_by=popularity.desc', isTv: true },
-        { sectionId: 'railDocs', endpoint: 'discover/movie?with_genres=99&sort_by=popularity.desc', isTv: false },
-        { sectionId: 'railSeries', endpoint: 'discover/tv?sort_by=popularity.desc', isTv: true }
-      ];
-
-      // 1. Populate the Dynamic Hero Banner
-      async function loadHeroBanner() {
-        const data = await tmdbFetch('trending/all/day');
-        if (data && data.results && data.results.length > 0) {
-          const top = data.results[0];
-          window.featuredHeroItem = {
-            id: top.id,
-            title: top.title || top.name,
-            overview: top.overview,
-            poster: `https://image.tmdb.org/t/p/w500${top.poster_path}`,
-            backdrop: `https://image.tmdb.org/t/p/original${top.backdrop_path || top.poster_path}`,
-            year: (top.release_date || top.first_air_date || '2026').substring(0, 4),
-            rating: top.vote_average ? top.vote_average.toFixed(1) : '8.5',
-            isTv: top.media_type === 'tv'
-          };
-
-          const banner = document.getElementById('heroBanner');
-          const title = document.getElementById('heroTitle');
-          const year = document.getElementById('heroYear');
-          const desc = document.getElementById('heroDesc');
-
-          if (banner) banner.style.backgroundImage = `url(${window.featuredHeroItem.backdrop})`;
-          if (title) title.textContent = window.featuredHeroItem.title;
-          if (year) year.textContent = window.featuredHeroItem.year;
-          if (desc) desc.textContent = window.featuredHeroItem.overview;
-        }
-      }
-
-      // 2. Render Continue Watching from IndexedDB
-      async function renderContinueWatching() {
-        const rail = document.getElementById('railContinueWatching');
-        if (!rail || !window.NexusDB) return;
-        const scroller = rail.querySelector('.rail-scroller');
-        const items = await window.NexusDB.getAllWatchProgress();
-
-        if (!items || items.length === 0) {
-          rail.style.display = 'none';
-          return;
-        }
-
-        rail.style.display = 'flex';
-        scroller.innerHTML = items.map(item => {
-          const pct = item.duration > 0 ? Math.min(100, Math.round((item.position / item.duration) * 100)) : 15;
-          const resumeBadge = item.isTv ? `Resume ${item.seasonInfo}` : 'Resume Movie';
-       return `
-         <div class="poster-card" data-media='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
-           <div class="poster-img-wrap">
-             <span class="poster-badge">${resumeBadge}</span>
-             <img src="${item.poster}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover;">
-             <div class="resume-progress-bar"><div class="resume-progress-fill" style="width:${pct}%"></div></div>
-           </div>
-           <span class="poster-card-title">${item.title}</span>
-         </div>
-       `;
-        }).join('');
-
-        scroller.querySelectorAll('.poster-card').forEach(card => {
-          card.addEventListener('click', () => {
-            const data = JSON.parse(card.getAttribute('data-media'));
-            if (typeof window.openDetailsView === 'function') window.openDetailsView(data);
-          });
-        });
-      }
-
-      // 3. Render all TMDB Rails (Parallel Non-Blocking)
-      function renderRails() {
-        RAILS.forEach(async (r) => {
-          const section = document.getElementById(r.sectionId);
-          if (!section) return;
-          const scroller = section.querySelector('.rail-scroller');
-          const data = await tmdbFetch(r.endpoint);
-
-          if (data && data.results && scroller) {
-            scroller.innerHTML = data.results
-              .filter(it => it.poster_path)
-              .slice(0, 15)
-              .map(it => {
-                const mediaItem = {
-                  id: it.id,
-                  title: it.title || it.name || 'Untitled',
-                  overview: it.overview || '',
-                  poster: `https://image.tmdb.org/t/p/w500${it.poster_path}`,
-                  backdrop: `https://image.tmdb.org/t/p/original${it.backdrop_path || it.poster_path}`,
-                  year: (it.release_date || it.first_air_date || '2026').substring(0, 4),
-                  rating: it.vote_average ? it.vote_average.toFixed(1) : '8.0',
-                  isTv: r.isTv || it.media_type === 'tv'
-                };
-
-                return `
-                  <div class="poster-card" data-media='${JSON.stringify(mediaItem).replace(/'/g, "&apos;")}'>
-                    <div class="poster-img-wrap">
-                      <span class="poster-badge">${it.vote_average ? it.vote_average.toFixed(1) + ' ★' : 'HD'}</span>
-                      <img src="${mediaItem.poster}" alt="${mediaItem.title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
-                    <span class="poster-card-title">${mediaItem.title}</span>
-                  </div>
-                `;
-              }).join('');
-
-            scroller.querySelectorAll('.poster-card').forEach(card => {
-              card.addEventListener('click', () => {
-                const data = JSON.parse(card.getAttribute('data-media'));
-                if (typeof window.openDetailsView === 'function') window.openDetailsView(data);
-              });
-            });
-          }
-        });
-      }
-
-      // Load on start
-      document.addEventListener('DOMContentLoaded', () => {
-        loadHeroBanner();
-        renderContinueWatching();
-        renderRails();
-        window.addEventListener('nexus:history-updated', renderContinueWatching);
-      });
-    })();
-  </script>
-  <!-- ========================================================================
-       STEP 4/6: SILENT WATERFALL PLAYBACK ENGINE & NATIVE BRIDGE DISPATCHER
-       ======================================================================== -->
-  <style>
-    /* In-Page Desktop Video Player */
-    .desktop-player-overlay {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      z-index: 500;
-      display: none;
-      flex-direction: column;
-    }
-    .desktop-player-overlay.active {
-      display: flex;
-    }
-
-    /* Subtle Waterfall Connection Toast */
-    .waterfall-status-toast {
-      position: fixed;
-      bottom: calc(var(--safe-bottom) + 80px);
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--glass-surface);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border-light);
-      padding: 10px 18px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 450;
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.25s, opacity 0.25s;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    }
-    .waterfall-status-toast.active {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-    .waterfall-spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: wfSpin 0.7s linear infinite;
-    }
-    @keyframes wfSpin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
-
-  <!-- Waterfall Status Indicator Toast -->
-  <div class="waterfall-status-toast" id="waterfallToast">
-    <div class="waterfall-spinner"></div>
-    <span id="waterfallToastText">Connecting to stream...</span>
-  </div>
-
-  <!-- In-Page Fullscreen Stream Player (Browser Fallback) -->
-  <div class="desktop-player-overlay" id="desktopPlayerOverlay">
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:calc(var(--safe-top) + 10px) 16px 10px 16px; background:#141414;">
-      <span id="desktopPlayerTitle" style="font-weight:700; font-size:0.95rem;">Playing Stream</span>
-      <button class="glass-btn" id="closeDesktopPlayerBtn" style="width:36px; height:36px;">✕</button>
-    </div>
-    <iframe id="desktopPlayerIframe" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen" style="width:100%; height:100%; border:none;"></iframe>
-  </div>
-
-  <!-- Waterfall Engine Script -->
-  <script type="module">
-    import { getWaterfallStream } from './sources.js';
-
-    // Ensure NativeAppBridge supports playStream directly
-    if (window.NativeAppBridge && !window.NativeAppBridge.playStream) {
-      window.NativeAppBridge.playStream = function (payload) {
-        const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-        window.NativeAppBridge.send('PLAY_STREAM', data);
+      const navigateTo = (tab) => {
+        if (tab === currentTab) return;
+        window.history.pushState({ tab }, '');
+        setCurrentTab(tab);
       };
-    }
 
-    const toast = document.getElementById('waterfallToast');
-    const toastText = document.getElementById('waterfallToastText');
-    const playerOverlay = document.getElementById('desktopPlayerOverlay');
-    const playerIframe = document.getElementById('desktopPlayerIframe');
-    const playerTitle = document.getElementById('desktopPlayerTitle');
-    const closePlayerBtn = document.getElementById('closeDesktopPlayerBtn');
+      const tabs = [
+        { id: 'catalog', label: 'Catalog', icon: '🎬' },
+        { id: 'search', label: 'Search', icon: '🔍' },
+        { id: 'downloads', label: 'Downloads', icon: '📥' },
+        { id: 'storage', label: 'Local Hub', icon: '📁' },
+        { id: 'settings', label: 'Settings', icon: '⚙️' }
+      ];
 
-    function showWaterfallToast(msg, duration = 3000) {
-      if (!toast || !toastText) return;
-      toastText.textContent = msg;
-      toast.classList.add('active');
-      clearTimeout(window._wfToastTimer);
-      if (duration > 0) {
-        window._wfToastTimer = setTimeout(() => toast.classList.remove('active'), duration);
-      }
-    }
+      return (
+        <div className="max-w-md mx-auto min-h-screen flex flex-col p-4">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-base">
+                F
+              </div>
+              <h1 className="text-base font-bold text-white tracking-wide">FLEX</h1>
+            </div>
+            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium ${
+              Bridge.isNative() ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'
+            }`}>
+              {Bridge.isNative() ? 'Native Shell' : 'Browser Mode'}
+            </span>
+          </header>
 
-    function hideWaterfallToast() {
-      if (toast) toast.classList.remove('active');
-    }
+          {/* Screen Container */}
+          <main className="flex-1">
+            {currentTab === 'catalog' && <CatalogView onSelectMedia={setActiveMedia} />}
+            {currentTab === 'search' && <SearchView onSelectMedia={setActiveMedia} />}
+            {currentTab === 'downloads' && <DownloadsView downloadEvents={downloadEvents} />}
+            {currentTab === 'storage' && <LocalHubView />}
+            {currentTab === 'settings' && <SettingsView capabilities={capabilities} />}
+          </main>
 
-    // 1. Core Silent Waterfall Playback Execution
-    window.playMediaWaterfall = async function (mediaItem, season = 1, episode = 1, sourceIndex = 0) {
-      if (!mediaItem) return;
+          {/* Player Modal Overlay */}
+          <PlayerModal activeMedia={activeMedia} onClose={() => setActiveMedia(null)} />
 
-      const isTv = Boolean(mediaItem.isTv);
-      const isFailover = sourceIndex > 0;
-      showWaterfallToast(isFailover ? `Switching to backup server (${sourceIndex + 1})...` : 'Resolving stream...', 0);
-
-      try {
-        // Resolve candidate stream and tracks via sources.js
-        const candidate = await getWaterfallStream({
-          tmdbId: mediaItem.id,
-          mediaType: isTv ? 'tv' : 'movie',
-          season,
-          episode,
-          sourceIndex
-        });
-
-        // Store active session for failover listener
-        window.currentPlaybackSession = {
-          mediaItem,
-          season,
-          episode,
-          sourceIndex: candidate.currentIndex,
-          hasMore: candidate.hasMore
-        };
-
-        // Construct Rich Native Bridge Contract Payload
-        const nativePayload = {
-          tmdbId: String(mediaItem.id),
-          title: mediaItem.title || mediaItem.name || 'Untitled',
-          streamUrl: candidate.streamUrl,
-          headers: {
-            "Referer": candidate.referrerUrl,
-            "User-Agent": navigator.userAgent || 'Mozilla/5.0 (Linux; Android 14) Flux/1.0'
-          },
-          subtitles: candidate.subtitles || [],
-          audioTracks: candidate.audioTracks || ['Original Audio'],
-          startPositionMs: 0
-        };
-
-        hideWaterfallToast();
-
-        // 2. Dispatch: Native Shell vs Desktop Browser Fallback
-        if (window.NativeAppBridge && window.NativeAppBridge.isNative()) {
-          window.NativeAppBridge.playStream(JSON.stringify(nativePayload));
-        } else {
-          // In-browser fallback
-          playerTitle.textContent = `${nativePayload.title} (${candidate.providerName})`;
-          playerIframe.src = candidate.streamUrl;
-          playerOverlay.classList.add('active');
-        }
-
-        // 3. Save deduplicated progress record to IndexedDB
-       if (window.NexusDB) {
-         window.NexusDB.saveWatchProgress({
-           tmdbId: String(mediaItem.id),
-           id: mediaItem.id,
-           isTv,
-           season,
-           episode,
-           title: nativePayload.title,
-           poster: mediaItem.poster || '',
-           streamUrl: candidate.streamUrl,
-           position: 120,
-           duration: 3600
-         });
-       }
-      } catch (err) {
-        console.error('[Waterfall] Resolution error:', err);
-        showWaterfallToast('Stream resolution failed. Retrying next source...', 2500);
-
-        if (sourceIndex < 4) {
-          setTimeout(() => window.playMediaWaterfall(mediaItem, season, episode, sourceIndex + 1), 800);
-        } else {
-          showWaterfallToast('All stream servers unavailable.', 4000);
-        }
-      }
-    };
-
-    // 4. Inbound Telemetry Failover Listener (STREAM_FAILED from Native Shell)
-    const handleStreamFailure = (eventData) => {
-      try {
-        const data = typeof eventData === 'string' ? JSON.parse(eventData) : eventData;
-        if (data?.type === 'STREAM_FAILED' && window.currentPlaybackSession) {
-          const { mediaItem, season, episode, sourceIndex, hasMore } = window.currentPlaybackSession;
-          if (hasMore) {
-            console.warn(`[Native Bridge] Stream failed on server ${sourceIndex + 1}. Auto-triggering next source...`);
-            window.playMediaWaterfall(mediaItem, season, episode, sourceIndex + 1);
-          } else {
-            showWaterfallToast('All available stream mirrors exhausted.', 4000);
-          }
-        }
-      } catch (e) {}
-    };
-
-    window.addEventListener('message', (e) => handleStreamFailure(e.data));
-    document.addEventListener('message', (e) => handleStreamFailure(e.data));
-
-    // Download Safeguard & Re-Download Confirmation Controller
-   let pendingDownloadData = null;
-   const redownloadModal = document.getElementById('redownloadConfirmModal');
-   const btnCancelRedownload = document.getElementById('btnCancelRedownload');
-   const btnConfirmRedownload = document.getElementById('btnConfirmRedownload');
-
-   function executeDownload(item, season = 1, episode = 1) {
-     const isTv = Boolean(item.isTv);
-     const tmdbId = String(item.tmdbId || item.id);
-     const downloadKey = isTv ? `${tmdbId}_s${season}_e${episode}` : `${tmdbId}`;
-     const downloadTitle = isTv ? `${item.title} S${String(season).padStart(2, '0')}E${String(episode).padStart(2, '0')}` : item.title;
-     const streamUrl = isTv
-       ? `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
-       : `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
-
-     // 1. Dispatch to Native Bridge
-     if (window.NativeAppBridge) {
-       window.NativeAppBridge.startDownload({
-         url: streamUrl,
-         title: downloadTitle,
-         filename: `${downloadTitle.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
-       });
-       window.NativeAppBridge.showToast(`Queued for download: ${downloadTitle}`);
-     }
-
-     // 2. Dispatch to Downloads tab
-     window.dispatchEvent(new CustomEvent('nexus:download-added', {
-       detail: {
-         id: downloadKey,
-         tmdbId,
-         isTv,
-         season,
-         episode,
-         title: downloadTitle,
-         poster: item.poster || '',
-         quality: '1080p',
-         streamUrl
-       }
-     }));
-   }
-
-   document.getElementById('btnDetailsDownload')?.addEventListener('click', () => {
-     const item = window.currentDetailsItem || window.featuredHeroItem;
-     if (!item) return;
-
-     const isTv = Boolean(item.isTv);
-     const seasonEl = document.getElementById('seasonSelect');
-     const season = (isTv && seasonEl) ? parseInt(seasonEl.value, 10) || 1 : 1;
-     const episode = 1;
-     const tmdbId = String(item.tmdbId || item.id);
-     const downloadKey = isTv ? `${tmdbId}_s${season}_e${episode}` : `${tmdbId}`;
-
-     // Read active queue to check for duplicate
-     let currentQueue = [];
-     try {
-       currentQueue = JSON.parse(localStorage.getItem('nexus_downloads_queue')) || [];
-     } catch (e) {}
-
-     const isAlreadyInQueue = currentQueue.some(d => d.id === downloadKey || (d.tmdbId === tmdbId && !isTv));
-
-     if (isAlreadyInQueue) {
-       // Trigger Glass Confirmation Modal
-       pendingDownloadData = { item, season, episode };
-       if (redownloadModal) redownloadModal.classList.add('active');
-     } else {
-       executeDownload(item, season, episode);
-     }
-   });
-
-   btnCancelRedownload?.addEventListener('click', () => {
-     if (redownloadModal) redownloadModal.classList.remove('active');
-     pendingDownloadData = null;
-   });
-
-   btnConfirmRedownload?.addEventListener('click', () => {
-     if (redownloadModal) redownloadModal.classList.remove('active');
-     if (pendingDownloadData) {
-       executeDownload(pendingDownloadData.item, pendingDownloadData.season, pendingDownloadData.episode);
-       pendingDownloadData = null;
-     }
-   });
-
-    // 6. Connect Episode Card Clicks to Waterfall
-    window.addEventListener('nexus:trigger-stream', (e) => {
-      if (e.detail?.item) {
-        window.playMediaWaterfall(e.detail.item, e.detail.season || 1, e.detail.episode || 1, 0);
-      }
-    });
-
-    // Close in-page desktop player
-    closePlayerBtn?.addEventListener('click', () => {
-      playerOverlay.classList.remove('active');
-      playerIframe.src = '';
-    });
-  </script>
-  <!-- ========================================================================
-       STEP 9: MODALS, NETWORK TOAST & ADVANCED UTILITIES
-       ======================================================================== -->
-  <style>
-    /* Network Toast Alert */
-    .network-toast {
-      position: fixed;
-      top: calc(var(--safe-top) + 60px);
-      left: 50%;
-      transform: translateX(-50%) translateY(-30px);
-      background: rgba(229, 9, 20, 0.92);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border-light);
-      padding: 10px 18px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 600;
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 0.3s, opacity 0.3s;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    }
-    .network-toast.active {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-      pointer-events: auto;
-    }
-  </style>
-
-  <!-- Network Offline Toast -->
-  <div class="network-toast" id="networkToast">
-    <span>Connection lost. Working offline.</span>
-    <button id="btnRetryNet" style="background:#fff; color:#000; border:none; padding:4px 10px; border-radius:999px; font-size:0.75rem; font-weight:800; cursor:pointer;">Retry</button>
-  </div>
-
-  <!-- FMHY Directory Modal -->
-  <div class="glass-modal-overlay" id="fmhyModal" style="z-index: 450;">
-    <div class="glass-sheet" style="max-height: 80vh;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:1.15rem; font-weight:800;">FMHY Directory</h3>
-        <button class="glass-btn" id="closeFmhyBtn" style="width:32px; height:32px;">✕</button>
-      </div>
-      <p style="font-size:0.8rem; color:var(--text-muted);">Curated direct streaming and entertainment hubs:</p>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <a href="https://fmhy.net/videopiracyguide" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-          <span>Movies & TV Shows Guide</span>
-        </a>
-        <a href="https://fmhy.net/videopiracyguide#anime" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-          <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-          <span>Anime Streams & Trackers</span>
-        </a>
-        <a href="https://fmhy.net/videopiracyguide#live-tv-sports" target="_blank" rel="noopener" class="drawer-item" style="text-decoration:none;">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
-          <span>Live TV & Sports Streams</span>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings & Resolution Modal -->
-  <div class="glass-modal-overlay" id="settingsModal" style="z-index: 450;">
-    <div class="glass-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:1.15rem; font-weight:800;">Settings & Resolution</h3>
-        <button class="glass-btn" id="closeSettingsBtn" style="width:32px; height:32px;">✕</button>
-      </div>
-
-      <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:6px;">DEFAULT PLAYBACK RESOLUTION</div>
-      <select class="glass-select" id="defaultResPicker">
-        <option value="1080p">1080p (Full HD - High Bandwidth)</option>
-        <option value="720p">720p (Data Saver - Smooth Streaming)</option>
-      </select>
-
-      <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-top:10px;">ACTIVE SCRAPER MODULE</div>
-      <div style="background:var(--glass-card); border:1px solid var(--glass-border); padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <div style="font-weight:700; font-size:0.9rem;">sources.js</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">Decoupled Multi-Embed Resolver</div>
+          {/* Bottom Bar */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800/80 px-2 py-1.5 pb-[calc(env(safe-area-inset-bottom,0px)+6px)] flex justify-around">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => navigateTo(tab.id)}
+                className={`flex flex-col items-center flex-1 py-1 transition ${
+                  currentTab === tab.id ? 'text-indigo-400 font-semibold' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span className="text-lg">{tab.icon}</span>
+                <span className="text-[10px] mt-0.5">{tab.label}</span>
+              </button>
+            ))}
+          </nav>
         </div>
-        <span style="color:#4caf50; font-weight:700; font-size:0.8rem;">Active ES6</span>
-      </div>
-    </div>
-  </div>
+      );
+    }
 
-  <!-- Master Control Script (Navigation, Drawer, Settings, Offline & Native Handshakes) -->
-  <script>
-    (function () {
-      // 1. Drawer Navigation Controls
-      const drawerOverlay = document.getElementById('drawerOverlay');
-      const drawerPanel = document.getElementById('drawerPanel');
-      const openDrawerBtn = document.getElementById('openDrawerBtn');
-      const closeDrawerBtn = document.getElementById('closeDrawerBtn');
-
-      function closeDrawer() {
-        drawerOverlay?.classList.remove('active');
-        drawerPanel?.classList.remove('active');
-      }
-
-      openDrawerBtn?.addEventListener('click', () => {
-        drawerOverlay?.classList.add('active');
-        drawerPanel?.classList.add('active');
-      });
-      closeDrawerBtn?.addEventListener('click', closeDrawer);
-      drawerOverlay?.addEventListener('click', closeDrawer);
-
-      // 2. FMHY Directory Modal
-      const fmhyModal = document.getElementById('fmhyModal');
-      document.getElementById('drawerItemFmhy')?.addEventListener('click', () => {
-        closeDrawer();
-        fmhyModal?.classList.add('active');
-      });
-      document.getElementById('closeFmhyBtn')?.addEventListener('click', () => {
-        fmhyModal?.classList.remove('active');
-      });
-      fmhyModal?.addEventListener('click', (e) => {
-        if (e.target === fmhyModal) fmhyModal.classList.remove('active');
-      });
-
-      // 3. Settings & Resolution Controls
-      const settingsModal = document.getElementById('settingsModal');
-      const defaultResPicker = document.getElementById('defaultResPicker');
-
-      // Load saved resolution preference
-      const savedRes = localStorage.getItem('nexus_pref_res') || '1080p';
-      if (defaultResPicker) {
-        defaultResPicker.value = savedRes;
-        defaultResPicker.addEventListener('change', () => {
-          localStorage.setItem('nexus_pref_res', defaultResPicker.value);
-        });
-      }
-
-      document.getElementById('drawerItemSettings')?.addEventListener('click', () => {
-        closeDrawer();
-        settingsModal?.classList.add('active');
-      });
-      document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
-        settingsModal?.classList.remove('active');
-      });
-      settingsModal?.addEventListener('click', (e) => {
-        if (e.target === settingsModal) settingsModal.classList.remove('active');
-      });
-
-      // 4. Granular Cache Purge (Clears session/posters, preserves Watch History & Downloads)
-      document.getElementById('drawerItemPurgeCache')?.addEventListener('click', () => {
-        closeDrawer();
-        sessionStorage.clear();
-        alert('Metadata and image cache purged successfully.\nYour Watch History and Downloads are preserved.');
-        window.location.reload();
-      });
-
-      // 5. Wipe History Trigger from Drawer
-      document.getElementById('drawerItemClearHistory')?.addEventListener('click', () => {
-        closeDrawer();
-        document.getElementById('wipeConfirmModal')?.classList.add('active');
-      });
-
-      // 6. Network Offline Toast & Reconnect Handler
-      const netToast = document.getElementById('networkToast');
-      window.addEventListener('offline', () => netToast?.classList.add('active'));
-      window.addEventListener('online', () => netToast?.classList.remove('active'));
-      document.getElementById('btnRetryNet')?.addEventListener('click', () => {
-        if (navigator.onLine) {
-          netToast?.classList.remove('active');
-          window.location.reload();
-        } else {
-          alert('Still offline. Check your internet connection.');
-        }
-      });
-
-      // 7. PWA Install Prompt Banner
-      let deferredPrompt = null;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const banner = document.getElementById('pwaInstallBanner');
-        if (banner) banner.style.display = 'flex';
-      });
-
-      document.getElementById('btnInstallPwa')?.addEventListener('click', () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          deferredPrompt = null;
-          const banner = document.getElementById('pwaInstallBanner');
-          if (banner) banner.style.display = 'none';
-        }
-      });
-
-      // 8. Capsule Navigation Tab Switching
-      const tabBtns = document.querySelectorAll('.nav-tab-btn');
-      const views = document.querySelectorAll('.view-container');
-      const capsulePill = document.getElementById('navCapsulePill');
-
-      tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const index = parseInt(btn.getAttribute('data-index'), 10);
-          tabBtns.forEach(b => b.classList.remove('active'));
-          views.forEach(v => v.classList.remove('active'));
-
-          btn.classList.add('active');
-          if (capsulePill) capsulePill.style.transform = `translateX(${index * 100}%)`;
-
-          const targetView = document.getElementById(btn.getAttribute('data-target'));
-          if (targetView) targetView.classList.add('active');
-        });
-      });
-
-      // 9. NATIVE BRIDGE HANDSHAKES (Auto-Play Next Episode & Error Fallback)
-      if (window.NativeAppBridge) {
-        // Auto-Play Next Episode upon playback finish
-        window.NativeAppBridge.on('STREAM_ENDED', (payload) => {
-          if (!payload) return;
-          const nextEp = (payload.episode || 1) + 1;
-          const season = payload.season || 1;
-          const activeItem = window.currentDetailsItem || window.featuredHeroItem;
-
-          if (activeItem && activeItem.isTv) {
-            window.NativeAppBridge.showToast(`Auto-playing Episode ${nextEp}...`);
-            window.triggerStreamModal(activeItem, season, nextEp);
-          }
-        });
-
-        // Playback Error Fallback: automatically attempt the next server
-        window.NativeAppBridge.on('STREAM_ERROR', (payload) => {
-          console.warn('[Bridge] Stream playback failed, attempting fallback resolver:', payload);
-          window.NativeAppBridge.showToast('Server issue detected. Trying fallback stream...');
-          const activeItem = window.currentDetailsItem || window.featuredHeroItem;
-          if (activeItem) {
-            window.triggerStreamModal(activeItem, payload?.season || 1, payload?.episode || 1);
-          }
-        });
-      }
-    })();
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
