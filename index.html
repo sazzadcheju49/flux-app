@@ -167,10 +167,705 @@
       margin-top: 6px;
     }
     /* === [CSS-SLOT: STAGE 3 - PLAYER] === */
+
+    /* Player Overlay & Transparent Surface */
+    #view-player {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      touch-action: none;
+    }
+    body:has(#view-player.active) nav.tab-bar,
+    body:has(#view-player.active) header {
+      display: none !important;
+    }
+    .player-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: opacity 0.25s ease;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .player-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .player-overlay.locked .player-top,
+    .player-overlay.locked .player-bottom,
+    .player-overlay.locked .player-center {
+      display: none !important;
+    }
+    .player-top {
+      padding: calc(env(safe-area-inset-top, 16px) + 8px) 16px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
+    }
+    .player-title-info {
+      flex: 1;
+      margin: 0 12px;
+      overflow: hidden;
+    }
+    .player-main-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-sub-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .player-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .player-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .player-btn-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(20, 23, 31, 0.7);
+      border: 1px solid var(--surface-border);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .player-btn-circle.lg {
+      width: 64px;
+      height: 64px;
+    }
+    .player-bottom {
+      padding: 16px 16px calc(env(safe-area-inset-bottom, 16px) + 12px);
+      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    }
+    .seek-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .seek-slider {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      outline: none;
+    }
+    .seek-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    .time-lbl {
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+    }
+    .controls-secondary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .gesture-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--surface-border);
+      padding: 12px 24px;
+      border-radius: 12px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .buffering-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+      pointer-events: none;
+    }
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    .player-modal {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--surface-border);
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
+      z-index: 20;
+      display: none;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .player-modal h4 {
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+    .modal-list-item {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--surface-border);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .countdown-overlay {
+      position: absolute;
+      bottom: 90px;
+      right: 16px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 10px;
+      display: none;
+      z-index: 15;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
+    .error-dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      border: 1px solid var(--danger);
+      padding: 20px;
+      border-radius: 12px;
+      width: 85%;
+      max-width: 340px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 30;
+      text-align: center;
+    }
     /* === [CSS-SLOT: STAGE 4 - MUSIC] === */
+    /* Music UI & Track Lists */
+    .music-nav-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .music-nav-filter::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .track-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .track-item:active { background: var(--surface-border); }
+    .track-art {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #232733;
+      flex-shrink: 0;
+    }
+    .track-meta {
+      flex: 1;
+      overflow: hidden;
+    }
+    .track-title {
+      font-size: 0.88rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-artist {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Mini-Player (Positioned directly above Tab Bar) */
+    #music-mini-player {
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      bottom: calc(var(--tab-height) + var(--safe-bottom) + 8px);
+      height: 56px;
+      background: rgba(20, 23, 31, 0.95);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      padding: 6px 12px;
+      gap: 12px;
+      z-index: 45;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      cursor: pointer;
+    }
+    #music-mini-player .track-meta { flex: 1; }
+
+    /* Full Now-Playing Overlay Screen */
+    #music-now-playing {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: calc(env(safe-area-inset-top, 16px) + 12px) 24px calc(env(safe-area-inset-bottom, 16px) + 24px);
+    }
+    .now-playing-art-wrap {
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 330px;
+      margin: 16px auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      background: var(--surface);
+    }
+    .now-playing-art {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .now-playing-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .extra-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
     /* === [CSS-SLOT: STAGE 5 - PODCASTS] === */
+    /* Podcasts Layout & Subscriptions */
+    .podcast-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .podcast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 12px;
+    }
+    .podcast-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .podcast-cover {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #232733;
+      display: block;
+    }
+    .podcast-card-info {
+      padding: 6px;
+    }
+    .podcast-card-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .podcast-card-author {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    /* Episode Feed & Show Detail View */
+    #podcast-detail-view {
+      display: none;
+      margin-top: 4px;
+    }
+    .show-header {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      padding: 12px;
+      border-radius: 10px;
+    }
+    .show-cover {
+      width: 90px;
+      height: 90px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #232733;
+    }
+    .show-meta {
+      flex: 1;
+      overflow: hidden;
+    }
+    .episode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .episode-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+    }
+    .episode-card.played {
+      opacity: 0.6;
+    }
+    .episode-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .episode-date {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .episode-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .episode-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--surface-border);
+      padding-top: 8px;
+    }
     /* === [CSS-SLOT: STAGE 6 - DOWNLOADS] === */
+    /* Downloads Storage & Item Layout */
+    .storage-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .storage-bar-track {
+      height: 6px;
+      background: var(--surface-border);
+      border-radius: 3px;
+      margin: 10px 0 6px;
+      overflow: hidden;
+    }
+    .storage-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .download-item {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .dl-row-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dl-art {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--surface-border);
+      flex-shrink: 0;
+    }
+    .dl-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .dl-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dl-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      gap: 8px;
+    }
+    .dl-progress-track {
+      height: 4px;
+      background: var(--surface-border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .dl-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+    .dl-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Quality / Track Selection Modal */
+    #download-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 120;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .download-modal-dialog {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      box-shadow: 0 -8px 24px rgba(0,0,0,0.6);
+      animation: slideUp 0.25s ease-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .picker-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 12px;
+      display: block;
+    }
     /* === [CSS-SLOT: STAGE 7 - SETTINGS & BOOKMARKS] === */
+    /* Settings & Bookmarks */
+    .settings-group {
+      margin-bottom: 20px;
+    }
+    .settings-group-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+    }
+    .settings-row label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .settings-subtext {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--surface-border);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* Bookmarks Grid & PIN Prompt */
+    .bookmarks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .bookmark-tile {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .bookmark-tile:active { background: var(--surface-border); }
+    .bookmark-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    .bookmark-delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    #pin-lock-modal {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .pin-input {
+      font-size: 1.6rem;
+      text-align: center;
+      letter-spacing: 12px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px;
+      width: 180px;
+      margin: 16px 0;
+    }
+
   </style>
 </head>
 <body>
@@ -236,31 +931,442 @@
     <!-- View: Player -->
     <section id="view-player" class="view-container">
       <!-- === [HTML-SLOT: STAGE 3 - PLAYER VIEW] === -->
+      <div id="player-gesture-box" style="position:absolute; inset:0; z-index:1;"></div>
+
+      <div class="buffering-spinner" id="player-buffering"></div>
+
+      <div class="gesture-indicator" id="player-gesture-feedback">
+        <span id="player-gesture-icon">⚙</span>
+        <span id="player-gesture-text">100%</span>
+      </div>
+
+      <div class="countdown-overlay" id="player-next-countdown">
+        <div style="font-size:0.8rem; margin-bottom:4px;">Next episode in <span id="countdown-num">5</span>s</div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm" onclick="PlayerEngine.triggerNextEpisode()">Play Now</button>
+          <button class="btn btn-secondary btn-sm" onclick="PlayerEngine.cancelCountdown()">Cancel</button>
+        </div>
+      </div>
+
+      <div class="error-dialog" id="player-error-dialog">
+        <h4 style="color:var(--danger);">Playback Stream Error</h4>
+        <p style="font-size:0.82rem; color:var(--text-muted);" id="player-error-text">Failed to fetch the stream payload.</p>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="PlayerEngine.retryStream()">Retry</button>
+          <button class="btn btn-sm" style="flex:1;" onclick="PlayerEngine.switchSite()">Next Site</button>
+        </div>
+      </div>
+
+      <div class="player-modal" id="player-modal-sheet">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h4 id="player-modal-title">Select Track</h4>
+          <button class="btn btn-secondary btn-sm" onclick="PlayerEngine.closeModal()">✕</button>
+        </div>
+        <div id="player-modal-content"></div>
+      </div>
+
+      <div class="player-overlay" id="player-ui">
+        <div class="player-top">
+          <button class="header-btn" onclick="PlayerEngine.exit()">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="player-title-info">
+            <div class="player-main-title" id="player-display-title">Media Title</div>
+            <div class="player-sub-title" id="player-display-sub">Season 1 Episode 1</div>
+          </div>
+          <div class="player-actions">
+            <button class="header-btn" onclick="PlayerEngine.cycleAspect()" title="Aspect Ratio">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="12" x="3" y="6" rx="2"/></svg>
+            </button>
+            <button class="header-btn" onclick="PlayerEngine.openTrackModal('subtitles')" title="Subtitles">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2zm3 5h2m-2 3h5m4-3h2m-4 3h1"/></svg>
+            </button>
+            <button class="header-btn" onclick="PlayerEngine.openTrackModal('audio')" title="Audio">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>
+            </button>
+            <button class="header-btn" onclick="PlayerEngine.triggerPiP()" title="PiP">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="14" x="3" y="5" rx="2"/><rect width="7" height="5" x="12" y="12" rx="1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="player-center">
+          <div class="player-btn-circle" onclick="PlayerEngine.skip(-10)">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          </div>
+          <div class="player-btn-circle lg" id="player-play-btn" onclick="PlayerEngine.togglePlay()">
+            <svg id="icon-play" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+            <svg id="icon-pause" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+          </div>
+          <div class="player-btn-circle" onclick="PlayerEngine.skip(10)">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M23 4v6h-6M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          </div>
+        </div>
+
+        <div class="player-bottom">
+          <div class="seek-row">
+            <span class="time-lbl" id="player-time-curr">00:00</span>
+            <input type="range" class="seek-slider" id="player-seek" min="0" max="100" value="0">
+            <span class="time-lbl" id="player-time-total">00:00</span>
+          </div>
+          <div class="controls-secondary">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <button class="header-btn" id="player-lock-btn" onclick="PlayerEngine.toggleLock()" title="Lock Interface">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              </button>
+              <button class="header-btn" onclick="PlayerEngine.cycleSpeed()" id="player-speed-btn" style="font-size:0.75rem; font-weight:700;">1.0x</button>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+              <button class="header-btn" onclick="PlayerEngine.toggleOrientation()" title="Rotate Screen">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- View: Music -->
     <section id="view-music" class="view-container">
       <!-- === [HTML-SLOT: STAGE 4 - MUSIC VIEW] === -->
+      <!-- Search Input -->
+      <div class="search-box">
+        <input type="search" id="music-search-input" placeholder="Search Audius & Jamendo tracks...">
+        <button class="btn btn-sm" onclick="MusicEngine.search()">Search</button>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <div class="music-nav-filter">
+        <div class="filter-chip active" id="chip-trending" onclick="MusicEngine.setTab('trending')">Trending</div>
+        <div class="filter-chip" id="chip-favorites" onclick="MusicEngine.setTab('favorites')">Favorites</div>
+        <div class="filter-chip" id="chip-playlists" onclick="MusicEngine.setTab('playlists')">Playlists</div>
+      </div>
+
+      <!-- Track List Container -->
+      <div id="music-content-area">
+        <div class="track-list" id="music-track-list"></div>
+      </div>
+
+      <!-- Mini Player Component -->
+      <div id="music-mini-player" onclick="MusicEngine.openFullPlayer()">
+        <img id="mini-art" class="track-art" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+        <div class="track-meta">
+          <div class="track-title" id="mini-title">Not Playing</div>
+          <div class="track-artist" id="mini-artist">—</div>
+        </div>
+        <button class="header-btn" onclick="event.stopPropagation(); MusicEngine.togglePlay();">
+          <svg id="mini-icon-play" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+          <svg id="mini-icon-pause" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+        </button>
+        <button class="header-btn" onclick="event.stopPropagation(); MusicEngine.next();">
+          <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg>
+        </button>
+      </div>
+
+      <!-- Full Now Playing Modal -->
+      <div id="music-now-playing">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button class="header-btn" onclick="MusicEngine.closeFullPlayer()">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">NOW PLAYING</span>
+          <button class="header-btn" onclick="MusicEngine.toggleFavoriteCurrent()" id="btn-fav-now">
+            <svg id="fav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+        </div>
+
+        <div class="now-playing-art-wrap">
+          <img id="full-art" class="now-playing-art" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+        </div>
+
+        <div>
+          <h2 id="full-title" style="font-size:1.25rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">Track Title</h2>
+          <p id="full-artist" style="font-size:0.9rem; color:var(--text-muted); text-align:center; margin-top:4px;">Artist Name</p>
+        </div>
+
+        <div>
+          <div class="seek-row" style="margin-bottom:4px;">
+            <span class="time-lbl" id="full-time-curr">00:00</span>
+            <input type="range" class="seek-slider" id="full-seek" min="0" max="100" value="0">
+            <span class="time-lbl" id="full-time-total">00:00</span>
+          </div>
+
+          <div class="now-playing-controls">
+            <button class="header-btn" onclick="MusicEngine.prev()">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 19V5"/></svg>
+            </button>
+            <button class="header-btn" onclick="MusicEngine.skipTime(-15)">
+              <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 4v6h6M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            </button>
+            <div class="player-btn-circle lg" onclick="MusicEngine.togglePlay()">
+              <svg id="full-icon-play" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+              <svg id="full-icon-pause" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+            </div>
+            <button class="header-btn" onclick="MusicEngine.skipTime(15)">
+              <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M23 4v6h-6M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+            </button>
+            <button class="header-btn" onclick="MusicEngine.next()">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg>
+            </button>
+          </div>
+
+          <div class="extra-controls">
+            <button class="header-btn" onclick="MusicEngine.cycleSpeed()" id="btn-music-speed" style="font-size:0.8rem; font-weight:600;">1.0x</button>
+            <button class="header-btn" onclick="MusicEngine.cycleSleepTimer()" id="btn-music-sleep" style="font-size:0.8rem; font-weight:600;">Sleep: Off</button>
+            <button class="header-btn" onclick="MusicEngine.addToPlaylistPrompt()" style="font-size:0.8rem; font-weight:600;">+ Playlist</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- View: Podcasts -->
     <section id="view-podcasts" class="view-container">
       <!-- === [HTML-SLOT: STAGE 5 - PODCASTS VIEW] === -->
+      <!-- Search Input -->
+      <div class="search-box">
+        <input type="search" id="podcast-search-input" placeholder="Search Apple Podcasts & RSS...">
+        <button class="btn btn-sm" onclick="PodcastEngine.search()">Search</button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="podcast-tabs">
+        <button class="filter-chip active" id="chip-pod-explore" onclick="PodcastEngine.setTab('explore')">Explore</button>
+        <button class="filter-chip" id="chip-pod-subs" onclick="PodcastEngine.setTab('subs')">Subscriptions</button>
+        <button class="filter-chip" id="chip-pod-new" onclick="PodcastEngine.setTab('new')">New Feed</button>
+        <button class="header-btn" onclick="PodcastEngine.refreshSubscriptions()" title="Refresh Feeds" style="margin-left:auto;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+
+      <!-- Main Podcast Directory View -->
+      <div id="podcast-main-grid-wrap">
+        <div class="podcast-grid" id="podcast-grid"></div>
+      </div>
+
+      <!-- Show Details & Episode List View -->
+      <div id="podcast-detail-view">
+        <button class="btn btn-secondary btn-sm" onclick="PodcastEngine.closeDetail()" style="margin-bottom:12px;">← Back to Shows</button>
+        <div class="show-header">
+          <img id="show-detail-art" class="show-cover" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+          <div class="show-meta">
+            <h3 id="show-detail-title" style="font-size:1rem; font-weight:700;">Show Name</h3>
+            <p id="show-detail-author" style="font-size:0.75rem; color:var(--text-muted); margin:4px 0 8px;">Author</p>
+            <button class="btn btn-sm" id="btn-sub-toggle" onclick="PodcastEngine.toggleSubscribeCurrent()">+ Subscribe</button>
+          </div>
+        </div>
+        <div class="episode-list" id="podcast-episode-list"></div>
+      </div>
     </section>
 
     <!-- View: Downloads -->
     <section id="view-downloads" class="view-container">
       <!-- === [HTML-SLOT: STAGE 6 - DOWNLOADS VIEW] === -->
+      <!-- Storage Capacity Header -->
+      <div class="storage-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.85rem; font-weight:600;">Device Storage</span>
+          <span id="storage-txt" style="font-size:0.75rem; color:var(--text-muted);">Calculating...</span>
+        </div>
+        <div class="storage-bar-track">
+          <div id="storage-bar" class="storage-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Downloads Filter & Actions -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:0.95rem; font-weight:700;">Downloaded Files</h3>
+        <button class="btn btn-secondary btn-sm" onclick="DownloadEngine.refreshList()">Refresh</button>
+      </div>
+
+      <!-- Download Items List -->
+      <div id="downloads-list"></div>
+
+      <!-- Quality & Audio/Subtitle Track Picker Modal (Invoked Every Time) -->
+      <div id="download-modal">
+        <div class="download-modal-dialog">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="font-size:1rem; font-weight:700;">Download Options</h3>
+            <button class="btn btn-secondary btn-sm" onclick="DownloadEngine.closeModal()">✕</button>
+          </div>
+          <p id="dl-modal-item-title" style="font-size:0.82rem; color:var(--text-muted);">Fetching manifests...</p>
+
+          <label class="picker-label">Resolution / Quality</label>
+          <select id="dl-quality-select" class="picker-select"></select>
+
+          <label class="picker-label">Audio Track</label>
+          <select id="dl-audio-select" class="picker-select"></select>
+
+          <label class="picker-label">Subtitle Track</label>
+          <select id="dl-sub-select" class="picker-select"></select>
+
+          <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="DownloadEngine.closeModal()">Cancel</button>
+            <button class="btn" style="flex:1;" onclick="DownloadEngine.confirmDownload()">Start Download</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- View: Bookmarks -->
     <section id="view-bookmarks" class="view-container">
       <!-- === [HTML-SLOT: STAGE 7 - BOOKMARKS VIEW] === -->
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>Saved Bookmarks</h3>
+        <button class="btn btn-sm" onclick="BookmarksEngine.openAddPrompt()">+ Add Bookmark</button>
+      </div>
+      <div class="bookmarks-grid" id="bookmarks-list"></div>
+
+      <!-- PIN Security Challenge Screen -->
+      <div id="pin-lock-modal">
+        <h3 style="margin-bottom:8px;">PIN Verification</h3>
+        <p style="font-size:0.82rem; color:var(--text-muted);">Enter PIN to access private bookmarks</p>
+        <input type="password" maxlength="4" pattern="[0-9]*" inputmode="numeric" id="pin-unlock-input" class="pin-input">
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-secondary" onclick="history.back()">Cancel</button>
+          <button class="btn" onclick="BookmarksEngine.verifyPin()">Unlock</button>
+        </div>
+      </div>
     </section>
 
     <!-- View: Settings -->
     <section id="view-settings" class="view-container">
       <!-- === [HTML-SLOT: STAGE 7 - SETTINGS VIEW] === -->
+      <!-- Appearance & Colors -->
+      <div class="settings-group">
+        <div class="settings-group-title">Appearance</div>
+        <div class="card" style="margin-bottom:6px;">
+          <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:8px;">Accent Color</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="Theme.setAccent('#6366f1')">Indigo</button>
+            <button class="btn btn-secondary btn-sm" onclick="Theme.setAccent('#10b981')">Emerald</button>
+            <button class="btn btn-secondary btn-sm" onclick="Theme.setAccent('#f43f5e')">Rose</button>
+            <button class="btn btn-secondary btn-sm" onclick="Theme.setAccent('#eab308')">Amber</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>Default Language</span>
+            <span class="settings-subtext">Preferred audio & subtitles</span>
+          </label>
+          <select id="setting-lang" class="picker-select" style="width:auto; margin:0;" onchange="SettingsEngine.setPref('flex_lang', this.value)">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Network & VPN -->
+      <div class="settings-group">
+        <div class="settings-group-title">WireGuard VPN & Connectivity</div>
+        <div class="card" style="margin-bottom:6px;">
+          <label style="font-size:0.82rem; color:var(--text-muted); display:block; margin-bottom:6px;">WireGuard Configuration (.conf)</label>
+          <textarea id="vpn-conf-input" placeholder="Paste [Interface] ... [Peer] config here" style="width:100%; height:75px; background:var(--bg); border:1px solid var(--surface-border); border-radius:6px; color:var(--text); padding:8px; font-family:monospace; font-size:0.75rem; margin-bottom:8px;"></textarea>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-sm" onclick="SettingsEngine.applyVpnConfig()">Load Config</button>
+            <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.toggleVpnConnection()" id="btn-vpn-status">Connect VPN</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>VPN Auto-Connect</span>
+            <span class="settings-subtext">Connect automatically on startup</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-vpn-auto" onchange="SettingsEngine.setPref('flex_vpn_auto', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>VPN Kill Switch</span>
+            <span class="settings-subtext">Block non-VPN network traffic</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-vpn-kill" onchange="SettingsEngine.setPref('flex_vpn_kill', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>Wi-Fi Only Downloads</span>
+            <span class="settings-subtext">Block cellular data for media downloads</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-wifi-only" onchange="SettingsEngine.setPref('flex_wifi_only', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Content Filtering & Security -->
+      <div class="settings-group">
+        <div class="settings-group-title">Security & Ad-Blocking</div>
+        <div class="settings-row">
+          <label>
+            <span>Block Popup Windows</span>
+            <span class="settings-subtext">Block unrequested navigation tabs</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setting-popup-block" checked onchange="SettingsEngine.togglePopupBlock(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>Filter Rules</span>
+            <span class="settings-subtext">Reload adblock-rules.txt</span>
+          </label>
+          <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.reloadAdblock()">Reload Now</button>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>Bookmark Security PIN</span>
+            <span class="settings-subtext">Protect saved bookmarks</span>
+          </label>
+          <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.configurePin()">Set PIN</button>
+        </div>
+      </div>
+
+      <!-- Sources & Engine Editor -->
+      <div class="settings-group">
+        <div class="settings-group-title">Source Engine Config</div>
+        <div class="card" id="source-sites-editor">
+          <!-- Dynamically populated source sites editor -->
+        </div>
+      </div>
+
+      <!-- Backup, Diagnostics & Maintenance -->
+      <div class="settings-group">
+        <div class="settings-group-title">Data Backup & Maintenance</div>
+        <div class="settings-row">
+          <label>
+            <span>Library Data</span>
+            <span class="settings-subtext">Export/Import complete app state</span>
+          </label>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.exportData()">Export</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file-input').click()">Import</button>
+            <input type="file" id="import-file-input" style="display:none;" accept=".json" onchange="SettingsEngine.importData(event)">
+          </div>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>Cache & Storage</span>
+            <span class="settings-subtext">Purge offline buffers and cookies</span>
+          </label>
+          <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.clearCache()">Clear</button>
+        </div>
+        <div class="settings-row">
+          <label>
+            <span>Bridge Test Suite</span>
+            <span class="settings-subtext">Execute Shell API Contract v8.0 suite</span>
+          </label>
+          <button class="btn btn-sm" onclick="Diagnostics.runAll()">Run Tests</button>
+        </div>
+        <div class="diag-grid" id="diag-results"></div>
+      </div>
     </section>
   </main>
 
@@ -727,10 +1833,1713 @@
     MovieEngine.init();
 
     // === [JS-SLOT: STAGE 3 - PLAYER ENGINE] ===
+    /**
+     * PLAYER ENGINE (VLC Controls, Gesture Bus, Native Shell Sync)
+     */
+    const PlayerEngine = {
+      isLocked: false,
+      isPlaying: false,
+      duration: 0,
+      position: 0,
+      aspectModes: ['fit', 'fill', 'zoom'],
+      aspectIndex: 0,
+      speeds: [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0],
+      speedIndex: 3,
+      controlsTimeout: null,
+      countdownTimer: null,
+      activeSession: null,
+
+      // Gesture tracking
+      touchStartX: 0,
+      touchStartY: 0,
+      touchStartTime: 0,
+      lastTapTime: 0,
+      touchMode: null,
+      initialVol: 1,
+      initialBright: 1,
+
+      init() {
+        window.addEventListener('app:route', (e) => {
+          if (e.detail.view === 'player') this.onEnter();
+          else this.onLeave();
+        });
+
+        // Event hooks dispatched from Flex Shell v8.0
+        window.addEventListener('shell:playbackProgress', (e) => this.onProgress(e.detail));
+        window.addEventListener('shell:playerState', (e) => this.onStateChange(e.detail));
+        window.addEventListener('shell:pipChanged', (e) => {
+          if (e.detail && e.detail.inPip) this.hideControls();
+        });
+        window.addEventListener('shell:ON_PLAYBACK_ERROR', (e) => this.onError(e.detail));
+
+        this.setupGestures();
+        this.setupSeek();
+      },
+
+      async onEnter() {
+        Shell.setImmersive(true);
+        this.resetOverlayTimer();
+        this.activeSession = await DB.get('pendingWatch', 'active');
+
+        if (this.activeSession) {
+          document.getElementById('player-display-title').textContent = this.activeSession.title || 'Media';
+          const sub = this.activeSession.type === 'tv'
+            ? `Season ${this.activeSession.season} Episode ${this.activeSession.episode}`
+            : 'Feature Presentation';
+          document.getElementById('player-display-sub').textContent = sub;
+        }
+
+        // Check Native Shell state
+        const state = Shell.getPlayerState();
+        if (state) {
+          this.duration = state.duration || 0;
+          this.position = state.position || 0;
+          this.updatePlayState(state.isPlaying);
+        }
+      },
+
+      onLeave() {
+        Shell.setImmersive(false);
+        this.cancelCountdown();
+        this.clearOverlayTimer();
+      },
+
+      exit() {
+        Shell.playerControl('stop');
+        history.back();
+      },
+
+      togglePlay() {
+        if (this.isLocked) return;
+        this.isPlaying = !this.isPlaying;
+        Shell.playerControl(this.isPlaying ? 'play' : 'pause');
+        this.updatePlayState(this.isPlaying);
+        this.resetOverlayTimer();
+      },
+
+      updatePlayState(playing) {
+        this.isPlaying = playing;
+        document.getElementById('icon-play').style.display = playing ? 'none' : 'block';
+        document.getElementById('icon-pause').style.display = playing ? 'block' : 'none';
+      },
+
+      skip(sec) {
+        if (this.isLocked) return;
+        const target = Math.max(0, Math.min(this.duration, this.position + sec));
+        Shell.playerControl('seek', { position: target });
+        this.resetOverlayTimer();
+      },
+
+      setupSeek() {
+        const slider = document.getElementById('player-seek');
+        slider.addEventListener('input', (e) => {
+          if (this.isLocked) return;
+          this.clearOverlayTimer();
+          const target = (parseFloat(e.target.value) / 100) * this.duration;
+          document.getElementById('player-time-curr').textContent = this.formatTime(target);
+        });
+        slider.addEventListener('change', (e) => {
+          if (this.isLocked) return;
+          const target = (parseFloat(e.target.value) / 100) * this.duration;
+          Shell.playerControl('seek', { position: target });
+          this.resetOverlayTimer();
+        });
+      },
+
+      onProgress(detail) {
+        if (!detail) return;
+        this.position = detail.position || 0;
+        this.duration = detail.duration || this.duration;
+
+        const slider = document.getElementById('player-seek');
+        const currLbl = document.getElementById('player-time-curr');
+        const totalLbl = document.getElementById('player-time-total');
+
+        if (this.duration > 0) {
+          slider.value = (this.position / this.duration) * 100;
+          currLbl.textContent = this.formatTime(this.position);
+          totalLbl.textContent = this.formatTime(this.duration);
+
+          // Watch progress persistence (Watched check at >= 90%)
+          if (this.activeSession && (this.position / this.duration) >= 0.90) {
+            this.handleEpisodeCompleted();
+          }
+        }
+      },
+
+      onStateChange(detail) {
+        const spinner = document.getElementById('player-buffering');
+        if (detail && detail.isBuffering) {
+          spinner.style.display = 'block';
+        } else {
+          spinner.style.display = 'none';
+        }
+        if (detail && typeof detail.isPlaying === 'boolean') {
+          this.updatePlayState(detail.isPlaying);
+        }
+      },
+
+      onError(detail) {
+        document.getElementById('player-error-text').textContent = (detail && detail.message) || 'Playback stream encountered a fatal error.';
+        document.getElementById('player-error-dialog').style.display = 'flex';
+      },
+
+      async retryStream() {
+        document.getElementById('player-error-dialog').style.display = 'none';
+        Shell.playerControl('retry');
+      },
+
+      async switchSite() {
+        document.getElementById('player-error-dialog').style.display = 'none';
+        if (!this.activeSession || !this.activeSession.candidates) return;
+
+        let nextIdx = (this.activeSession.candidateIndex || 0) + 1;
+        if (nextIdx >= this.activeSession.candidates.length) {
+          Toast.show("No more alternative sources available.");
+          return;
+        }
+
+        this.activeSession.candidateIndex = nextIdx;
+        await DB.set('pendingWatch', this.activeSession);
+        const nextCandidate = this.activeSession.candidates[nextIdx];
+        Toast.show(`Switching source: ${nextCandidate.name}...`);
+        window.location.href = nextCandidate.url;
+      },
+
+      async handleEpisodeCompleted() {
+        if (!this.activeSession || this.activeSession.type !== 'tv' || this.countdownTimer) return;
+        const countdownBox = document.getElementById('player-next-countdown');
+        countdownBox.style.display = 'block';
+        let remaining = 5;
+        document.getElementById('countdown-num').textContent = remaining;
+
+        this.countdownTimer = setInterval(() => {
+          remaining -= 1;
+          document.getElementById('countdown-num').textContent = remaining;
+          if (remaining <= 0) {
+            this.cancelCountdown();
+            this.triggerNextEpisode();
+          }
+        }, 1000);
+      },
+
+      cancelCountdown() {
+        if (this.countdownTimer) {
+          clearInterval(this.countdownTimer);
+          this.countdownTimer = null;
+        }
+        document.getElementById('player-next-countdown').style.display = 'none';
+      },
+
+      async triggerNextEpisode() {
+        this.cancelCountdown();
+        if (!this.activeSession) return;
+        const nextEp = parseInt(this.activeSession.episode, 10) + 1;
+        Toast.show(`Loading Episode ${nextEp}...`);
+        MovieEngine.startWatchFlow(this.activeSession.tmdbId, 'tv', encodeURIComponent(this.activeSession.title));
+      },
+
+      toggleLock() {
+        this.isLocked = !this.isLocked;
+        const ui = document.getElementById('player-ui');
+        ui.classList.toggle('locked', this.isLocked);
+        Toast.show(this.isLocked ? "Controls Locked" : "Controls Unlocked");
+        this.resetOverlayTimer();
+      },
+
+      cycleAspect() {
+        if (this.isLocked) return;
+        this.aspectIndex = (this.aspectIndex + 1) % this.aspectModes.length;
+        const mode = this.aspectModes[this.aspectIndex];
+        Shell.setVideoLayout(mode);
+        this.showGestureFeedback(`Aspect: ${mode.toUpperCase()}`);
+        this.resetOverlayTimer();
+      },
+
+      cycleSpeed() {
+        if (this.isLocked) return;
+        this.speedIndex = (this.speedIndex + 1) % this.speeds.length;
+        const speed = this.speeds[this.speedIndex];
+        Shell.playerControl('setSpeed', { speed });
+        document.getElementById('player-speed-btn').textContent = `${speed}x`;
+        this.showGestureFeedback(`Speed: ${speed}x`);
+        this.resetOverlayTimer();
+      },
+
+      toggleOrientation() {
+        Shell.playerControl('toggleOrientation');
+      },
+
+      triggerPiP() {
+        Shell.playerControl('enterPiP');
+      },
+
+      async openTrackModal(type) {
+        if (this.isLocked) return;
+        const modal = document.getElementById('player-modal-sheet');
+        const title = document.getElementById('player-modal-title');
+        const list = document.getElementById('player-modal-content');
+
+        title.textContent = type === 'audio' ? 'Select Audio Track' : 'Select Subtitle Track';
+        list.innerHTML = 'Loading tracks...';
+        modal.style.display = 'block';
+
+        const tracks = Shell.call('getTracks', type) || [];
+        if (!tracks.length) {
+          list.innerHTML = `<div class="modal-list-item">Default / Embedded ${type}</div>`;
+          return;
+        }
+
+        list.innerHTML = tracks.map((t, i) => `
+          <div class="modal-list-item" onclick="PlayerEngine.selectTrack('${type}', ${i})">
+            <span>${t.name || t.language || 'Track ' + (i + 1)}</span>
+            <span>${t.selected ? '✓' : ''}</span>
+          </div>
+        `).join('');
+      },
+
+      selectTrack(type, index) {
+        Shell.call('selectTrack', type, index);
+        this.closeModal();
+        Toast.show(`Switched ${type} track`);
+      },
+
+      closeModal() {
+        document.getElementById('player-modal-sheet').style.display = 'none';
+        this.resetOverlayTimer();
+      },
+
+      setupGestures() {
+        const box = document.getElementById('player-gesture-box');
+        let pressTimer = null;
+
+        box.addEventListener('touchstart', (e) => {
+          if (this.isLocked) return;
+          const touch = e.touches[0];
+          this.touchStartX = touch.clientX;
+          this.touchStartY = touch.clientY;
+          this.touchStartTime = Date.now();
+          this.touchMode = null;
+
+          // 2x Long Press detection
+          pressTimer = setTimeout(() => {
+            Shell.playerControl('setSpeed', { speed: 2.0 });
+            this.showGestureFeedback('2.0x Fast Forward');
+          }, 500);
+        });
+
+        box.addEventListener('touchmove', (e) => {
+          if (this.isLocked) return;
+          clearTimeout(pressTimer);
+          const touch = e.touches[0];
+          const dx = touch.clientX - this.touchStartX;
+          const dy = touch.clientY - this.touchStartY;
+          const width = window.innerWidth;
+
+          if (!this.touchMode) {
+            if (Math.abs(dx) > 25 && Math.abs(dx) > Math.abs(dy)) this.touchMode = 'seek';
+            else if (Math.abs(dy) > 25) {
+              this.touchMode = this.touchStartX < width / 2 ? 'brightness' : 'volume';
+            }
+          }
+
+          if (this.touchMode === 'seek') {
+            const seekDelta = Math.floor(dx / 5);
+            this.showGestureFeedback(`${seekDelta > 0 ? '+' : ''}${seekDelta}s`);
+          } else if (this.touchMode === 'volume') {
+            const volDelta = Math.round(-dy / 2);
+            this.showGestureFeedback(`Vol: ${Math.max(0, Math.min(100, 50 + volDelta))}%`);
+          } else if (this.touchMode === 'brightness') {
+            const brightDelta = Math.round(-dy / 2);
+            this.showGestureFeedback(`Bright: ${Math.max(0, Math.min(100, 50 + brightDelta))}%`);
+          }
+        });
+
+        box.addEventListener('touchend', (e) => {
+          clearTimeout(pressTimer);
+          Shell.playerControl('setSpeed', { speed: this.speeds[this.speedIndex] });
+
+          const now = Date.now();
+          const dt = now - this.touchStartTime;
+
+          // Double tap detection
+          if (dt < 250 && !this.touchMode) {
+            if (now - this.lastTapTime < 300) {
+              const width = window.innerWidth;
+              if (this.touchStartX < width * 0.35) this.skip(-10);
+              else if (this.touchStartX > width * 0.65) this.skip(10);
+              else this.togglePlay();
+              this.lastTapTime = 0;
+              return;
+            }
+            this.lastTapTime = now;
+            setTimeout(() => {
+              if (this.lastTapTime !== 0) {
+                this.toggleControls();
+                this.lastTapTime = 0;
+              }
+            }, 300);
+          }
+          this.touchMode = null;
+        });
+      },
+
+      toggleControls() {
+        const ui = document.getElementById('player-ui');
+        if (ui.classList.contains('hidden')) {
+          ui.classList.remove('hidden');
+          this.resetOverlayTimer();
+        } else {
+          ui.classList.add('hidden');
+          this.clearOverlayTimer();
+        }
+      },
+
+      hideControls() {
+        document.getElementById('player-ui').classList.add('hidden');
+        this.clearOverlayTimer();
+      },
+
+      resetOverlayTimer() {
+        this.clearOverlayTimer();
+        this.controlsTimeout = setTimeout(() => this.hideControls(), 4500);
+      },
+
+      clearOverlayTimer() {
+        if (this.controlsTimeout) clearTimeout(this.controlsTimeout);
+      },
+
+      showGestureFeedback(txt) {
+        const el = document.getElementById('player-gesture-feedback');
+        document.getElementById('player-gesture-text').textContent = txt;
+        el.style.display = 'flex';
+        clearTimeout(el.timer);
+        el.timer = setTimeout(() => { el.style.display = 'none'; }, 800);
+      },
+
+      formatTime(sec) {
+        if (!sec || isNaN(sec)) return '00:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+    };
+
+    PlayerEngine.init();
     // === [JS-SLOT: STAGE 4 - MUSIC ENGINE] ===
+    /**
+     * MUSIC ENGINE (Jamendo & Audius APIs, Queue, Sleep Timer, Audio Bridge/HTML5 fallback)
+     */
+    const MusicEngine = {
+      queue: [],
+      currentIndex: -1,
+      isPlaying: false,
+      audioElement: null,
+      speeds: [0.75, 1.0, 1.25, 1.5, 2.0],
+      speedIndex: 1,
+      sleepTimer: null,
+      sleepMinutes: 0,
+      activeTab: 'trending',
+
+      init() {
+        // Fallback HTML5 audio element outside native shell
+        this.audioElement = new Audio();
+        this.audioElement.addEventListener('timeupdate', () => this.onTimeUpdate());
+        this.audioElement.addEventListener('ended', () => this.next());
+
+        window.addEventListener('app:route', (e) => {
+          if (e.detail.view === 'music' && this.queue.length === 0) {
+            this.loadTrending();
+          }
+        });
+
+        const sInput = document.getElementById('music-search-input');
+        if (sInput) {
+          sInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.search();
+          });
+        }
+
+        const seek = document.getElementById('full-seek');
+        seek.addEventListener('input', (e) => {
+          const dur = this.getDuration();
+          if (dur > 0) {
+            const target = (parseFloat(e.target.value) / 100) * dur;
+            document.getElementById('full-time-curr').textContent = this.formatTime(target);
+          }
+        });
+        seek.addEventListener('change', (e) => {
+          const dur = this.getDuration();
+          if (dur > 0) {
+            const target = (parseFloat(e.target.value) / 100) * dur;
+            this.seekTo(target);
+          }
+        });
+      },
+
+      setTab(tab) {
+        this.activeTab = tab;
+        ['trending', 'favorites', 'playlists'].forEach(t => {
+          document.getElementById(`chip-${t}`).classList.toggle('active', t === tab);
+        });
+        if (tab === 'trending') this.loadTrending();
+        else if (tab === 'favorites') this.loadFavorites();
+        else if (tab === 'playlists') this.loadPlaylists();
+      },
+
+      async loadTrending() {
+        Toast.show("Loading trending music...");
+        const tracks = [];
+
+        // 1. Fetch Jamendo Popular Tracks
+        try {
+          const jamRes = await Shell.fetchAsync(
+            `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=15&order=popularity_total&audioformat=mp32`
+          );
+          const data = typeof jamRes.body === 'string' ? JSON.parse(jamRes.body) : jamRes.body;
+          if (data && data.results) {
+            data.results.forEach(t => {
+              tracks.push({
+                id: `jam_${t.id}`,
+                title: t.name,
+                artist: t.artist_name,
+                artwork: t.image || t.album_image,
+                streamUrl: t.audio,
+                duration: t.duration,
+                source: 'Jamendo'
+              });
+            });
+          }
+        } catch(e) { console.warn("Jamendo fetch failed:", e); }
+
+        // 2. Fetch Audius Trending Tracks
+        try {
+          const audRes = await Shell.fetchAsync(
+            `https://discoveryprovider.audius.co/v1/tracks/trending?app_name=FLEX_APP&limit=15`
+          );
+          const aData = typeof audRes.body === 'string' ? JSON.parse(audRes.body) : audRes.body;
+          if (aData && aData.data) {
+            aData.data.forEach(t => {
+              tracks.push({
+                id: `aud_${t.id}`,
+                title: t.title,
+                artist: t.user ? t.user.name : 'Unknown Artist',
+                artwork: t.artwork ? (t.artwork['480x480'] || t.artwork['150x150']) : '',
+                streamUrl: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream?app_name=FLEX_APP`,
+                duration: t.duration,
+                source: 'Audius'
+              });
+            });
+          }
+        } catch(e) { console.warn("Audius fetch failed:", e); }
+
+        this.queue = tracks;
+        this.renderTrackList(tracks);
+      },
+
+      async search() {
+        const q = document.getElementById('music-search-input').value.trim();
+        if (!q) return;
+        Toast.show(`Searching for "${q}"...`);
+        const tracks = [];
+
+        // Jamendo Search
+        try {
+          const jRes = await Shell.fetchAsync(
+            `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=12&search=${encodeURIComponent(q)}&audioformat=mp32`
+          );
+          const jData = typeof jRes.body === 'string' ? JSON.parse(jRes.body) : jRes.body;
+          if (jData && jData.results) {
+            jData.results.forEach(t => {
+              tracks.push({
+                id: `jam_${t.id}`,
+                title: t.name,
+                artist: t.artist_name,
+                artwork: t.image || t.album_image,
+                streamUrl: t.audio,
+                duration: t.duration,
+                source: 'Jamendo'
+              });
+            });
+          }
+        } catch(e) {}
+
+        // Audius Search
+        try {
+          const aRes = await Shell.fetchAsync(
+            `https://discoveryprovider.audius.co/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=FLEX_APP&limit=12`
+          );
+          const aData = typeof aRes.body === 'string' ? JSON.parse(aRes.body) : aRes.body;
+          if (aData && aData.data) {
+            aData.data.forEach(t => {
+              tracks.push({
+                id: `aud_${t.id}`,
+                title: t.title,
+                artist: t.user ? t.user.name : 'Unknown Artist',
+                artwork: t.artwork ? (t.artwork['480x480'] || t.artwork['150x150']) : '',
+                streamUrl: `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream?app_name=FLEX_APP`,
+                duration: t.duration,
+                source: 'Audius'
+              });
+            });
+          }
+        } catch(e) {}
+
+        this.queue = tracks;
+        this.renderTrackList(tracks);
+      },
+
+      async loadFavorites() {
+        const favs = await DB.getAll('favorites');
+        this.queue = favs;
+        this.renderTrackList(favs, true);
+      },
+
+      async loadPlaylists() {
+        const playlists = await DB.getAll('playlists');
+        const list = document.getElementById('music-track-list');
+        if (!playlists.length) {
+          list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.9rem;">No playlists saved yet.</div>`;
+          return;
+        }
+        list.innerHTML = playlists.map(pl => `
+          <div class="card" onclick="MusicEngine.loadPlaylistTracks('${pl.id}')" style="cursor:pointer;">
+            <h4>${pl.name}</h4>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">${pl.tracks ? pl.tracks.length : 0} tracks</div>
+          </div>
+        `).join('');
+      },
+
+      async loadPlaylistTracks(id) {
+        const pl = await DB.get('playlists', id);
+        if (pl && pl.tracks) {
+          this.queue = pl.tracks;
+          this.renderTrackList(pl.tracks);
+        }
+      },
+
+      renderTrackList(tracks, isFavList = false) {
+        const list = document.getElementById('music-track-list');
+        if (!tracks || !tracks.length) {
+          list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.9rem;">No tracks found.</div>`;
+          return;
+        }
+
+        list.innerHTML = tracks.map((t, idx) => `
+          <div class="track-item" onclick="MusicEngine.playIndex(${idx})">
+            <img class="track-art" src="${t.artwork || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}" loading="lazy">
+            <div class="track-meta">
+              <div class="track-title">${t.title}</div>
+              <div class="track-artist">${t.artist} • ${t.source}</div>
+            </div>
+            <div class="track-actions">
+              <button class="header-btn" onclick="event.stopPropagation(); MusicEngine.toggleFavorite(${idx});">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      async playIndex(index) {
+        if (!this.queue[index]) return;
+        this.currentIndex = index;
+        const track = this.queue[index];
+
+        this.isPlaying = true;
+        this.updateUI(track);
+
+        // Native Shell stream dispatch
+        if (Shell.isAvailable()) {
+          Shell.call('playStream', {
+            url: track.streamUrl,
+            audioMode: true,
+            title: track.title,
+            artist: track.artist,
+            artwork: track.artwork
+          });
+        } else {
+          // HTML5 Fallback
+          this.audioElement.src = track.streamUrl;
+          this.audioElement.playbackRate = this.speeds[this.speedIndex];
+          this.audioElement.play().catch(console.warn);
+        }
+
+        this.showMiniPlayer();
+      },
+
+      togglePlay() {
+        if (this.currentIndex === -1 && this.queue.length > 0) {
+          this.playIndex(0);
+          return;
+        }
+        this.isPlaying = !this.isPlaying;
+        if (Shell.isAvailable()) {
+          Shell.playerControl(this.isPlaying ? 'play' : 'pause');
+        } else {
+          if (this.isPlaying) this.audioElement.play();
+          else this.audioElement.pause();
+        }
+        this.syncPlayState(this.isPlaying);
+      },
+
+      next() {
+        if (this.queue.length === 0) return;
+        let nxt = this.currentIndex + 1;
+        if (nxt >= this.queue.length) nxt = 0;
+        this.playIndex(nxt);
+      },
+
+      prev() {
+        if (this.queue.length === 0) return;
+        let prv = this.currentIndex - 1;
+        if (prv < 0) prv = this.queue.length - 1;
+        this.playIndex(prv);
+      },
+
+      skipTime(sec) {
+        const curr = this.getCurrentTime();
+        this.seekTo(curr + sec);
+      },
+
+      seekTo(targetSec) {
+        if (Shell.isAvailable()) {
+          Shell.playerControl('seek', { position: targetSec });
+        } else if (this.audioElement) {
+          this.audioElement.currentTime = targetSec;
+        }
+      },
+
+      getCurrentTime() {
+        if (Shell.isAvailable()) {
+          const s = Shell.getPlayerState();
+          return s ? (s.position || 0) : 0;
+        }
+        return this.audioElement ? this.audioElement.currentTime : 0;
+      },
+
+      getDuration() {
+        if (Shell.isAvailable()) {
+          const s = Shell.getPlayerState();
+          return s ? (s.duration || 0) : 0;
+        }
+        return this.audioElement ? (this.audioElement.duration || 0) : 0;
+      },
+
+      onTimeUpdate() {
+        const curr = this.getCurrentTime();
+        const dur = this.getDuration();
+        if (dur > 0) {
+          document.getElementById('full-seek').value = (curr / dur) * 100;
+          document.getElementById('full-time-curr').textContent = this.formatTime(curr);
+          document.getElementById('full-time-total').textContent = this.formatTime(dur);
+        }
+      },
+
+      updateUI(track) {
+        document.getElementById('mini-title').textContent = track.title;
+        document.getElementById('mini-artist').textContent = track.artist;
+        document.getElementById('mini-art').src = track.artwork || '';
+
+        document.getElementById('full-title').textContent = track.title;
+        document.getElementById('full-artist').textContent = track.artist;
+        document.getElementById('full-art').src = track.artwork || '';
+
+        this.syncPlayState(true);
+      },
+
+      syncPlayState(playing) {
+        this.isPlaying = playing;
+        document.getElementById('mini-icon-play').style.display = playing ? 'none' : 'block';
+        document.getElementById('mini-icon-pause').style.display = playing ? 'block' : 'none';
+        document.getElementById('full-icon-play').style.display = playing ? 'none' : 'block';
+        document.getElementById('full-icon-pause').style.display = playing ? 'block' : 'none';
+      },
+
+      showMiniPlayer() {
+        document.getElementById('music-mini-player').style.display = 'flex';
+      },
+
+      openFullPlayer() {
+        document.getElementById('music-now-playing').style.display = 'flex';
+      },
+
+      closeFullPlayer() {
+        document.getElementById('music-now-playing').style.display = 'none';
+      },
+
+      cycleSpeed() {
+        this.speedIndex = (this.speedIndex + 1) % this.speeds.length;
+        const spd = this.speeds[this.speedIndex];
+        if (Shell.isAvailable()) {
+          Shell.playerControl('setSpeed', { speed: spd });
+        } else if (this.audioElement) {
+          this.audioElement.playbackRate = spd;
+        }
+        document.getElementById('btn-music-speed').textContent = `${spd}x`;
+        Toast.show(`Speed: ${spd}x`);
+      },
+
+      cycleSleepTimer() {
+        const options = [0, 15, 30, 45, 60];
+        const next = options[(options.indexOf(this.sleepMinutes) + 1) % options.length];
+        this.sleepMinutes = next;
+
+        if (this.sleepTimer) clearTimeout(this.sleepTimer);
+
+        if (next === 0) {
+          document.getElementById('btn-music-sleep').textContent = 'Sleep: Off';
+          Toast.show('Sleep timer disabled');
+        } else {
+          document.getElementById('btn-music-sleep').textContent = `Sleep: ${next}m`;
+          Toast.show(`Sleep timer set to ${next} minutes`);
+          this.sleepTimer = setTimeout(() => {
+            this.togglePlay();
+            Toast.show('Sleep timer ended playback');
+          }, next * 60 * 1000);
+        }
+      },
+
+      async toggleFavorite(idx) {
+        const track = this.queue[idx];
+        if (!track) return;
+        const exists = await DB.get('favorites', track.id);
+        if (exists) {
+          await DB.delete('favorites', track.id);
+          Toast.show('Removed from Favorites');
+        } else {
+          await DB.set('favorites', track);
+          Toast.show('Added to Favorites');
+        }
+      },
+
+      async toggleFavoriteCurrent() {
+        if (this.currentIndex >= 0) {
+          await this.toggleFavorite(this.currentIndex);
+        }
+      },
+
+      async addToPlaylistPrompt() {
+        if (this.currentIndex < 0) return;
+        const track = this.queue[this.currentIndex];
+        const name = prompt('Enter playlist name:');
+        if (!name) return;
+
+        const id = 'pl_' + name.toLowerCase().replace(/\s+/g, '_');
+        let playlist = await DB.get('playlists', id);
+        if (!playlist) {
+          playlist = { id, name, tracks: [] };
+        }
+        if (!playlist.tracks.some(t => t.id === track.id)) {
+          playlist.tracks.push(track);
+          await DB.set('playlists', playlist);
+          Toast.show(`Added to "${name}"`);
+        } else {
+          Toast.show('Track already in playlist');
+        }
+      },
+
+      formatTime(sec) {
+        if (!sec || isNaN(sec)) return '00:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+    };
+
+    MusicEngine.init();
     // === [JS-SLOT: STAGE 5 - PODCAST ENGINE] ===
+    /**
+     * PODCASTS ENGINE (iTunes API, RSS Parser via Shell.fetchAsync, Resume Sync, Subscriptions)
+     */
+    const PodcastEngine = {
+      activeTab: 'explore',
+      currentShow: null,
+      episodes: [],
+
+      init() {
+        window.addEventListener('app:route', (e) => {
+          if (e.detail.view === 'podcasts' && !this.currentShow) {
+            this.setTab(this.activeTab);
+          }
+        });
+
+        const sInput = document.getElementById('podcast-search-input');
+        if (sInput) {
+          sInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.search();
+          });
+        }
+      },
+
+      setTab(tab) {
+        this.activeTab = tab;
+        document.getElementById('podcast-detail-view').style.display = 'none';
+        document.getElementById('podcast-main-grid-wrap').style.display = 'block';
+
+        ['explore', 'subs', 'new'].forEach(t => {
+          const el = document.getElementById(`chip-pod-${t}`);
+          if (el) el.classList.toggle('active', t === tab);
+        });
+
+        if (tab === 'explore') this.loadTopPodcasts();
+        else if (tab === 'subs') this.loadSubscriptions();
+        else if (tab === 'new') this.loadNewEpisodesFeed();
+      },
+
+      async loadTopPodcasts() {
+        Toast.show("Loading popular podcasts...");
+        try {
+          const res = await Shell.fetchAsync('https://itunes.apple.com/search?term=podcast&media=podcast&limit=24');
+          const data = typeof res.body === 'string' ? JSON.parse(res.body) : res.body;
+          if (data && data.results) {
+            this.renderShowGrid(data.results);
+          }
+        } catch(e) {
+          console.warn("Error fetching podcasts:", e);
+        }
+      },
+
+      async search() {
+        const q = document.getElementById('podcast-search-input').value.trim();
+        if (!q) return;
+        Toast.show(`Searching for "${q}"...`);
+        try {
+          const res = await Shell.fetchAsync(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=podcast&limit=24`);
+          const data = typeof res.body === 'string' ? JSON.parse(res.body) : res.body;
+          if (data && data.results) {
+            this.renderShowGrid(data.results);
+          }
+        } catch(e) {
+          Toast.show("Search request failed.");
+        }
+      },
+
+      renderShowGrid(shows) {
+        const grid = document.getElementById('podcast-grid');
+        if (!shows || !shows.length) {
+          grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);">No podcasts found.</div>`;
+          return;
+        }
+
+        grid.innerHTML = shows.map(s => {
+          const title = s.collectionName || s.trackName;
+          const author = s.artistName || '';
+          const cover = s.artworkUrl600 || s.artworkUrl100;
+          const feed = s.feedUrl;
+          return `
+            <div class="podcast-card" onclick="PodcastEngine.openShow('${encodeURIComponent(feed)}', '${encodeURIComponent(title)}', '${encodeURIComponent(author)}', '${encodeURIComponent(cover)}')">
+              <img class="podcast-cover" src="${cover}" loading="lazy">
+              <div class="podcast-card-info">
+                <div class="podcast-card-title">${title}</div>
+                <div class="podcast-card-author">${author}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      async openShow(encFeed, encTitle, encAuthor, encCover) {
+        const feedUrl = decodeURIComponent(encFeed);
+        const title = decodeURIComponent(encTitle);
+        const author = decodeURIComponent(encAuthor);
+        const cover = decodeURIComponent(encCover);
+
+        this.currentShow = { feedUrl, title, author, cover };
+
+        document.getElementById('podcast-main-grid-wrap').style.display = 'none';
+        document.getElementById('podcast-detail-view').style.display = 'block';
+
+        document.getElementById('show-detail-title').textContent = title;
+        document.getElementById('show-detail-author').textContent = author;
+        document.getElementById('show-detail-art').src = cover;
+
+        await this.syncSubButton();
+        this.fetchAndParseFeed(feedUrl);
+      },
+
+      closeDetail() {
+        this.currentShow = null;
+        document.getElementById('podcast-detail-view').style.display = 'none';
+        document.getElementById('podcast-main-grid-wrap').style.display = 'block';
+      },
+
+      async syncSubButton() {
+        const btn = document.getElementById('btn-sub-toggle');
+        if (!this.currentShow) return;
+        const sub = await DB.get('subscriptions', this.currentShow.feedUrl);
+        if (sub) {
+          btn.textContent = '✓ Subscribed';
+          btn.className = 'btn btn-secondary btn-sm';
+        } else {
+          btn.textContent = '+ Subscribe';
+          btn.className = 'btn btn-sm';
+        }
+      },
+
+      async toggleSubscribeCurrent() {
+        if (!this.currentShow) return;
+        const sub = await DB.get('subscriptions', this.currentShow.feedUrl);
+        if (sub) {
+          await DB.delete('subscriptions', this.currentShow.feedUrl);
+          Toast.show('Unsubscribed');
+        } else {
+          await DB.set('subscriptions', {
+            id: this.currentShow.feedUrl,
+            ...this.currentShow,
+            subscribedAt: Date.now()
+          });
+          Toast.show('Subscribed');
+        }
+        this.syncSubButton();
+      },
+
+      async fetchAndParseFeed(url) {
+        const list = document.getElementById('podcast-episode-list');
+        list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Fetching and parsing RSS feed...</div>`;
+
+        try {
+          const res = await Shell.fetchAsync(url);
+          const xmlText = res.body;
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(xmlText, 'text/xml');
+          const items = Array.from(xml.querySelectorAll('item'));
+
+          const history = await DB.getAll('history');
+          const playedGuids = new Set(history.filter(h => h.played).map(h => h.id));
+
+          this.episodes = items.map(item => {
+            const enc = item.querySelector('enclosure');
+            const mediaUrl = enc ? enc.getAttribute('url') : '';
+            const guid = (item.querySelector('guid') ? item.querySelector('guid').textContent : mediaUrl).trim();
+            const pubDate = item.querySelector('pubDate') ? new Date(item.querySelector('pubDate').textContent).toLocaleDateString() : '';
+            const duration = item.querySelector('duration') ? item.querySelector('duration').textContent : '';
+
+            return {
+              id: guid,
+              title: (item.querySelector('title') ? item.querySelector('title').textContent : 'Untitled Episode').trim(),
+              description: (item.querySelector('description') ? item.querySelector('description').textContent.replace(/<[^>]*>?/gm, '') : '').trim(),
+              mediaUrl,
+              pubDate,
+              duration,
+              isPlayed: playedGuids.has(guid)
+            };
+          }).filter(e => e.mediaUrl);
+
+          this.renderEpisodeList();
+        } catch(e) {
+          list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger);">Failed to parse RSS feed: ${e.message}</div>`;
+        }
+      },
+
+      renderEpisodeList() {
+        const list = document.getElementById('podcast-episode-list');
+        if (!this.episodes.length) {
+          list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">No playable episodes found.</div>`;
+          return;
+        }
+
+        list.innerHTML = this.episodes.map((ep, idx) => `
+          <div class="episode-card ${ep.isPlayed ? 'played' : ''}">
+            <div class="episode-title">${ep.title}</div>
+            <div class="episode-date">${ep.pubDate} ${ep.duration ? '• ' + ep.duration : ''}</div>
+            <div class="episode-desc">${ep.description}</div>
+            <div class="episode-actions">
+              <button class="btn btn-sm" onclick="PodcastEngine.playEpisode(${idx})">▶ Play</button>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <button class="header-btn" onclick="PodcastEngine.togglePlayed(${idx})" title="Toggle Played">
+                  <svg width="18" height="18" fill="${ep.isPlayed ? 'var(--accent)' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                </button>
+                <button class="header-btn" onclick="PodcastEngine.downloadEpisode(${idx})" title="Download">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      async playEpisode(idx) {
+        const ep = this.episodes[idx];
+        if (!ep || !this.currentShow) return;
+
+        // Sync with existing audio engine and resume point
+        const historyItem = await DB.get('history', ep.id);
+        const resumeSec = (historyItem && historyItem.position) ? historyItem.position : 0;
+
+        if (Shell.isAvailable()) {
+          Shell.call('playStream', {
+            url: ep.mediaUrl,
+            audioMode: true,
+            title: ep.title,
+            artist: this.currentShow.title,
+            artwork: this.currentShow.cover,
+            startPosition: resumeSec
+          });
+        } else if (MusicEngine.audioElement) {
+          MusicEngine.audioElement.src = ep.mediaUrl;
+          MusicEngine.audioElement.currentTime = resumeSec;
+          MusicEngine.audioElement.play();
+        }
+
+        Toast.show(resumeSec > 0 ? `Resuming from ${MusicEngine.formatTime(resumeSec)}` : `Playing episode...`);
+
+        // Record entry in history for tracking
+        await DB.set('history', {
+          id: ep.id,
+          title: ep.title,
+          show: this.currentShow.title,
+          lastPlayed: Date.now(),
+          position: resumeSec,
+          played: false
+        });
+      },
+
+      async togglePlayed(idx) {
+        const ep = this.episodes[idx];
+        if (!ep) return;
+        ep.isPlayed = !ep.isPlayed;
+
+        let record = await DB.get('history', ep.id);
+        if (!record) {
+          record = { id: ep.id, title: ep.title, lastPlayed: Date.now() };
+        }
+        record.played = ep.isPlayed;
+        await DB.set('history', record);
+
+        this.renderEpisodeList();
+        Toast.show(ep.isPlayed ? "Marked as played" : "Marked as unplayed");
+      },
+
+      downloadEpisode(idx) {
+        const ep = this.episodes[idx];
+        if (!ep) return;
+        Toast.show(`Queuing download: ${ep.title}`);
+        window.dispatchEvent(new CustomEvent('download:enqueue', {
+          detail: {
+            id: ep.id,
+            title: ep.title,
+            url: ep.mediaUrl,
+            type: 'file',
+            artwork: this.currentShow ? this.currentShow.cover : ''
+          }
+        }));
+      },
+
+      async loadSubscriptions() {
+        const subs = await DB.getAll('subscriptions');
+        this.renderShowGrid(subs.map(s => ({
+          collectionName: s.title,
+          artistName: s.author,
+          artworkUrl600: s.cover,
+          feedUrl: s.feedUrl
+        })));
+      },
+
+      async loadNewEpisodesFeed() {
+        const subs = await DB.getAll('subscriptions');
+        if (!subs.length) {
+          document.getElementById('podcast-grid').innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);">
+              Subscribe to podcasts to view latest episodes here.
+            </div>`;
+          return;
+        }
+
+        Toast.show("Refreshing recent episodes from subscriptions...");
+        const allNew = [];
+
+        // Check top 3 subscriptions concurrently
+        await Promise.all(subs.slice(0, 3).map(async (sub) => {
+          try {
+            const res = await Shell.fetchAsync(sub.feedUrl);
+            const xml = new DOMParser().parseFromString(res.body, 'text/xml');
+            const first = xml.querySelector('item');
+            if (first) {
+              const enc = first.querySelector('enclosure');
+              allNew.push({
+                title: first.querySelector('title').textContent,
+                show: sub.title,
+                mediaUrl: enc ? enc.getAttribute('url') : '',
+                cover: sub.cover
+              });
+            }
+          } catch(e) {}
+        }));
+
+        const grid = document.getElementById('podcast-grid');
+        grid.innerHTML = allNew.map(item => `
+          <div class="card" style="grid-column:1/-1; display:flex; gap:12px; align-items:center;">
+            <img src="${item.cover}" style="width:50px; height:50px; border-radius:6px; object-fit:cover;">
+            <div style="flex:1; overflow:hidden;">
+              <h4 style="font-size:0.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
+              <p style="font-size:0.75rem; color:var(--text-muted);">${item.show}</p>
+            </div>
+            <button class="btn btn-sm" onclick="MusicEngine.audioElement.src='${item.mediaUrl}'; MusicEngine.audioElement.play();">▶</button>
+          </div>
+        `).join('');
+      },
+
+      refreshSubscriptions() {
+        Toast.show("Updating feeds...");
+        if (this.activeTab === 'new') this.loadNewEpisodesFeed();
+        else if (this.activeTab === 'subs') this.loadSubscriptions();
+        else this.loadTopPodcasts();
+      }
+    };
+
+    PodcastEngine.init();
     // === [JS-SLOT: STAGE 6 - DOWNLOADS ENGINE] ===
+    /**
+     * DOWNLOADS ENGINE (HLS Master Parser, Offline Storage, Wi-Fi Gatekeeper, Native Progress)
+     */
+    const DownloadEngine = {
+      downloads: [],
+      pendingPayload: null,
+
+      init() {
+        window.addEventListener('app:route', (e) => {
+          if (e.detail.view === 'downloads') {
+            this.refreshList();
+            this.updateStorageStats();
+          }
+        });
+
+        // Global enqueue event hook
+        window.addEventListener('download:enqueue', (e) => this.openPickerModal(e.detail));
+
+        // Shell progress bus
+        window.addEventListener('shell:downloadProgress', (e) => this.onProgress(e.detail));
+
+        this.refreshList();
+      },
+
+      async updateStorageStats() {
+        if ('storage' in navigator && 'estimate' in navigator.storage) {
+          try {
+            const { quota, usage } = await navigator.storage.estimate();
+            const usedMB = (usage / (1024 * 1024)).toFixed(1);
+            const totalMB = (quota / (1024 * 1024)).toFixed(1);
+            const pct = Math.min(100, Math.round((usage / quota) * 100));
+
+            document.getElementById('storage-bar').style.width = `${pct}%`;
+            document.getElementById('storage-txt').textContent = `${usedMB} MB / ${totalMB} MB (${pct}%)`;
+            return;
+          } catch(e) {}
+        }
+        document.getElementById('storage-txt').textContent = "Available";
+      },
+
+      async refreshList() {
+        if (Shell.isAvailable()) {
+          const list = Shell.call('listDownloads') || [];
+          this.downloads = list;
+        } else {
+          // Browser mock storage fallback
+          this.downloads = (await DB.getAll('history')).filter(h => h.isDownload);
+        }
+        this.renderList();
+      },
+
+      renderList() {
+        const container = document.getElementById('downloads-list');
+        if (!this.downloads || !this.downloads.length) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:40px 16px; color:var(--text-muted); font-size:0.85rem;">
+              No downloads active or saved.
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = this.downloads.map(item => {
+          const isDone = item.status === 'completed';
+          const isPaused = item.status === 'paused';
+          const progress = Math.round(item.progress || (isDone ? 100 : 0));
+
+          return `
+            <div class="download-item" id="dl-card-${item.id}">
+              <div class="dl-row-header">
+                <img class="dl-art" src="${item.artwork || 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'/>'}">
+                <div class="dl-info">
+                  <div class="dl-title">${item.title}</div>
+                  <div class="dl-meta">
+                    <span id="dl-stat-${item.id}" style="color:${isDone ? 'var(--success)' : 'var(--accent)'}; text-transform:uppercase; font-weight:600;">
+                      ${item.status || 'Active'}
+                    </span>
+                    <span>${item.quality || 'Auto'}</span>
+                    <span id="dl-pct-${item.id}">${progress}%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="dl-progress-track">
+                <div class="dl-progress-fill" id="dl-bar-${item.id}" style="width:${progress}%;"></div>
+              </div>
+              <div class="dl-actions">
+                ${isDone ? `
+                  <button class="btn btn-sm" onclick="DownloadEngine.playOffline('${item.id}')">▶ Play Offline</button>
+                  <button class="btn btn-secondary btn-sm" onclick="DownloadEngine.deleteItem('${item.id}')">Delete</button>
+                ` : `
+                  ${isPaused ? `
+                    <button class="btn btn-sm" onclick="DownloadEngine.resumeItem('${item.id}')">Resume</button>
+                  ` : `
+                    <button class="btn btn-secondary btn-sm" onclick="DownloadEngine.pauseItem('${item.id}')">Pause</button>
+                  `}
+                  <button class="btn btn-secondary btn-sm" onclick="DownloadEngine.cancelItem('${item.id}')">Cancel</button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      async openPickerModal(item) {
+        // Wi-Fi gatekeeper verification
+        const wifiOnly = localStorage.getItem('flex_wifi_only') === 'true';
+        if (wifiOnly && navigator.connection && navigator.connection.type && navigator.connection.type !== 'wifi') {
+          Toast.show("Download blocked: Wi-Fi only mode is active.");
+          return;
+        }
+
+        this.pendingPayload = item;
+        document.getElementById('dl-modal-item-title').textContent = item.title;
+        document.getElementById('download-modal').style.display = 'flex';
+
+        const qSelect = document.getElementById('dl-quality-select');
+        const aSelect = document.getElementById('dl-audio-select');
+        const sSelect = document.getElementById('dl-sub-select');
+
+        qSelect.innerHTML = '<option value="">Scanning master playlist...</option>';
+        aSelect.innerHTML = '<option value="en">English (Default)</option>';
+        sSelect.innerHTML = '<option value="none">None</option><option value="en" selected>English</option>';
+
+        if (item.type === 'file' || !item.url.includes('.m3u8')) {
+          qSelect.innerHTML = '<option value="direct">Original Direct File</option>';
+          return;
+        }
+
+        // Parse HLS master playlist for available resolutions and tracks
+        try {
+          const res = await Shell.fetchAsync(item.url);
+          const manifest = res.body;
+
+          const resolutions = [];
+          const lines = manifest.split('\n');
+
+          lines.forEach(line => {
+            if (line.includes('RESOLUTION=')) {
+              const match = line.match(/RESOLUTION=\d+x(\d+)/);
+              if (match && !resolutions.includes(match[1])) {
+                resolutions.push(match[1]);
+              }
+            }
+          });
+
+          if (resolutions.length) {
+            resolutions.sort((a, b) => b - a);
+            qSelect.innerHTML = resolutions.map(r => `<option value="${r}">${r}p HD</option>`).join('');
+          } else {
+            qSelect.innerHTML = '<option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option>';
+          }
+        } catch(e) {
+          qSelect.innerHTML = '<option value="720">720p (Default)</option><option value="1080">1080p</option>';
+        }
+      },
+
+      closeModal() {
+        this.pendingPayload = null;
+        document.getElementById('download-modal').style.display = 'none';
+      },
+
+      async confirmDownload() {
+        if (!this.pendingPayload) return;
+        const quality = document.getElementById('dl-quality-select').value;
+        const audio = document.getElementById('dl-audio-select').value;
+        const sub = document.getElementById('dl-sub-select').value;
+
+        const downloadConfig = {
+          id: this.pendingPayload.id || 'dl_' + Date.now(),
+          title: this.pendingPayload.title,
+          url: this.pendingPayload.url,
+          type: this.pendingPayload.type || 'hls',
+          artwork: this.pendingPayload.artwork || '',
+          quality,
+          audioLang: audio,
+          subLang: sub,
+          status: 'downloading',
+          progress: 0
+        };
+
+        this.closeModal();
+        Toast.show(`Download started: ${downloadConfig.title}`);
+
+        if (Shell.isAvailable()) {
+          Shell.call('startDownload', downloadConfig);
+        } else {
+          // Mock container storage for testing outside shell
+          downloadConfig.isDownload = true;
+          await DB.set('history', downloadConfig);
+          this.refreshList();
+        }
+      },
+
+      onProgress(detail) {
+        if (!detail) return;
+        const bar = document.getElementById(`dl-bar-${detail.id}`);
+        const pct = document.getElementById(`dl-pct-${detail.id}`);
+        const stat = document.getElementById(`dl-stat-${detail.id}`);
+
+        if (bar && pct) {
+          const val = Math.round(detail.progress || 0);
+          bar.style.width = `${val}%`;
+          pct.textContent = `${val}%`;
+          if (stat && detail.status) stat.textContent = detail.status;
+        }
+
+        if (detail.status === 'completed') {
+          this.refreshList();
+          this.updateStorageStats();
+        }
+      },
+
+      pauseItem(id) {
+        if (Shell.isAvailable()) Shell.call('pauseDownload', id);
+        Toast.show("Download paused");
+        this.refreshList();
+      },
+
+      resumeItem(id) {
+        if (Shell.isAvailable()) Shell.call('resumeDownload', id);
+        Toast.show("Resuming download...");
+        this.refreshList();
+      },
+
+      cancelItem(id) {
+        if (Shell.isAvailable()) Shell.call('cancelDownload', id);
+        Toast.show("Download cancelled");
+        this.refreshList();
+      },
+
+      async deleteItem(id) {
+        if (Shell.isAvailable()) {
+          Shell.call('deleteDownload', id);
+        } else {
+          await DB.delete('history', id);
+        }
+        Toast.show("File deleted from local storage");
+        this.refreshList();
+        this.updateStorageStats();
+      },
+
+      playOffline(id) {
+        const item = this.downloads.find(d => d.id === id);
+        if (!item) return;
+
+        Toast.show(`Playing offline: ${item.title}`);
+        if (Shell.isAvailable()) {
+          Shell.call('playStream', {
+            id: item.id,
+            url: item.url,
+            preferOffline: true,
+            title: item.title,
+            artwork: item.artwork
+          });
+        } else {
+          window.location.hash = '#/player';
+        }
+      }
+    };
+
+    DownloadEngine.init();
     // === [JS-SLOT: STAGE 7 - SETTINGS, VPN & BOOKMARKS] ===
+    /**
+     * BOOKMARKS ENGINE (PIN Protected Private Bookmarks)
+     */
+    const BookmarksEngine = {
+      isUnlocked: false,
+
+      init() {
+        window.addEventListener('app:route', (e) => {
+          if (e.detail.view === 'bookmarks') this.onEnter();
+        });
+      },
+
+      async onEnter() {
+        const pin = localStorage.getItem('flex_pin');
+        if (pin && !this.isUnlocked) {
+          document.getElementById('pin-lock-modal').style.display = 'flex';
+          document.getElementById('pin-unlock-input').value = '';
+          document.getElementById('pin-unlock-input').focus();
+        } else {
+          document.getElementById('pin-lock-modal').style.display = 'none';
+          this.loadBookmarks();
+        }
+      },
+
+      verifyPin() {
+        const input = document.getElementById('pin-unlock-input').value;
+        const saved = localStorage.getItem('flex_pin');
+        if (input === saved) {
+          this.isUnlocked = true;
+          document.getElementById('pin-lock-modal').style.display = 'none';
+          this.loadBookmarks();
+        } else {
+          Toast.show("Incorrect PIN");
+          document.getElementById('pin-unlock-input').value = '';
+        }
+      },
+
+      async loadBookmarks() {
+        const list = await DB.getAll('bookmarks');
+        const container = document.getElementById('bookmarks-list');
+        if (!list.length) {
+          container.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted); font-size:0.85rem;">
+              No bookmarks saved. Tap "+ Add Bookmark" to add sites.
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = list.map(b => `
+          <div class="bookmark-tile" onclick="BookmarksEngine.openUrl('${encodeURIComponent(b.url)}')">
+            <button class="bookmark-delete-btn" onclick="event.stopPropagation(); BookmarksEngine.deleteBookmark('${b.id}')">✕</button>
+            <div style="font-size:1.4rem;">🌐</div>
+            <div class="bookmark-title">${b.name}</div>
+          </div>
+        `).join('');
+      },
+
+      async openAddPrompt() {
+        const name = prompt("Bookmark Name:");
+        if (!name) return;
+        const url = prompt("Target URL (https://...):");
+        if (!url) return;
+
+        const id = 'bm_' + Date.now();
+        await DB.set('bookmarks', { id, name, url });
+        Toast.show("Bookmark saved");
+        this.loadBookmarks();
+      },
+
+      async deleteBookmark(id) {
+        await DB.delete('bookmarks', id);
+        Toast.show("Bookmark deleted");
+        this.loadBookmarks();
+      },
+
+      openUrl(encUrl) {
+        const url = decodeURIComponent(encUrl);
+        Shell.setAutoPlayExternal(true);
+        window.location.href = url;
+      }
+    };
+
+    /**
+     * SETTINGS & MAINTENANCE ENGINE
+     */
+    const SettingsEngine = {
+      vpnConnected: false,
+
+      init() {
+        // Restore preferences into UI
+        document.getElementById('setting-lang').value = localStorage.getItem('flex_lang') || 'en';
+        document.getElementById('setting-wifi-only').checked = localStorage.getItem('flex_wifi_only') === 'true';
+        document.getElementById('setting-vpn-auto').checked = localStorage.getItem('flex_vpn_auto') === 'true';
+        document.getElementById('setting-vpn-kill').checked = localStorage.getItem('flex_vpn_kill') === 'true';
+
+        this.renderSourcesEditor();
+      },
+
+      setPref(key, val) {
+        localStorage.setItem(key, val);
+        Toast.show("Setting saved");
+      },
+
+      applyVpnConfig() {
+        const input = document.getElementById('vpn-conf-input');
+        const conf = input.value.trim();
+        if (!conf) {
+          Toast.show("Please paste a valid WireGuard config.");
+          return;
+        }
+        Shell.setVpnConfig(conf);
+        localStorage.setItem('flex_vpn_conf', conf);
+        input.value = ''; // Discard from memory/DOM immediately
+        Toast.show("WireGuard configuration loaded.");
+      },
+
+      toggleVpnConnection() {
+        this.vpnConnected = !this.vpnConnected;
+        const btn = document.getElementById('btn-vpn-status');
+        if (this.vpnConnected) {
+          Shell.call('connectVpn');
+          btn.textContent = 'Disconnect VPN';
+          btn.className = 'btn btn-danger btn-sm';
+          Toast.show("VPN connection requested");
+        } else {
+          Shell.call('disconnectVpn');
+          btn.textContent = 'Connect VPN';
+          btn.className = 'btn btn-secondary btn-sm';
+          Toast.show("VPN disconnected");
+        }
+      },
+
+      togglePopupBlock(enable) {
+        Shell.setPopupBlocking(enable);
+        Toast.show(`Popup blocking ${enable ? 'enabled' : 'disabled'}`);
+      },
+
+      async reloadAdblock() {
+        Toast.show("Reloading adblock rules...");
+        try {
+          const res = await fetch('./adblock-rules.txt');
+          const txt = await res.text();
+          Shell.updateAdBlockRules(txt);
+          Toast.show("Adblock rules updated");
+        } catch(e) {
+          Toast.show("Failed to reload rules file");
+        }
+      },
+
+      configurePin() {
+        const currentPin = localStorage.getItem('flex_pin');
+        if (currentPin) {
+          const check = prompt("Enter existing PIN:");
+          if (check !== currentPin) {
+            Toast.show("Incorrect current PIN");
+            return;
+          }
+        }
+        const newPin = prompt("Enter new 4-digit PIN (leave empty to disable):");
+        if (newPin === null) return;
+        if (newPin === '') {
+          localStorage.removeItem('flex_pin');
+          BookmarksEngine.isUnlocked = true;
+          Toast.show("PIN protection disabled");
+        } else if (/^\d{4}$/.test(newPin)) {
+          localStorage.setItem('flex_pin', newPin);
+          BookmarksEngine.isUnlocked = false;
+          Toast.show("PIN configured successfully");
+        } else {
+          Toast.show("PIN must be exactly 4 digits");
+        }
+      },
+
+      renderSourcesEditor() {
+        const container = document.getElementById('source-sites-editor');
+        if (typeof SOURCE_SITES === 'undefined' || !SOURCE_SITES.length) {
+          container.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted);">No source entries found in source.js</div>`;
+          return;
+        }
+
+        container.innerHTML = SOURCE_SITES.map((src, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--surface-border);">
+            <div>
+              <div style="font-size:0.85rem; font-weight:600;">${src.name}</div>
+              <div style="font-size:0.72rem; color:${src.broken ? 'var(--danger)' : 'var(--text-muted)'};">
+                ${src.broken ? 'Flagged Broken' : (src.enabled ? 'Active' : 'Disabled')}
+              </div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.toggleSourceBroken(${idx})">
+                ${src.broken ? 'Unmark Broken' : 'Mark Broken'}
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="SettingsEngine.toggleSourceEnabled(${idx})">
+                ${src.enabled ? 'Disable' : 'Enable'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      toggleSourceBroken(idx) {
+        SOURCE_SITES[idx].broken = !SOURCE_SITES[idx].broken;
+        this.renderSourcesEditor();
+      },
+
+      toggleSourceEnabled(idx) {
+        SOURCE_SITES[idx].enabled = !SOURCE_SITES[idx].enabled;
+        this.renderSourcesEditor();
+      },
+
+      async exportData() {
+        Toast.show("Exporting application data...");
+        const backup = {
+          version: 8.0,
+          timestamp: Date.now(),
+          settings: {
+            accent: localStorage.getItem('flex_accent'),
+            lang: localStorage.getItem('flex_lang'),
+            wifiOnly: localStorage.getItem('flex_wifi_only'),
+            vpnAuto: localStorage.getItem('flex_vpn_auto')
+          },
+          watchlist: await DB.getAll('watchlist'),
+          history: await DB.getAll('history'),
+          playlists: await DB.getAll('playlists'),
+          favorites: await DB.getAll('favorites'),
+          subscriptions: await DB.getAll('subscriptions'),
+          bookmarks: await DB.getAll('bookmarks')
+        };
+
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `flex_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+
+      async importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!data.version) throw new Error("Invalid format");
+
+            // Restore settings
+            if (data.settings) {
+              if (data.settings.accent) Theme.setAccent(data.settings.accent);
+              if (data.settings.lang) localStorage.setItem('flex_lang', data.settings.lang);
+              if (data.settings.wifiOnly) localStorage.setItem('flex_wifi_only', data.settings.wifiOnly);
+              if (data.settings.vpnAuto) localStorage.setItem('flex_vpn_auto', data.settings.vpnAuto);
+            }
+
+            // Restore IndexedDB stores
+            const stores = ['watchlist', 'history', 'playlists', 'favorites', 'subscriptions', 'bookmarks'];
+            for (const s of stores) {
+              if (Array.isArray(data[s])) {
+                for (const item of data[s]) {
+                  await DB.set(s, item);
+                }
+              }
+            }
+
+            Toast.show("Data restored successfully!");
+            setTimeout(() => location.reload(), 1000);
+          } catch(err) {
+            Toast.show("Failed to import: Invalid JSON");
+          }
+        };
+        reader.readAsText(file);
+      },
+
+      async clearCache() {
+        if (confirm("Clear local cache and cookies?")) {
+          Shell.call('clearCacheAndCookies');
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+          Toast.show("Cache purged.");
+        }
+      }
+    };
+
+    BookmarksEngine.init();
+    SettingsEngine.init();
 
     window.addEventListener('DOMContentLoaded', async () => {
       Theme.init();
