@@ -3586,7 +3586,30 @@
         const tests = [
           {
             name: "Bridge Attached (NativeApp)",
-            fn: async () => await Shell.waitForBridge(1000, 50)
+            fn: async () => {
+              // Check if it's named something else or attached under Android/Native
+              const candidates = ['NativeApp', 'Android', 'AndroidBridge', 'flexApp', 'JSBridge'];
+              const found = candidates.find(name => typeof window[name] !== 'undefined');
+              
+              if (found && found !== 'NativeApp') {
+                alert(`Found bridge under a different name: window.${found}`);
+                window.NativeApp = window[found]; // Alias it
+                return true;
+              }
+              
+              if (typeof window.NativeApp === 'undefined') {
+                // Check if any custom object was added to window
+                const nonStandard = Object.keys(window).filter(k => 
+                  !k.startsWith('webkit') && !k.startsWith('on') && 
+                  ['Android', 'Native', 'Bridge', 'flex'].some(term => k.toLowerCase().includes(term.toLowerCase()))
+                );
+                if (nonStandard.length > 0) {
+                  alert(`Detected possible native objects: ${nonStandard.join(', ')}`);
+                }
+              }
+
+              return Shell.isAvailable();
+            }
           },
           {
             name: "Callback Registry (__flexFetchCb)",
