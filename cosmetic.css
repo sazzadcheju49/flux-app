@@ -1,0 +1,4 @@
+iframe[id*="ads"], div[class*="banner-ad"], div[id*="pop-overlay"] {
+  display: none !important;
+  visibility: hidden !important;
+}
