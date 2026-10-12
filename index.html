@@ -1481,21 +1481,15 @@
       }
     };
 
+    
     /**
      * FLEX SHELL ADAPTER (v8.0)
      */
-    /**
-     * FLEX SHELL ADAPTER (v8.0) - Asynchronous Dynamic Bridge
-     */
     const Shell = {
-      callbacks: new Map(),
-
-      // Always evaluates window.NativeApp dynamically in real-time
       isAvailable() {
         return typeof window.NativeApp !== 'undefined' && window.NativeApp !== null;
       },
 
-      // Polling helper: waits up to timeoutMs (checks every intervalMs)
       async waitForBridge(timeoutMs = 1000, intervalMs = 50) {
         if (this.isAvailable()) return true;
         const start = Date.now();
@@ -1507,15 +1501,10 @@
       },
 
       init() {
-        window.__flexFetchCb = (id, res) => {
-          const cb = this.callbacks.get(id);
-          if (cb) {
-            try { cb.resolve(typeof res === 'string' ? JSON.parse(res) : res); }
-            catch(e) { cb.reject(e); }
-            finally { this.callbacks.delete(id); }
-          }
-        };
+        // Initialize callback map for Android
+        window.__flexFetchCb = window.__flexFetchCb || {};
 
+        // Event hooks dispatched from Flex Shell
         window.__flexEvent = (event, payload) => {
           const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
           window.dispatchEvent(new CustomEvent(`shell:${event}`, { detail: data }));
@@ -1523,46 +1512,43 @@
       },
 
       async fetchAsync(url, opts = {}) {
-        // Automatically resolve relative URLs (like ./manifest.json) to full https:// URLs
+        // 1. Force absolute URL (fixes OkHttp crash)
         const absoluteUrl = new URL(url, window.location.href).href;
 
-        // Dynamic check at the exact moment of execution
+        // Fallback for desktop/browser preview mode
         if (!this.isAvailable()) {
           const res = await fetch(absoluteUrl, opts);
           const body = await res.text();
           return { status: res.status, headers: {}, body };
         }
 
-        return new Promise((resolve, reject) => {
-          const id = 'req_' + Math.random().toString(36).substring(2, 9);
-          
-          // 8-second safety timeout so the test doesn't hang indefinitely if Android errors out
-          const timer = setTimeout(() => {
-            this.callbacks.delete(id);
-            reject(new Error("Native fetchAsync timed out after 8s"));
-          }, 8000);
+        return new Promise((resolve) => {
+          // 2. Generate unique callback ID
+          const callbackId = 'cb_' + Date.now() + '_' + Math.random().toString(36).substring(2);
 
-          this.callbacks.set(id, { 
-            resolve: (val) => { clearTimeout(timer); resolve(val); }, 
-            reject: (err) => { clearTimeout(timer); reject(err); } 
+          // 3. Register global callback
+          window.__flexFetchCb = window.__flexFetchCb || {};
+          window.__flexFetchCb[callbackId] = (resultObj) => {
+            delete window.__flexFetchCb[callbackId];
+            // Normalize resultObj in case Android returns a raw string or JSON
+            const parsed = typeof resultObj === 'string' ? JSON.parse(resultObj) : resultObj;
+            resolve(parsed);
+          };
+
+          // 4. Send to Android (strictly formatted JSON string)
+          const requestPayload = JSON.stringify({
+            url: absoluteUrl,
+            method: opts.method || 'GET',
+            headers: opts.headers || {},
+            body: opts.body || ''
           });
 
-          try {
-            window.NativeApp.fetchAsync(id, JSON.stringify({ url: absoluteUrl, ...opts }));
-          } catch(e) {
-            clearTimeout(timer);
-            this.callbacks.delete(id);
-            reject(e);
-          }
+          window.NativeApp.fetchAsync(requestPayload, callbackId);
         });
       },
 
       call(name, ...args) {
-        // Dynamic evaluation at the exact moment of invocation
-        if (!this.isAvailable()) {
-          console.warn(`[Shell Mock Fallback] ${name} invoked without native bridge.`);
-          return null;
-        }
+        if (!this.isAvailable()) return null;
         try {
           const serializedArgs = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a);
           const out = window.NativeApp[name](...serializedArgs);
@@ -3629,7 +3615,7 @@
           },
           {
             name: "Callback Registry (__flexFetchCb)",
-            fn: () => typeof window.__flexFetchCb === 'function'
+            fn: () => typeof window.__flexFetchCb === 'object' || typeof window.__flexFetchCb === 'function'
           },
           {
             name: "Event Bus (__flexEvent)",
