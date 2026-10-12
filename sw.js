@@ -1,58 +1,60 @@
-const CACHE_NAME = 'flux-cache-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'flex-v1';
+const STATIC_ASSETS = [
   './',
   './index.html',
+  './source.js',
+  './adblock-rules.txt',
+  './cosmetic.css',
+  './inject.js',
   './manifest.json'
 ];
 
-// Install: Cache core application shell
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
+  self.skipWaiting();
 });
 
-// Activate: Clean up older cache versions
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+
+  // Network-first for application core files
+  if (STATIC_ASSETS.some((asset) => url.pathname.endsWith(asset.replace('./', '')))) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          return res;
         })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-
-// Fetch: Stale-while-revalidate for local assets, pass-through for streaming media
-self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
-
-  // Bypass cache for video streaming (.m3u8, .ts, .mp4) and range requests
-  if (
-    event.request.headers.get('range') ||
-    requestUrl.pathname.endsWith('.m3u8') ||
-    requestUrl.pathname.endsWith('.ts') ||
-    requestUrl.pathname.endsWith('.mp4')
-  ) {
+        .catch(() => caches.match(e.request))
+    );
     return;
   }
 
-  // Network-first strategy with cache fallback for app shell
-  event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return networkResponse;
-      })
-      .catch(() => caches.match(event.request))
+  // Stale-while-revalidate for TMDB API and dynamic media images
+  e.respondWith(
+    caches.match(e.request).then((cached) => {
+      const fetchPromise = fetch(e.request)
+        .then((networkRes) => {
+          if (networkRes.status === 200) {
+            const clone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          }
+          return networkRes;
+        })
+        .catch(() => cached);
+      return cached || fetchPromise;
+    })
   );
 });
