@@ -3540,7 +3540,64 @@
 
     BookmarksEngine.init();
     SettingsEngine.init();
+    /**
+     * DIAGNOSTICS TEST SUITE
+     */
+    const Diagnostics = {
+      async runAll() {
+        const resultsEl = document.getElementById('diag-results');
+        if (!resultsEl) {
+          alert('Error: diag-results container not found.');
+          return;
+        }
 
+        resultsEl.innerHTML = '';
+        Toast.show("Running bridge diagnostics...");
+
+        const tests = [
+          { name: "Bridge Attached (NativeApp)", fn: () => Shell.isAvailable() },
+          { name: "Callback Registry (__flexFetchCb)", fn: () => typeof window.__flexFetchCb === 'function' },
+          { name: "Event Bus (__flexEvent)", fn: () => typeof window.__flexEvent === 'function' },
+          { name: "IndexedDB Storage", fn: async () => {
+              await DB.set('pendingWatch', { id: 'diag_test', ts: Date.now() });
+              const res = await DB.get('pendingWatch', 'diag_test');
+              await DB.delete('pendingWatch', 'diag_test');
+              return res && res.id === 'diag_test';
+            }
+          },
+          { name: "Network Layer (fetchAsync)", fn: async () => {
+              const res = await Shell.fetchAsync('./manifest.json');
+              return res && (res.status === 200 || typeof res.body === 'string');
+            }
+          },
+          { name: "AdBlock Integration Bridge", fn: () => Shell.updateAdBlockRules("||test.com^") !== undefined },
+          { name: "Player Bridge Controls", fn: () => Shell.playerControl("status") !== undefined }
+        ];
+
+        for (const test of tests) {
+          const item = document.createElement('div');
+          item.className = 'diag-item';
+          item.innerHTML = `<span>${test.name}</span><span class="badge badge-warn">TESTING...</span>`;
+          resultsEl.appendChild(item);
+
+          let passed = false;
+          try {
+            passed = await test.fn();
+          } catch (e) {
+            passed = false;
+          }
+
+          const badge = item.querySelector('.badge');
+          if (passed) {
+            badge.className = 'badge badge-pass';
+            badge.textContent = 'PASS';
+          } else {
+            badge.className = 'badge badge-fail';
+            badge.textContent = Shell.isAvailable() ? 'FAIL' : 'MOCKED';
+          }
+        }
+      }
+    };
     window.addEventListener('DOMContentLoaded', async () => {
       Theme.init();
       Shell.init();
