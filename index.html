@@ -1523,18 +1523,34 @@
       },
 
       async fetchAsync(url, opts = {}) {
+        // Automatically resolve relative URLs (like ./manifest.json) to full https:// URLs
+        const absoluteUrl = new URL(url, window.location.href).href;
+
         // Dynamic check at the exact moment of execution
         if (!this.isAvailable()) {
-          const res = await fetch(url, opts);
+          const res = await fetch(absoluteUrl, opts);
           const body = await res.text();
           return { status: res.status, headers: {}, body };
         }
+
         return new Promise((resolve, reject) => {
           const id = 'req_' + Math.random().toString(36).substring(2, 9);
-          this.callbacks.set(id, { resolve, reject });
+          
+          // 8-second safety timeout so the test doesn't hang indefinitely if Android errors out
+          const timer = setTimeout(() => {
+            this.callbacks.delete(id);
+            reject(new Error("Native fetchAsync timed out after 8s"));
+          }, 8000);
+
+          this.callbacks.set(id, { 
+            resolve: (val) => { clearTimeout(timer); resolve(val); }, 
+            reject: (err) => { clearTimeout(timer); reject(err); } 
+          });
+
           try {
-            window.NativeApp.fetchAsync(id, JSON.stringify({ url, ...opts }));
+            window.NativeApp.fetchAsync(id, JSON.stringify({ url: absoluteUrl, ...opts }));
           } catch(e) {
+            clearTimeout(timer);
             this.callbacks.delete(id);
             reject(e);
           }
