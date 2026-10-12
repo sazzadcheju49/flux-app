@@ -3633,8 +3633,26 @@
           {
             name: "Network Layer (fetchAsync)",
             fn: async () => {
-              const res = await Shell.fetchAsync('./manifest.json');
-              return res && (res.status === 200 || typeof res.body === 'string');
+              try {
+                // Add an 8-second timeout check so it doesn't wait forever
+                const timeoutPromise = new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error("Timeout: Android never called window.__flexFetchCb[callbackId]()")), 8000)
+                );
+                
+                const res = await Promise.race([
+                  Shell.fetchAsync('./manifest.json'),
+                  timeoutPromise
+                ]);
+
+                // Show what Android returned
+                alert("Android returned: " + JSON.stringify(res));
+
+                // Flex contract: status 200 and has body content
+                return res && (res.status === 200 || typeof res.body === 'string');
+              } catch (err) {
+                alert("fetchAsync Error: " + err.message);
+                return false;
+              }
             }
           },
           {
