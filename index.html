@@ -1484,9 +1484,27 @@
     /**
      * FLEX SHELL ADAPTER (v8.0)
      */
+    /**
+     * FLEX SHELL ADAPTER (v8.0) - Asynchronous Dynamic Bridge
+     */
     const Shell = {
       callbacks: new Map(),
-      isAvailable() { return typeof window.NativeApp !== 'undefined'; },
+
+      // Always evaluates window.NativeApp dynamically in real-time
+      isAvailable() {
+        return typeof window.NativeApp !== 'undefined' && window.NativeApp !== null;
+      },
+
+      // Polling helper: waits up to timeoutMs (checks every intervalMs)
+      async waitForBridge(timeoutMs = 1000, intervalMs = 50) {
+        if (this.isAvailable()) return true;
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs) {
+          await new Promise(r => setTimeout(r, intervalMs));
+          if (this.isAvailable()) return true;
+        }
+        return false;
+      },
 
       init() {
         window.__flexFetchCb = (id, res) => {
@@ -1505,6 +1523,7 @@
       },
 
       async fetchAsync(url, opts = {}) {
+        // Dynamic check at the exact moment of execution
         if (!this.isAvailable()) {
           const res = await fetch(url, opts);
           const body = await res.text();
@@ -1523,12 +1542,17 @@
       },
 
       call(name, ...args) {
-        if (!this.isAvailable()) return null;
+        // Dynamic evaluation at the exact moment of invocation
+        if (!this.isAvailable()) {
+          console.warn(`[Shell Mock Fallback] ${name} invoked without native bridge.`);
+          return null;
+        }
         try {
-          const out = window.NativeApp[name](...args.map(a => typeof a === 'object' ? JSON.stringify(a) : a));
+          const serializedArgs = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a);
+          const out = window.NativeApp[name](...serializedArgs);
           return out ? JSON.parse(out) : null;
         } catch(e) {
-          console.error(`[Bridge] ${name} failed:`, e);
+          console.error(`[Bridge Error] ${name}:`, e);
           return null;
         }
       },
@@ -1583,6 +1607,8 @@
      */
     async function initSilentStartup() {
       try {
+        // Wait up to 1000ms for async bridge injection before continuing
+        await Shell.waitForBridge(1000, 50);
         const [rulesRes, scriptRes, cssRes] = await Promise.allSettled([
           fetch('./adblock-rules.txt').then(r => r.text()),
           fetch('./inject.js').then(r => r.text()),
@@ -3543,6 +3569,9 @@
     /**
      * DIAGNOSTICS TEST SUITE
      */
+    /**
+     * DIAGNOSTICS TEST SUITE
+     */
     const Diagnostics = {
       async runAll() {
         const resultsEl = document.getElementById('diag-results');
@@ -3555,23 +3584,42 @@
         Toast.show("Running bridge diagnostics...");
 
         const tests = [
-          { name: "Bridge Attached (NativeApp)", fn: () => Shell.isAvailable() },
-          { name: "Callback Registry (__flexFetchCb)", fn: () => typeof window.__flexFetchCb === 'function' },
-          { name: "Event Bus (__flexEvent)", fn: () => typeof window.__flexEvent === 'function' },
-          { name: "IndexedDB Storage", fn: async () => {
+          {
+            name: "Bridge Attached (NativeApp)",
+            fn: async () => await Shell.waitForBridge(1000, 50)
+          },
+          {
+            name: "Callback Registry (__flexFetchCb)",
+            fn: () => typeof window.__flexFetchCb === 'function'
+          },
+          {
+            name: "Event Bus (__flexEvent)",
+            fn: () => typeof window.__flexEvent === 'function'
+          },
+          {
+            name: "IndexedDB Storage",
+            fn: async () => {
               await DB.set('pendingWatch', { id: 'diag_test', ts: Date.now() });
               const res = await DB.get('pendingWatch', 'diag_test');
               await DB.delete('pendingWatch', 'diag_test');
               return res && res.id === 'diag_test';
             }
           },
-          { name: "Network Layer (fetchAsync)", fn: async () => {
+          {
+            name: "Network Layer (fetchAsync)",
+            fn: async () => {
               const res = await Shell.fetchAsync('./manifest.json');
               return res && (res.status === 200 || typeof res.body === 'string');
             }
           },
-          { name: "AdBlock Integration Bridge", fn: () => Shell.updateAdBlockRules("||test.com^") !== undefined },
-          { name: "Player Bridge Controls", fn: () => Shell.playerControl("status") !== undefined }
+          {
+            name: "AdBlock Integration Bridge",
+            fn: () => Shell.updateAdBlockRules("||test.com^") !== undefined
+          },
+          {
+            name: "Player Bridge Controls",
+            fn: () => Shell.playerControl("status") !== undefined
+          }
         ];
 
         for (const test of tests) {
