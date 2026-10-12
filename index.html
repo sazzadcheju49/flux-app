@@ -3,184 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Flex Media</title>
+  <title>Flex</title>
   <link rel="manifest" href="./manifest.json">
   <style>
     :root {
       --accent: #6366f1;
-      --bg: #0d0f12;
-      --surface: #171a21;
-      --surface-border: #232733;
+      --bg: #0b0d11;
+      --surface: #14171f;
+      --surface-border: #212634;
       --text: #f3f4f6;
-      --text-muted: #9ca3af;
+      --text-muted: #94a3b8;
       --danger: #ef4444;
       --success: #10b981;
-      --tab-height: 64px;
+      --tab-height: 60px;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
-      background-color: var(--bg);
+      background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
+      padding-bottom: calc(var(--tab-height) + var(--safe-bottom) + 20px);
       overflow-x: hidden;
-      padding-bottom: calc(var(--tab-height) + var(--safe-bottom));
     }
 
-    /* Layout & Routing */
+    /* Common UI Elements */
     header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: rgba(13, 15, 18, 0.85);
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(11, 13, 17, 0.88);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--surface-border);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
     }
+    header h1 { font-size: 1.15rem; font-weight: 700; color: var(--accent); }
+    .header-btn { background: none; border: none; color: var(--text); cursor: pointer; display: flex; }
 
-    header h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--accent);
-    }
+    .view-container { display: none; padding: 16px; }
+    .view-container.active { display: block; }
 
-    .view-container {
-      padding: 16px;
-      display: none;
-    }
-
-    .view-container.active {
-      display: block;
-    }
-
-    /* Bottom Nav Bar */
-    nav.tab-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--tab-height) + var(--safe-bottom));
-      padding-bottom: var(--safe-bottom);
-      background: var(--surface);
-      border-top: 1px solid var(--surface-border);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 50;
-    }
-
-    .tab-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: 500;
-      transition: color 0.15s ease;
-    }
-
-    .tab-item.active {
-      color: var(--accent);
-    }
-
-    .tab-item svg {
-      width: 20px;
-      height: 20px;
-      stroke-width: 2;
-    }
-
-    /* UI Primitives */
     .btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 10px 16px; font-weight: 600; cursor: pointer; display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;
     }
     .btn:active { opacity: 0.8; }
     .btn-secondary { background: var(--surface-border); color: var(--text); }
-    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
 
-    .card {
+    /* Bottom Tab Bar */
+    nav.tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: calc(var(--tab-height) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: var(--surface); border-top: 1px solid var(--surface-border);
+      display: flex; justify-content: space-around; align-items: center; z-index: 50;
+    }
+    .tab-item {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      text-decoration: none; color: var(--text-muted); font-size: 0.72rem; font-weight: 500;
+    }
+    .tab-item.active { color: var(--accent); }
+    .tab-item svg { width: 20px; height: 20px; stroke-width: 2; }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 1000; pointer-events: none; }
+    .toast {
+      background: rgba(20, 23, 31, 0.95); border: 1px solid var(--surface-border);
+      color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem;
+      margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+    }
+
+    /* === [CSS-SLOT: STAGE 2 - MOVIES] === */
+    /* Movies & Detail Styles */
+    .search-box {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .search-box input {
+      flex: 1;
       background: var(--surface);
       border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      padding: 14px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .movie-section { margin-bottom: 24px; }
+    .movie-section h3 {
+      font-size: 1rem;
       margin-bottom: 12px;
+      font-weight: 600;
+      color: var(--text);
     }
-
-    /* Diagnostics UI */
-    .diag-grid {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
+    .movie-row {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
     }
-    .diag-item {
+    .movie-row::-webkit-scrollbar { display: none; }
+    .movie-card {
+      min-width: 120px;
+      max-width: 120px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .movie-poster {
+      width: 100%;
+      height: 180px;
+      border-radius: 8px;
+      background: var(--surface-border);
+      object-fit: cover;
+      display: block;
+    }
+    .movie-info { margin-top: 6px; }
+    .movie-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .movie-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      margin-top: 2px;
     }
-    .badge {
-      font-size: 0.7rem;
-      padding: 3px 7px;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-    .badge-fail { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-    .badge-warn { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
 
-    /* Toast Notifications */
-    #toast-container {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
+    /* Detail View */
+    .detail-backdrop {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      background: var(--surface-border);
     }
-    .toast {
-      background: rgba(23, 26, 33, 0.95);
-      border: 1px solid var(--surface-border);
+    .detail-header { display: flex; gap: 16px; margin-bottom: 16px; }
+    .detail-poster {
+      width: 100px;
+      height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--surface-border);
+    }
+    .detail-meta-text { flex: 1; }
+    .detail-meta-text h2 { font-size: 1.2rem; margin-bottom: 6px; }
+    .picker-select {
+      background: var(--surface);
       color: var(--text);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      backdrop-filter: blur(8px);
-      transition: opacity 0.2s, transform 0.2s;
+      border: 1px solid var(--surface-border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      outline: none;
+      width: 100%;
+      margin-top: 6px;
     }
+    /* === [CSS-SLOT: STAGE 3 - PLAYER] === */
+    /* === [CSS-SLOT: STAGE 4 - MUSIC] === */
+    /* === [CSS-SLOT: STAGE 5 - PODCASTS] === */
+    /* === [CSS-SLOT: STAGE 6 - DOWNLOADS] === */
+    /* === [CSS-SLOT: STAGE 7 - SETTINGS & BOOKMARKS] === */
   </style>
 </head>
 <body>
@@ -188,55 +178,89 @@
   <header>
     <h1 id="view-title">Flex</h1>
     <div id="header-actions">
-      <a href="#/bookmarks" style="color:var(--text-muted); text-decoration:none;">
+      <a href="#/bookmarks" class="header-btn" title="Bookmarks">
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
       </a>
     </div>
   </header>
 
   <main>
+    <!-- View: Movies -->
     <section id="view-movies" class="view-container">
-      <h2>Movies</h2>
-      <p class="text-muted" style="margin-top:8px;">Ready for Stage 2 integration.</p>
+      <!-- === [HTML-SLOT: STAGE 2 - MOVIES VIEW] === -->
+      <div class="search-box">
+        <input type="search" id="movies-search-input" placeholder="Search movies & shows...">
+        <button class="btn btn-sm" onclick="MovieEngine.search()">Search</button>
+      </div>
+
+      <div id="movies-search-results" class="movie-section" style="display:none;">
+        <h3>Search Results</h3>
+        <div class="movie-row" id="movies-search-row"></div>
+      </div>
+
+      <div class="movie-section" id="section-continue" style="display:none;">
+        <h3>Continue Watching</h3>
+        <div class="movie-row" id="row-continue"></div>
+      </div>
+
+      <div class="movie-section" id="section-watchlist" style="display:none;">
+        <h3>Watchlist</h3>
+        <div class="movie-row" id="row-watchlist"></div>
+      </div>
+
+      <div class="movie-section">
+        <h3>Trending Movies</h3>
+        <div class="movie-row" id="row-trending-movies"></div>
+      </div>
+
+      <div class="movie-section">
+        <h3>Trending TV Series</h3>
+        <div class="movie-row" id="row-trending-tv"></div>
+      </div>
+
+      <div class="movie-section">
+        <h3>Top Action</h3>
+        <div class="movie-row" id="row-action"></div>
+      </div>
     </section>
 
+    <!-- View: Title Detail -->
+    <section id="view-title" class="view-container">
+      <!-- === [HTML-SLOT: STAGE 2 - TITLE DETAIL VIEW] === -->
+      <button class="btn btn-secondary btn-sm" onclick="history.back()" style="margin-bottom:12px;">← Back</button>
+      <div id="title-detail-content">
+        <!-- Rendered dynamically by MovieEngine.renderTitlePage -->
+      </div>
+    </section>
+
+    <!-- View: Player -->
     <section id="view-player" class="view-container">
-      <h2>Player Overlay</h2>
+      <!-- === [HTML-SLOT: STAGE 3 - PLAYER VIEW] === -->
     </section>
 
+    <!-- View: Music -->
     <section id="view-music" class="view-container">
-      <h2>Music</h2>
+      <!-- === [HTML-SLOT: STAGE 4 - MUSIC VIEW] === -->
     </section>
 
+    <!-- View: Podcasts -->
     <section id="view-podcasts" class="view-container">
-      <h2>Podcasts</h2>
+      <!-- === [HTML-SLOT: STAGE 5 - PODCASTS VIEW] === -->
     </section>
 
+    <!-- View: Downloads -->
     <section id="view-downloads" class="view-container">
-      <h2>Downloads</h2>
+      <!-- === [HTML-SLOT: STAGE 6 - DOWNLOADS VIEW] === -->
     </section>
 
+    <!-- View: Bookmarks -->
     <section id="view-bookmarks" class="view-container">
-      <h2>Bookmarks</h2>
+      <!-- === [HTML-SLOT: STAGE 7 - BOOKMARKS VIEW] === -->
     </section>
 
+    <!-- View: Settings -->
     <section id="view-settings" class="view-container">
-      <div class="card">
-        <h3>Theme</h3>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <button class="btn btn-secondary" onclick="Theme.setAccent('#6366f1')">Indigo</button>
-          <button class="btn btn-secondary" onclick="Theme.setAccent('#10b981')">Emerald</button>
-          <button class="btn btn-secondary" onclick="Theme.setAccent('#f43f5e')">Rose</button>
-          <button class="btn btn-secondary" onclick="Theme.setAccent('#eab308')">Amber</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Diagnostics & Engine State</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 6px 0 12px;">Validates Shell API Contract v8.0 bindings.</p>
-        <button class="btn" onclick="Diagnostics.runAll()">Execute Bridge Tests</button>
-        <div class="diag-grid" id="diag-results"></div>
-      </div>
+      <!-- === [HTML-SLOT: STAGE 7 - SETTINGS VIEW] === -->
     </section>
   </main>
 
@@ -265,187 +289,156 @@
 
   <div id="toast-container"></div>
 
+  <!-- External Data -->
+  <script src="./source.js"></script>
+
   <script>
     /**
-     * API KEYS & RUNTIME CONSTANTS
+     * API KEYS & RUNTIME CONFIG
      */
-    const TMDB_KEY = "YOUR_TMDB_API_KEY";
-    const JAMENDO_CLIENT_ID = "YOUR_JAMENDO_CLIENT_ID";
+    const TMDB_KEY = "TMDB_API_KEY_HERE";
+    const JAMENDO_CLIENT_ID = "JAMENDO_CLIENT_ID_HERE";
 
     /**
      * TOAST SYSTEM
      */
     const Toast = {
-      show(message, duration = 3000) {
-        const container = document.getElementById('toast-container');
-        const el = document.createElement('div');
-        el.className = 'toast';
-        el.textContent = message;
-        container.appendChild(el);
-        setTimeout(() => {
-          el.style.opacity = '0';
-          setTimeout(() => el.remove(), 200);
-        }, duration);
+      show(msg, ms = 2500) {
+        const c = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, ms);
       }
     };
 
     /**
-     * THEME MANAGEMENT
+     * THEME ENGINE
      */
     const Theme = {
       init() {
-        const accent = localStorage.getItem('flex_accent') || '#6366f1';
-        this.setAccent(accent, false);
+        const color = localStorage.getItem('flex_accent') || '#6366f1';
+        this.setAccent(color, false);
       },
-      setAccent(color, save = true) {
-        document.documentElement.style.setProperty('--accent', color);
-        if (save) {
-          localStorage.setItem('flex_accent', color);
-          Toast.show(`Accent updated`);
-        }
+      setAccent(hex, save = true) {
+        document.documentElement.style.setProperty('--accent', hex);
+        if (save) localStorage.setItem('flex_accent', hex);
       }
     };
 
     /**
-     * INDEXEDDB STORAGE WRAPPER
+     * INDEXEDDB STORAGE
      */
     const DB = {
       db: null,
       async init() {
         return new Promise((resolve, reject) => {
-          const req = indexedDB.open('FlexMediaDB', 1);
-          req.onupgradeneeded = (e) => {
+          const r = indexedDB.open('FlexMediaDB', 1);
+          r.onupgradeneeded = (e) => {
             const db = e.target.result;
-            const stores = [
-              'watchlist',
-              'history',
-              'playlists',
-              'favorites',
-              'subscriptions',
-              'bookmarks',
-              'pendingWatch'
-            ];
-            stores.forEach((name) => {
-              if (!db.objectStoreNames.contains(name)) {
-                db.createObjectStore(name, { keyPath: 'id' });
-              }
+            ['watchlist', 'history', 'playlists', 'favorites', 'subscriptions', 'bookmarks', 'pendingWatch'].forEach(store => {
+              if (!db.objectStoreNames.contains(store)) db.createObjectStore(store, { keyPath: 'id' });
             });
           };
-          req.onsuccess = () => {
-            this.db = req.result;
-            resolve(this.db);
-          };
-          req.onerror = () => reject(req.error);
+          r.onsuccess = () => { this.db = r.result; resolve(this.db); };
+          r.onerror = () => reject(r.error);
         });
       },
-      async get(storeName, key) {
-        return new Promise((resolve, reject) => {
-          const tx = this.db.transaction(storeName, 'readonly');
-          const store = tx.objectStore(storeName);
-          const req = store.get(key);
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
+      async get(store, key) {
+        return new Promise((res, rej) => {
+          const r = this.db.transaction(store, 'readonly').objectStore(store).get(key);
+          r.onsuccess = () => res(r.result);
+          r.onerror = () => rej(r.error);
         });
       },
-      async set(storeName, value) {
-        return new Promise((resolve, reject) => {
-          const tx = this.db.transaction(storeName, 'readwrite');
-          const store = tx.objectStore(storeName);
-          const req = store.put(value);
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
+      async getAll(store) {
+        return new Promise((res, rej) => {
+          const r = this.db.transaction(store, 'readonly').objectStore(store).getAll();
+          r.onsuccess = () => res(r.result || []);
+          r.onerror = () => rej(r.error);
         });
       },
-      async delete(storeName, key) {
-        return new Promise((resolve, reject) => {
-          const tx = this.db.transaction(storeName, 'readwrite');
-          const store = tx.objectStore(storeName);
-          const req = store.delete(key);
-          req.onsuccess = () => resolve();
-          req.onerror = () => reject(req.error);
+      async set(store, val) {
+        return new Promise((res, rej) => {
+          const r = this.db.transaction(store, 'readwrite').objectStore(store).put(val);
+          r.onsuccess = () => res(r.result);
+          r.onerror = () => rej(r.error);
+        });
+      },
+      async delete(store, key) {
+        return new Promise((res, rej) => {
+          const r = this.db.transaction(store, 'readwrite').objectStore(store).delete(key);
+          r.onsuccess = () => res();
+          r.onerror = () => rej(r.error);
         });
       }
     };
 
     /**
-     * SHELL API CONTRACT v8.0 ADAPTER
+     * FLEX SHELL ADAPTER (v8.0)
      */
     const Shell = {
-      isAvailable() {
-        return typeof window.NativeApp !== 'undefined';
-      },
-
       callbacks: new Map(),
+      isAvailable() { return typeof window.NativeApp !== 'undefined'; },
 
       init() {
-        // Global async fetch return hook
-        window.__flexFetchCb = (id, resultJson) => {
+        window.__flexFetchCb = (id, res) => {
           const cb = this.callbacks.get(id);
           if (cb) {
-            try {
-              const parsed = typeof resultJson === 'string' ? JSON.parse(resultJson) : resultJson;
-              cb.resolve(parsed);
-            } catch (err) {
-              cb.reject(err);
-            } finally {
-              this.callbacks.delete(id);
-            }
+            try { cb.resolve(typeof res === 'string' ? JSON.parse(res) : res); }
+            catch(e) { cb.reject(e); }
+            finally { this.callbacks.delete(id); }
           }
         };
 
-        // Event hooks from NativeApp
-        window.__flexEvent = (event, payloadJson) => {
-          const payload = typeof payloadJson === 'string' ? JSON.parse(payloadJson) : payloadJson;
-          window.dispatchEvent(new CustomEvent(`shell:${event}`, { detail: payload }));
+        window.__flexEvent = (event, payload) => {
+          const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
+          window.dispatchEvent(new CustomEvent(`shell:${event}`, { detail: data }));
         };
       },
 
-      async fetchAsync(url, options = {}) {
+      async fetchAsync(url, opts = {}) {
         if (!this.isAvailable()) {
-          // Fallback to browser fetch
-          const res = await fetch(url, options);
-          const data = await res.text();
-          return { status: res.status, headers: {}, body: data };
+          const res = await fetch(url, opts);
+          const body = await res.text();
+          return { status: res.status, headers: {}, body };
         }
-
         return new Promise((resolve, reject) => {
-          const id = 'req_' + Math.random().toString(36).substring(2, 11);
+          const id = 'req_' + Math.random().toString(36).substring(2, 9);
           this.callbacks.set(id, { resolve, reject });
           try {
-            window.NativeApp.fetchAsync(id, JSON.stringify({ url, ...options }));
-          } catch (e) {
+            window.NativeApp.fetchAsync(id, JSON.stringify({ url, ...opts }));
+          } catch(e) {
             this.callbacks.delete(id);
             reject(e);
           }
         });
       },
 
-      call(method, ...args) {
-        if (!this.isAvailable()) {
-          console.warn(`[Shell Mock] ${method} called with:`, ...args);
-          return null;
-        }
+      call(name, ...args) {
+        if (!this.isAvailable()) return null;
         try {
-          const res = window.NativeApp[method](...args.map(a => typeof a === 'object' ? JSON.stringify(a) : a));
-          return res ? JSON.parse(res) : null;
-        } catch (e) {
-          console.error(`[Shell Bridge Error] ${method}:`, e);
+          const out = window.NativeApp[name](...args.map(a => typeof a === 'object' ? JSON.stringify(a) : a));
+          return out ? JSON.parse(out) : null;
+        } catch(e) {
+          console.error(`[Bridge] ${name} failed:`, e);
           return null;
         }
       },
 
-      // Bridge methods
-      updateAdBlockRules(rules) { return this.call('updateAdBlockRules', rules); },
-      setPopupBlocking(enabled) { return this.call('setPopupBlocking', enabled); },
-      setInjectedScript(js) { return this.call('setInjectedScript', js); },
-      setCosmeticCss(css) { return this.call('setCosmeticCss', css); },
-      updateSniffPatterns(patterns) { return this.call('updateSniffPatterns', patterns); },
-      setAutoPlayExternal(enabled) { return this.call('setAutoPlayExternal', enabled); },
+      updateAdBlockRules(r) { return this.call('updateAdBlockRules', r); },
+      setPopupBlocking(e) { return this.call('setPopupBlocking', e); },
+      setInjectedScript(s) { return this.call('setInjectedScript', s); },
+      setCosmeticCss(c) { return this.call('setCosmeticCss', c); },
+      updateSniffPatterns(p) { return this.call('updateSniffPatterns', p); },
+      setAutoPlayExternal(e) { return this.call('setAutoPlayExternal', e); },
       getPlayerState() { return this.call('getPlayerState'); },
-      playerControl(action, payload = {}) { return this.call('playerControl', action, payload); },
-      setVideoLayout(layout) { return this.call('setVideoLayout', layout); },
-      setImmersive(enabled) { return this.call('setImmersive', enabled); },
-      setVpnConfig(config) { return this.call('setVpnConfig', config); },
+      getPlaybackState() { return this.call('getPlaybackState'); },
+      playerControl(act, val) { return this.call('playerControl', act, val); },
+      setVideoLayout(l) { return this.call('setVideoLayout', l); },
+      setImmersive(e) { return this.call('setImmersive', e); },
+      setVpnConfig(c) { return this.call('setVpnConfig', c); },
       getLogs() { return this.call('getLogs'); }
     };
 
@@ -453,105 +446,304 @@
      * ROUTER
      */
     const Router = {
-      routes: ['movies', 'player', 'music', 'podcasts', 'downloads', 'settings', 'bookmarks'],
       init() {
-        window.addEventListener('hashchange', () => this.handleRoute());
-        this.handleRoute();
+        window.addEventListener('hashchange', () => this.route());
+        this.route();
       },
-      handleRoute() {
+      route() {
         const hash = window.location.hash || '#/movies';
         const parts = hash.replace(/^#\//, '').split('/');
-        const primary = parts[0] || 'movies';
+        const view = parts[0] || 'movies';
 
-        // Update active views
         document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-        const targetView = document.getElementById(`view-${primary}`);
-        if (targetView) {
-          targetView.classList.add('active');
-        }
 
-        // Update active tab buttons
+        const target = document.getElementById(`view-${view}`);
+        if (target) target.classList.add('active');
+
         document.querySelectorAll('.tab-item').forEach(el => {
-          el.classList.toggle('active', el.getAttribute('data-route') === primary);
+          el.classList.toggle('active', el.getAttribute('data-route') === view);
         });
 
-        // Set Title
         const titleEl = document.getElementById('view-title');
-        titleEl.textContent = primary.charAt(0).toUpperCase() + primary.slice(1);
+        titleEl.textContent = view.charAt(0).toUpperCase() + view.slice(1);
+
+        // Notify modules
+        window.dispatchEvent(new CustomEvent('app:route', { detail: { view, parts, hash } }));
       }
     };
 
     /**
-     * DIAGNOSTICS ENGINE
+     * SILENT STARTUP
      */
-    const Diagnostics = {
-      async runAll() {
-        const resultsEl = document.getElementById('diag-results');
-        resultsEl.innerHTML = '';
-        Toast.show("Running bridge diagnostics...");
+    async function initSilentStartup() {
+      try {
+        const [rulesRes, scriptRes, cssRes] = await Promise.allSettled([
+          fetch('./adblock-rules.txt').then(r => r.text()),
+          fetch('./inject.js').then(r => r.text()),
+          fetch('./cosmetic.css').then(r => r.text())
+        ]);
 
-        const tests = [
-          { name: "Bridge Attached", fn: () => Shell.isAvailable() },
-          { name: "Callback Registry Ready", fn: () => typeof window.__flexFetchCb === 'function' },
-          { name: "Event Bus Hooked", fn: () => typeof window.__flexEvent === 'function' },
-          { name: "IndexedDB Storage", fn: async () => {
-              await DB.set('pendingWatch', { id: 'diag_test', ts: Date.now() });
-              const res = await DB.get('pendingWatch', 'diag_test');
-              await DB.delete('pendingWatch', 'diag_test');
-              return res && res.id === 'diag_test';
-            }
-          },
-          { name: "Network Layer (fetchAsync)", fn: async () => {
-              const res = await Shell.fetchAsync('manifest.json');
-              return res && (res.status === 200 || typeof res.body === 'string');
-            }
-          },
-          { name: "AdBlock Integration Bridge", fn: () => Shell.updateAdBlockRules("||example.com^") !== undefined },
-          { name: "Player Bridge Controls", fn: () => Shell.playerControl("status") !== undefined }
-        ];
+        if (rulesRes.status === 'fulfilled') Shell.updateAdBlockRules(rulesRes.value);
+        Shell.setPopupBlocking(true);
+        if (scriptRes.status === 'fulfilled') Shell.setInjectedScript(scriptRes.value);
+        if (cssRes.status === 'fulfilled') Shell.setCosmeticCss(cssRes.value);
 
-        for (const test of tests) {
-          const item = document.createElement('div');
-          item.className = 'diag-item';
-          item.innerHTML = `<span>${test.name}</span><span class="badge badge-warn">TESTING...</span>`;
-          resultsEl.appendChild(item);
+        Shell.updateSniffPatterns([".*\\.m3u8.*", ".*\\.mp4.*"]);
+        Shell.setAutoPlayExternal(true);
 
-          let passed = false;
-          try {
-            passed = await test.fn();
-          } catch (e) {
-            passed = false;
-          }
-
-          const badge = item.querySelector('.badge');
-          if (passed) {
-            badge.className = 'badge badge-pass';
-            badge.textContent = 'PASS';
-          } else {
-            badge.className = 'badge badge-fail';
-            badge.textContent = Shell.isAvailable() ? 'FAIL' : 'MOCKED';
-          }
+        const vpnAuto = localStorage.getItem('flex_vpn_auto') === 'true';
+        if (vpnAuto) {
+          const vpnConfig = localStorage.getItem('flex_vpn_conf');
+          if (vpnConfig) Shell.setVpnConfig(vpnConfig);
         }
+      } catch (e) {
+        console.warn('Startup configuration deferred:', e);
+      }
+    }
+
+    // === [JS-SLOT: STAGE 2 - MOVIES & SOURCE ENGINE] ===
+    /**
+     * MOVIES & SOURCE ENGINE
+     */
+    const MovieEngine = {
+      tmdbBase: 'https://api.themoviedb.org/3',
+      imgBase: 'https://image.tmdb.org/t/p/w500',
+
+      async fetchTmdb(endpoint, params = {}) {
+        const url = new URL(`${this.tmdbBase}${endpoint}`);
+        url.searchParams.set('api_key', TMDB_KEY);
+        Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+        const res = await Shell.fetchAsync(url.toString());
+        return typeof res.body === 'string' ? JSON.parse(res.body) : res.body;
+      },
+
+      init() {
+        window.addEventListener('app:route', (e) => {
+          const { view, parts } = e.detail;
+          if (view === 'movies') this.loadHome();
+          if (view === 'title' && parts.length >= 3) {
+            this.loadTitleDetail(parts[1], parts[2]);
+          }
+        });
+
+        const sInput = document.getElementById('movies-search-input');
+        if (sInput) {
+          sInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.search();
+          });
+        }
+      },
+
+      async loadHome() {
+        try {
+          this.loadLocalRows();
+          const [trendingM, trendingT, actionM] = await Promise.all([
+            this.fetchTmdb('/trending/movie/week'),
+            this.fetchTmdb('/trending/tv/week'),
+            this.fetchTmdb('/discover/movie', { with_genres: '28' })
+          ]);
+          this.renderRow('row-trending-movies', trendingM.results, 'movie');
+          this.renderRow('row-trending-tv', trendingT.results, 'tv');
+          this.renderRow('row-action', actionM.results, 'movie');
+        } catch(err) {
+          console.warn('Error loading TMDB content:', err);
+        }
+      },
+
+      async loadLocalRows() {
+        const history = await DB.getAll('history');
+        const watchlist = await DB.getAll('watchlist');
+
+        if (history.length) {
+          document.getElementById('section-continue').style.display = 'block';
+          this.renderRow('row-continue', history, 'custom');
+        }
+        if (watchlist.length) {
+          document.getElementById('section-watchlist').style.display = 'block';
+          this.renderRow('row-watchlist', watchlist, 'custom');
+        }
+      },
+
+      renderRow(containerId, items, defaultType) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = (items || []).map(item => {
+          const type = item.type || (item.title ? 'movie' : 'tv') || defaultType;
+          const title = item.title || item.name;
+          const poster = item.poster_path ? `${this.imgBase}${item.poster_path}` : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="180"/>';
+          const rating = item.vote_average ? item.vote_average.toFixed(1) : '—';
+          return `
+            <div class="movie-card" onclick="location.hash='#/title/${type}/${item.id}'">
+              <img class="movie-poster" src="${poster}" loading="lazy" alt="${title}"/>
+              <div class="movie-info">
+                <div class="movie-title">${title}</div>
+                <div class="movie-meta">
+                  <span>${type.toUpperCase()}</span>
+                  <span>★ ${rating}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      async search() {
+        const q = document.getElementById('movies-search-input').value.trim();
+        if (!q) return;
+        Toast.show("Searching...");
+        const res = await this.fetchTmdb('/search/multi', { query: q });
+        const section = document.getElementById('movies-search-results');
+        section.style.display = 'block';
+        this.renderRow('movies-search-row', (res.results || []).filter(r => r.media_type !== 'person'), 'movie');
+      },
+
+      async loadTitleDetail(type, id) {
+        Toast.show("Loading details...");
+        const data = await this.fetchTmdb(`/${type}/${id}`);
+        const c = document.getElementById('title-detail-content');
+        const title = data.title || data.name;
+        const poster = data.poster_path ? `${this.imgBase}${data.poster_path}` : '';
+        const backdrop = data.backdrop_path ? `${this.imgBase}${data.backdrop_path}` : poster;
+        const isTv = type === 'tv';
+
+        let episodesHtml = '';
+        if (isTv && data.seasons) {
+          const validSeasons = data.seasons.filter(s => s.season_number > 0);
+          episodesHtml = `
+            <div style="margin: 14px 0;">
+              <label style="font-size:0.8rem; color:var(--text-muted);">Season & Episode</label>
+              <div style="display:flex; gap:8px;">
+                <select id="season-picker" class="picker-select" onchange="MovieEngine.onSeasonChange('${id}', this.value)">
+                  ${validSeasons.map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('')}
+                </select>
+                <select id="episode-picker" class="picker-select"></select>
+              </div>
+            </div>
+          `;
+        }
+
+        c.innerHTML = `
+          <img class="detail-backdrop" src="${backdrop}" alt="${title}">
+          <div class="detail-header">
+            <img class="detail-poster" src="${poster}" alt="${title}">
+            <div class="detail-meta-text">
+              <h2>${title}</h2>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
+                ${data.release_date || data.first_air_date || ''} • ★ ${data.vote_average ? data.vote_average.toFixed(1) : '—'}
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-watchlist-toggle" onclick="MovieEngine.toggleWatchlist('${id}', '${type}', '${encodeURIComponent(title)}', '${data.poster_path}')">
+                + Watchlist
+              </button>
+            </div>
+          </div>
+          <p style="font-size:0.88rem; line-height:1.4; color:var(--text-muted); margin-bottom:16px;">${data.overview || 'No overview available.'}</p>
+          ${episodesHtml}
+          <div style="display:flex; gap:8px; margin-top:16px;">
+            <button class="btn" style="flex:1;" onclick="MovieEngine.startWatchFlow('${id}', '${type}', '${encodeURIComponent(title)}')">▶ Watch Now</button>
+          </div>
+        `;
+
+        if (isTv) this.onSeasonChange(id, 1);
+      },
+
+      async onSeasonChange(tvId, seasonNum) {
+        const epPicker = document.getElementById('episode-picker');
+        if (!epPicker) return;
+        epPicker.innerHTML = `<option>Loading...</option>`;
+        const sData = await this.fetchTmdb(`/tv/${tvId}/season/${seasonNum}`);
+        epPicker.innerHTML = (sData.episodes || []).map(e => `
+          <option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>
+        `).join('');
+      },
+
+      async toggleWatchlist(id, type, encTitle, posterPath) {
+        const exists = await DB.get('watchlist', id);
+        if (exists) {
+          await DB.delete('watchlist', id);
+          Toast.show('Removed from Watchlist');
+        } else {
+          await DB.set('watchlist', {
+            id,
+            type,
+            title: decodeURIComponent(encTitle),
+            poster_path: posterPath,
+            added: Date.now()
+          });
+          Toast.show('Added to Watchlist');
+        }
+      },
+
+      async startWatchFlow(id, type, encTitle) {
+        const sPicker = document.getElementById('season-picker');
+        const ePicker = document.getElementById('episode-picker');
+        const season = sPicker ? sPicker.value : null;
+        const episode = ePicker ? ePicker.value : null;
+
+        // Retrieve configured sources from source.js
+        const activeSources = (typeof SOURCE_SITES !== 'undefined' ? SOURCE_SITES : []).filter(s => s.enabled && !s.broken);
+        if (!activeSources.length) {
+          Toast.show("No active streaming sources found.");
+          return;
+        }
+
+        const candidates = activeSources.map(s => ({
+          id: s.id,
+          name: s.name,
+          url: s.buildWatchUrl(type, id, season, episode)
+        }));
+
+        const currentCandidate = candidates[0];
+
+        // Store active session state before external navigation
+        await DB.set('pendingWatch', {
+          id: 'active',
+          tmdbId: id,
+          title: decodeURIComponent(encTitle),
+          type,
+          season,
+          episode,
+          candidates,
+          candidateIndex: 0,
+          timestamp: Date.now()
+        });
+
+        // Add item to history store
+        await DB.set('history', {
+          id,
+          title: decodeURIComponent(encTitle),
+          type,
+          season,
+          episode,
+          lastPlayed: Date.now()
+        });
+
+        Toast.show(`Routing to ${currentCandidate.name}...`);
+
+        // External redirection triggers shell stream detection
+        window.location.href = currentCandidate.url;
       }
     };
 
-    /**
-     * BOOTSTRAP LIFECYCLE
-     */
+    MovieEngine.init();
+    
+    // === [JS-SLOT: STAGE 3 - PLAYER ENGINE] ===
+    // === [JS-SLOT: STAGE 4 - MUSIC ENGINE] ===
+    // === [JS-SLOT: STAGE 5 - PODCAST ENGINE] ===
+    // === [JS-SLOT: STAGE 6 - DOWNLOADS ENGINE] ===
+    // === [JS-SLOT: STAGE 7 - SETTINGS, VPN & BOOKMARKS] ===
+
     window.addEventListener('DOMContentLoaded', async () => {
       Theme.init();
       Shell.init();
       await DB.init();
       Router.init();
+      initSilentStartup();
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.error);
 
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
-      }
-
-      // Check if resuming from an external watch session
-      const pending = await DB.get('pendingWatch', 'current');
-      if (pending) {
-        console.log('Restoring pending playback session:', pending);
+      // Restore pending watch if returning from external stream
+      const pending = await DB.get('pendingWatch', 'active');
+      if (pending && window.location.hash !== '#/player') {
+        window.location.hash = '#/player';
       }
     });
   </script>
