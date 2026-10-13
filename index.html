@@ -1,621 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Flex Shell v9.0 Diagnostic Suite</title>
-  <style>
-    :root {
-      --bg: #0b0d12;
-      --surface: #141822;
-      --border: #222a3d;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --pass: #10b981;
-      --fail: #ef4444;
-      --warn: #f59e0b;
-      --blue: #3b82f6;
-      --purple: #8b5cf6;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-      padding: 16px;
-      padding-bottom: 40px;
-      line-height: 1.4;
-      font-size: 13px;
-    }
-
-    header {
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    h1 { font-size: 1.25rem; font-weight: 700; color: #fff; }
-    .subhead { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
-
-    /* Summary Bar */
-    .summary-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .metric-val { font-size: 1.3rem; font-weight: 800; }
-    .metric-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 600; }
-
-    /* Action Buttons */
-    .btn-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    button {
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 14px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    button:active { opacity: 0.8; }
-    button.btn-purple { background: var(--purple); }
-    button.btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
-    button.btn-danger { background: var(--fail); }
-
-    /* Test Categories & Items */
-    .category-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--blue);
-      margin: 18px 0 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .test-list { display: flex; flex-direction: column; gap: 6px; }
-    .test-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 9px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .test-info { flex: 1; overflow: hidden; }
-    .test-name { font-weight: 600; font-size: 0.82rem; }
-    .test-detail { font-size: 0.72rem; color: var(--muted); margin-top: 2px; word-break: break-all; }
-    .badge {
-      font-size: 0.68rem;
-      padding: 3px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-    .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--pass); }
-    .badge-fail { background: rgba(239, 68, 68, 0.2); color: var(--fail); }
-    .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--warn); }
-    .badge-idle { background: rgba(148, 163, 184, 0.15); color: var(--muted); }
-
-    /* Live Event Terminal */
-    .terminal-card {
-      background: #06080d;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 20px;
-    }
-    .terminal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
-    }
-    #event-feed {
-      height: 180px;
-      overflow-y: auto;
-      font-family: monospace;
-      font-size: 0.72rem;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .log-row { display: flex; gap: 6px; }
-    .log-ts { color: var(--muted); flex-shrink: 0; }
-    .log-ev { color: var(--warn); font-weight: 700; }
-    .log-data { color: #cbd5e1; word-break: break-all; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flex Shell Diagnostics</title>
+<style>
+:root{--ac:#2563eb;--bg:#0f1115;--cd:#181b21;--tx:#e8eaed;--mu:#8a909b;--ok:#22c55e;--bd:#ef4444;--wn:#f59e0b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif}
+html.clear,html.clear body{background:transparent!important}
+html.clear #app{display:none}
+#app{padding:12px 12px 80px;max-width:720px;margin:auto}
+h1{font-size:18px;margin:4px 0 8px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--cd);color:var(--mu);font-size:12px;margin:0 6px 4px 0}
+details{background:var(--cd);border-radius:12px;margin:10px 0;padding:0 12px 8px}
+summary{padding:12px 0;font-weight:600}
+button,select,input,textarea{font:inherit;color:var(--tx);background:#252932;border:1px solid #333845;border-radius:8px;padding:8px 10px;margin:3px 3px 3px 0}
+button{background:var(--ac);border:0;color:#fff}
+button.g{background:#2a2e38;color:var(--tx)}
+button.r{background:#7f1d1d}
+input[type=checkbox]{width:18px;height:18px;padding:0;vertical-align:middle}
+input[type=range]{padding:0}
+input[type=color]{padding:0;height:36px;width:56px}
+textarea{width:100%;min-height:70px;font-family:monospace;font-size:12px}
+input[type=text],input[type=url]{width:100%}
+label{display:inline-block;margin:4px 12px 4px 0}
+pre{white-space:pre-wrap;word-break:break-all;background:#0b0d10;border-radius:8px;padding:8px;font-size:12px;max-height:200px;overflow:auto;margin:6px 0}
+.res{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #262a33}
+.res span:last-child{text-align:right;word-break:break-word}
+.PASS{color:var(--ok)}.FAIL{color:var(--bd)}.WARN{color:var(--wn)}.INFO{color:var(--mu)}
+progress{width:100%}
+.note{color:var(--mu);font-size:12px;margin:4px 0}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:50}
+html.m-overlay #ov{display:block}
+#ovbar{position:absolute;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);background:rgba(24,27,33,.96);border-radius:16px;padding:10px;color:var(--tx)}
+#ovinfo{font-size:12px;color:var(--mu);margin-bottom:6px;word-break:break-all}
+#hud{display:none;position:fixed;inset:0;z-index:60;user-select:none;-webkit-user-select:none;touch-action:none}
+html.m-player #hud{display:block}
+.hb{position:absolute;left:0;right:0;background:rgba(0,0,0,.55);padding:8px 12px;color:#fff}
+#hudtop{top:0;display:flex;justify-content:space-between;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 8px)}
+#hudbot{bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)}
+#hudmid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#hudmid button{font-size:28px;border-radius:50%;width:64px;height:64px;background:rgba(0,0,0,.55)}
+#hudind{position:absolute;top:30%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;border-radius:10px;padding:6px 14px;font-size:16px;display:none}
+#hud.hide .hb,#hud.hide #hudmid{display:none}
+#hudrow{display:flex;align-items:center;gap:8px;color:#fff}
+#hudrow input{flex:1;margin:0}
+</style>
 </head>
 <body>
+<div id="app">
+<h1>Flex Shell Diagnostics</h1>
+<div><span class="badge" id="b1">shell: ?</span><span class="badge" id="b2">insets: ?</span><span class="badge" id="b3">mode: app</span></div>
 
-  <header>
-    <h1>Flex Shell v9.0 Diagnostics</h1>
-    <div class="subhead">Contract Validation Engine • TwoWebViews Architecture</div>
-  </header>
+<details open><summary>1. Auto tests</summary>
+<div><button data-a="runAuto">Run auto tests</button><button class="g" data-a="copyRep">Copy report</button></div>
+<div id="res"></div>
+<textarea id="rep" readonly style="display:none"></textarea>
+<div class="note">Read-only checks plus network calls. Nothing here changes your settings.</div>
+</details>
 
-  <div class="summary-card">
-    <div>
-      <div class="metric-val" id="cnt-total">0</div>
-      <div class="metric-lbl">Total</div>
-    </div>
-    <div>
-      <div class="metric-val" style="color:var(--pass);" id="cnt-pass">0</div>
-      <div class="metric-lbl">Passed</div>
-    </div>
-    <div>
-      <div class="metric-val" style="color:var(--fail);" id="cnt-fail">0</div>
-      <div class="metric-lbl">Failed</div>
-    </div>
-    <div>
-      <div class="metric-val" style="color:var(--warn);" id="cnt-warn">0</div>
-      <div class="metric-lbl">Pending</div>
-    </div>
-  </div>
+<details><summary>2. Website, floating button, overlay</summary>
+<input type="url" id="siteUrl" value="https://example.com">
+<div>
+<button data-a="siteOpen">Open site</button><button class="g" data-a="siteBack">Back</button><button class="g" data-a="siteFwd">Fwd</button><button class="g" data-a="siteReload">Reload</button><button class="g" data-a="siteStop">Stop</button><button class="g" data-a="siteClose">Close site</button><button class="g" data-a="siteState">Get state</button><button class="g" data-a="siteOverlay">Show overlay</button>
+</div>
+<div><button data-a="fabOn">FAB on</button><button class="g" data-a="fabBadge">FAB badge 3</button><button class="g" data-a="fabOff">FAB off</button><button data-a="selfTest">Site self-test</button></div>
+<div class="note" id="lm">Last media detected: none</div>
+<div class="note">Open a site, then tap the floating button. This page should appear transparent over the site with a navigation bar. The self-test sets the ad rule "doubleclick.net" and checks that sites cannot see NativeApp, that blocked ads get typed replies, and that the network sniffer fires.</div>
+</details>
 
-  <div class="btn-row">
-    <button onclick="Runner.runAll()">▶ Run All Contract Tests</button>
-    <button class="btn-secondary" onclick="Runner.clearResults()">Reset</button>
-  </div>
+<details><summary>3. Player</summary>
+<div>
+<button data-a="pHls">Play HLS</button><button data-a="pMp4">Play MP4</button><button data-a="pQueue">Play queue</button><button data-a="pResume">Resume HLS</button><button data-a="pLocal">Play local file</button>
+</div>
+<div class="note">Audio mode (stays on this page):</div>
+<div>
+<button data-a="pAudio">Play MP3</button><button class="g" data-a="actl" data-v="play">Play</button><button class="g" data-a="actl" data-v="pause">Pause</button><button class="g" data-a="actl" data-v="stop">Stop</button>
+</div>
+<div><button class="g" data-a="pState">getPlayerState</button><button class="g" data-a="pTracks">getTracks</button><button class="g" data-a="pHist">Saved positions</button></div>
+<div class="note" id="audiostate"></div>
+<div class="note">Video opens a transparent HUD over the native video: tap to show or hide controls, swipe left/right to seek, swipe the left or right half up/down for brightness or volume, double-tap the sides for ±10s, long-press for 2x. Hardware Back should close it.</div>
+</details>
 
-  <div class="category-title">Interactive Shell Triggers</div>
-  <div class="btn-row">
-    <button class="btn-purple" onclick="Triggers.testOpenSite()">Open Site (browse)</button>
-    <button class="btn-purple" onclick="Triggers.testSetFab()">Deploy FAB</button>
-    <button class="btn-purple" onclick="Triggers.testToggleImmersive()">Toggle Immersive</button>
-    <button class="btn-secondary" onclick="Triggers.testFetchAsync()">Test fetchAsync()</button>
-  </div>
+<details><summary>4. Downloads</summary>
+<div>
+<button data-a="dSmall">Download small MP4</button><button data-a="dHls">Download HLS (360p)</button>
+</div>
+<progress id="dlp" max="100" value="0"></progress><div class="note" id="dlt">No download yet</div>
+<div>
+<button class="g" data-a="dPause">Pause</button><button class="g" data-a="dResume">Resume</button><button class="g" data-a="dCancel">Cancel</button><button class="r" data-a="dDelete">Delete</button>
+</div>
+<div>
+<button class="g" data-a="dList">listDownloads</button><button class="g" data-a="dMedia">listMedia</button><button class="g" data-a="dStore">Storage</button>
+</div>
+<div><button class="g" data-a="dOffSmall">Play small offline</button><button class="g" data-a="dOffHls">Play HLS offline</button></div>
+<div class="note">For the offline test, let the download finish, turn on airplane mode, then press an offline button.</div>
+</details>
 
-  <div id="results-container"></div>
+<details><summary>5. VPN</summary>
+<textarea id="vcfg" placeholder="Paste a WireGuard config here"></textarea>
+<div>
+<button data-a="vSet">Save config</button><button class="g" data-a="vClear">Clear config</button><button data-a="vConn">Connect</button><button class="g" data-a="vDis">Disconnect</button><button class="g" data-a="vStat">Status</button>
+</div>
+<label><input type="checkbox" data-c="vauto"> Auto-connect</label>
+<label><input type="checkbox" data-c="vkill"> Kill switch</label>
+<div class="note">The text box is cleared after saving. The kill switch blocks all app network while the VPN is down.</div>
+</details>
 
-  <!-- Realtime Native Event Bus Monitor -->
-  <div class="terminal-card">
-    <div class="terminal-header">
-      <span style="font-weight:700; font-size:0.75rem; text-transform:uppercase; color:var(--muted);">Live Native Events Bus (Section 4)</span>
-      <button class="btn-secondary" style="padding:2px 8px; font-size:0.7rem;" onclick="Terminal.clear()">Clear</button>
-    </div>
-    <div id="event-feed">
-      <div style="color:var(--muted); font-style:italic;">Listening for native events...</div>
-    </div>
-  </div>
+<details><summary>6. Settings and hardware</summary>
+<div>Accent <input type="color" id="accent" value="#2563eb" data-c="accent"> <button data-a="applyBars">Apply to bars</button><button class="g" data-a="insets">Safe insets</button></div>
+<label><input type="checkbox" data-c="imm"> Immersive</label>
+<label>Orientation <select data-c="orient"><option>auto</option><option>landscape</option><option>portrait</option></select></label>
+<div>Brightness <input type="range" min="0" max="100" value="50" data-c="bri"> <button class="g" data-a="briSys">System</button></div>
+<div>Volume <input type="range" min="0" max="100" value="50" data-c="vol"></div>
+<div class="note">Notifications</div>
+<div>
+<label><input type="checkbox" data-c="np" id="np_downloadProgress" checked> progress</label>
+<label><input type="checkbox" data-c="np" id="np_downloadSpeedEta" checked> speed/ETA</label>
+<label><input type="checkbox" data-c="np" id="np_downloadActions" checked> actions</label>
+<label><input type="checkbox" data-c="np" id="np_downloadComplete" checked> complete</label>
+<label><input type="checkbox" data-c="np" id="np_playbackControls" checked> playback</label>
+</div>
+<div><button class="g" data-a="npGet">Get prefs</button><button class="g" data-a="npOpen">System settings</button></div>
+<label><input type="checkbox" data-c="wifi"> Wi-Fi only downloads</label>
+<label><input type="checkbox" data-c="auto"> Auto-play external</label>
+<label><input type="checkbox" data-c="popup" checked> Block popups</label>
+<label><input type="checkbox" data-c="dbg"> Remote debugging</label>
+<input type="text" id="ua" placeholder="User agent (site WebView)"><button data-a="ua">Set user agent</button>
+<div class="note">Ad-block rules (one per line)</div>
+<textarea id="abr">doubleclick.net
+adservice
+/ads/</textarea><button data-a="abRules">Update rules</button>
+<div class="note">Allowlist</div>
+<textarea id="abw" style="min-height:40px"></textarea><button data-a="abAllow">Set allowlist</button>
+<div class="note">Sniff patterns</div>
+<textarea id="snf" style="min-height:40px">.m3u8
+.mp4
+.ts
+.mpd
+.mkv
+.webm
+.mp3
+.m4a</textarea><button data-a="sniff">Set patterns</button>
+<div class="note">Injected script (site pages)</div>
+<textarea id="inj" style="min-height:40px">console.log("flex inject ok")</textarea><button data-a="inj">Set script</button>
+<div class="note">Cosmetic CSS (site pages)</div>
+<textarea id="css" style="min-height:40px">.ad,.ads,[id^="ad-"]{display:none!important}</textarea><button data-a="css">Set CSS</button>
+<div>
+<button class="g" data-a="pick">Pick local file</button><button class="g" data-a="logs">getLogs</button><button class="g" data-a="ext">Open URL externally</button><button class="r" data-a="cache">Clear cache</button><button class="r" data-a="cookies">Clear cookies</button><button class="r" data-a="minimize">Minimize</button>
+</div>
+</details>
 
-  <script>
-    /**
-     * SECTION 4: GLOBAL EVENT LISTENER SUITE
-     * Hooks into all 20 native window.dispatchEvent hooks defined in contract v9.0
-     */
-    const Terminal = {
-      feed: document.getElementById('event-feed'),
-      init() {
-        const events = [
-          'siteState', 'fabTapped', 'overlayHidden', 'autoPlayStarted', 'mediaDetected',
-          'playerState', 'playbackProgress', 'playbackEnded', 'queueItemChanged',
-          'tracksChanged', 'pipChanged', 'ON_PLAYBACK_ERROR', 'downloadProgress',
-          'downloadPaused', 'downloadResumed', 'downloadCancelled', 'downloadComplete',
-          'downloadError', 'mediaDeleted', 'networkChange', 'vpnStatus'
-        ];
+<details><summary>7. Manual checklist</summary>
+<div class="note">1. App mode: status bar and notch strip show your accent color, and this page does not go under the notch.<br>
+2. Open a site: the page fits the screen. The floating button appears, drags, and snaps to an edge.<br>
+3. Tap the button: transparent overlay with the nav bar. Back, Forward, Reload and Close work. Tapping outside the bar closes it.<br>
+4. Run the site self-test: it should report four PASS lines.<br>
+5. Play HLS: edge-to-edge video with no notch strip, the HUD works, gestures work, and PiP works. Press hardware Back: you should return here.<br>
+6. Download the small file, watch the notification (speed and ETA), then play it offline.<br>
+7. MP3 in audio mode: turn the screen off and confirm it keeps playing.<br>
+8. Enable VPN with a config and confirm the status changes.</div>
+</details>
 
-        events.forEach(eventName => {
-          window.addEventListener(eventName, (e) => {
-            this.log(eventName, e.detail);
-          });
-        });
-      },
-      log(ev, detail) {
-        if (this.feed.children[0] && this.feed.children[0].textContent.includes('Listening')) {
-          this.feed.innerHTML = '';
-        }
-        const row = document.createElement('div');
-        row.className = 'log-row';
-        const ts = new Date().toTimeString().split(' ')[0];
-        row.innerHTML = `
-          <span class="log-ts">[${ts}]</span>
-          <span class="log-ev">${ev}:</span>
-          <span class="log-data">${detail ? JSON.stringify(detail) : '{}'}</span>
-        `;
-        this.feed.appendChild(row);
-        this.feed.scrollTop = this.feed.scrollHeight;
-      },
-      clear() {
-        this.feed.innerHTML = '<div style="color:var(--muted); font-style:italic;">Listening for native events...</div>';
-      }
-    };
+<details open><summary>8. Output and event log</summary>
+<pre id="out">Results appear here</pre>
+<pre id="log"></pre>
+</details>
+</div>
 
-    /**
-     * INTERACTIVE WORKBENCH TRIGGERS
-     */
-    const Triggers = {
-      testOpenSite() {
-        if (!window.NativeApp || !window.NativeApp.openSite) return alert("NativeApp.openSite not available.");
-        window.NativeApp.openSite("https://example.com");
-      },
-      testSetFab() {
-        if (!window.NativeApp || !window.NativeApp.setFab) return alert("NativeApp.setFab not available.");
-        window.NativeApp.setFab(JSON.stringify({
-          visible: true,
-          size: 56,
-          bgColor: "#3b82f6",
-          iconColor: "#ffffff",
-          badge: "1"
-        }));
-        alert("FAB payload dispatched. Switch to 'browse' mode (openSite) to view it.");
-      },
-      testToggleImmersive() {
-        if (!window.NativeApp || !window.NativeApp.setImmersive) return alert("NativeApp.setImmersive not available.");
-        this.isImm = !this.isImm;
-        window.NativeApp.setImmersive(this.isImm);
-      },
-      async testFetchAsync() {
-        if (!window.NativeApp || !window.NativeApp.fetchAsync) return alert("NativeApp.fetchAsync not available.");
-        try {
-          const res = await Runner.flexFetch("https://httpbin.org/get");
-          alert("fetchAsync Success! Status: " + res.status);
-        } catch(e) {
-          alert("fetchAsync Failed: " + e.message);
-        }
-      }
-    };
+<div id="ov"><div id="ovbar">
+<div id="ovinfo">No site state yet</div>
+<button class="g" data-o="back">◀</button><button class="g" data-o="fwd">▶</button><button class="g" data-o="reload">⟳</button><button class="g" data-o="stop">✕ Stop</button><button class="g" data-o="home">⌂ Home</button><button data-o="play">▶ Play detected</button><button class="r" data-o="close">Close</button>
+</div></div>
 
-    /**
-     * DIAGNOSTIC TEST RUNNER & CONTRACT VALIDATOR
-     */
-    const Runner = {
-      tests: [
-        /* 1. Bridge & Core Capabilities */
-        {
-          cat: "Bridge Detection & Hardware Capabilities",
-          name: "window.NativeApp Injected",
-          fn: () => typeof window.NativeApp !== 'undefined' && window.NativeApp !== null
-        },
-        {
-          cat: "Bridge Detection & Hardware Capabilities",
-          name: "getCapabilities() Schema",
-          fn: () => {
-            const res = JSON.parse(window.NativeApp.getCapabilities());
-            return res && res.shellVersion === "9.0-TwoWebViews";
-          }
-        },
-        {
-          cat: "Bridge Detection & Hardware Capabilities",
-          name: "getSafeInsets() Notch Metrics",
-          fn: () => {
-            const res = JSON.parse(window.NativeApp.getSafeInsets());
-            return res && typeof res.top === 'number' && typeof res.bottom === 'number';
-          }
-        },
-        {
-          cat: "Bridge Detection & Hardware Capabilities",
-          name: "setSystemBars() Invocation",
-          fn: () => {
-            window.NativeApp.setSystemBars(JSON.stringify({ color: "#0b0d12", darkIcons: false, navColor: "#000000" }));
-            return true;
-          }
-        },
+<div id="hud">
+<div class="hb" id="hudtop"><span id="hudt">Playing</span><button class="g" id="hx">✕ Close</button></div>
+<div id="hudmid"><button id="hpp">⏸</button></div>
+<div id="hudind"></div>
+<div class="hb" id="hudbot">
+<div id="hudrow"><span id="ht">0:00</span><input type="range" id="hs" min="0" max="1000" value="0"><span id="hd">0:00</span></div>
+<div>
+<button class="g" data-h="-10">⏪10</button><button class="g" data-h="10">10⏩</button><button class="g" id="hsp">1x</button><button class="g" id="hlay">fit</button><button class="g" id="hau">Audio</button><button class="g" id="hsu">Subs</button><button class="g" id="hpip">PiP</button><button class="g" id="hor">Rotate</button>
+</div>
+</div>
+</div>
 
-        /* 2. Two-WebView & Navigation */
-        {
-          cat: "Two-WebView Architecture (Section 3.1 & 3.2)",
-          name: "getSiteState() Synchronous Schema",
-          fn: () => {
-            const s = JSON.parse(window.NativeApp.getSiteState());
-            return s && typeof s.canGoBack === 'boolean' && typeof s.loading === 'boolean';
-          }
-        },
-        {
-          cat: "Two-WebView Architecture (Section 3.1 & 3.2)",
-          name: "setFab() Payload Handler",
-          fn: () => {
-            window.NativeApp.setFab(JSON.stringify({ visible: false, size: 56, bgColor: "#2563EB", badge: "0" }));
-            return true;
-          }
-        },
-        {
-          cat: "Two-WebView Architecture (Section 3.1 & 3.2)",
-          name: "Navigation Control Signatures",
-          fn: () => {
-            return typeof window.NativeApp.openSite === 'function' &&
-                   typeof window.NativeApp.closeSite === 'function' &&
-                   typeof window.NativeApp.siteBack === 'function' &&
-                   typeof window.NativeApp.siteForward === 'function' &&
-                   typeof window.NativeApp.siteReload === 'function' &&
-                   typeof window.NativeApp.siteStop === 'function';
-          }
-        },
-        {
-          cat: "Two-WebView Architecture (Section 3.1 & 3.2)",
-          name: "Overlay Mode Signatures",
-          fn: () => typeof window.NativeApp.showOverlay === 'function' && typeof window.NativeApp.hideOverlay === 'function'
-        },
+<script>
+(function(){
+'use strict';
+const $=i=>document.getElementById(i),J=JSON.stringify,N=window.NativeApp;
+const S={hls:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',mp4:'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',small:'https://www.w3schools.com/html/mov_bbb.mp4',mp3:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'};
+const EVENTS=['siteState','fabTapped','overlayHidden','autoPlayStarted','mediaDetected','playerState','playbackProgress','playbackEnded','queueItemChanged','tracksChanged','pipChanged','ON_PLAYBACK_ERROR','downloadProgress','downloadPaused','downloadResumed','downloadCancelled','downloadComplete','downloadError','mediaDeleted','networkChange','vpnStatus','playerClosed'];
+const M9=['getCapabilities','openSite','closeSite','siteBack','siteForward','siteReload','siteStop','getSiteState','showOverlay','hideOverlay','setFab','getSafeInsets','setSystemBars','setImmersive','fetch','fetchAsync','playStream','playerControl','getPlayerState','getTracks','selectTrack','setSubtitleStyle','setVideoLayout','setBrightness','getBrightness','setSystemVolume','getSystemVolume','setOrientation','enterPip','getPlaybackState','getAllPlaybackState','download','pauseDownload','resumeDownload','cancelDownload','deleteMedia','listDownloads','listMedia','getStorageInfo','setDownloadsWifiOnly','setVpnConfig','clearVpnConfig','vpnConnect','vpnDisconnect','getVpnStatus','setVpnAutoConnect','setVpnKillSwitch','updateAdBlockRules','setAdBlockAllowlist','updateSniffPatterns','setAutoPlayExternal','setInjectedScript','setCosmeticCss','setUserAgent','setNotificationPrefs','getNotificationPrefs','openNotificationSettings','pickLocalMedia','clearCache','clearCookies','openExternal','minimizeApp','setDebugging'];
+const EXTRA=['getLogs','setPopupBlocking','requestPermission'];
+let ui='app',prevUi='app',ps={},lastMedia=null,lastDl='',results=[],seen={},polling=null,badPolls=0,hudTimer=null,seeking=false,sniffSeen=false;
 
-        /* 3. Advanced Fetch (CORS Bypass) */
-        {
-          cat: "Network Layer & CORS Engine (Section 3.4)",
-          name: "Callback Registry window.__flexFetchCb",
-          fn: () => {
-            window.__flexFetchCb = window.__flexFetchCb || {};
-            return typeof window.__flexFetchCb === 'object';
-          }
-        },
-        {
-          cat: "Network Layer & CORS Engine (Section 3.4)",
-          name: "fetchAsync() UI-Thread Callback Return",
-          fn: async () => {
-            const res = await Runner.flexFetch("manifest.json");
-            return res && (res.status === 200 || typeof res.body === 'string');
-          }
-        },
+const parse=v=>{if(typeof v==='string'){try{return JSON.parse(v)}catch(e){return v}}return v};
+const fmt=ms=>{const s=Math.max(0,Math.floor((ms||0)/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const accent=()=>getComputedStyle(document.documentElement).getPropertyValue('--ac').trim()||'#2563eb';
+const lines=id=>$(id).value.split('\n').map(x=>x.trim()).filter(Boolean);
+function log(m){const l=$('log');l.textContent+=new Date().toTimeString().slice(0,8)+' '+m+'\n';const a=l.textContent.split('\n');if(a.length>200)l.textContent=a.slice(-150).join('\n');l.scrollTop=l.scrollHeight}
+function show(label,v){const s=typeof v==='string'?v:J(v,null,1);$('out').textContent=label+'\n'+s;log(label+' '+(s.length>150?s.slice(0,150)+'…':s))}
+function call(n,...a){if(!N)throw new Error('NativeApp missing (open this inside the Flex app)');if(typeof N[n]!=='function')throw new Error('method not found: '+n);return N[n](...a)}
 
-        /* 4. Embedded Player (Zero Native UI) */
-        {
-          cat: "Embedded Player Control (Section 3.5)",
-          name: "getPlayerState() State Retrieval",
-          fn: () => {
-            const s = JSON.parse(window.NativeApp.getPlayerState());
-            return s && typeof s.playing === 'boolean' && typeof s.positionMs === 'number';
-          }
-        },
-        {
-          cat: "Embedded Player Control (Section 3.5)",
-          name: "playerControl() Command Pipeline",
-          fn: () => {
-            window.NativeApp.playerControl(JSON.stringify({ cmd: "pause" }));
-            return true;
-          }
-        },
-        {
-          cat: "Embedded Player Control (Section 3.5)",
-          name: "getTracks() Track Schema",
-          fn: () => {
-            const t = JSON.parse(window.NativeApp.getTracks());
-            return t && Array.isArray(t.video) && Array.isArray(t.audio) && Array.isArray(t.text);
-          }
-        },
-        {
-          cat: "Embedded Player Control (Section 3.5)",
-          name: "Device Brightness & Volume Hardware",
-          fn: () => {
-            const b = window.NativeApp.getBrightness();
-            const v = window.NativeApp.getSystemVolume();
-            return typeof b === 'number' && typeof v === 'number';
-          }
-        },
-        {
-          cat: "Embedded Player Control (Section 3.5)",
-          name: "setSubtitleStyle() Handler",
-          fn: () => {
-            window.NativeApp.setSubtitleStyle(JSON.stringify({ size: 16, color: "#FFFFFF", backgroundColor: "#00000000" }));
-            return true;
-          }
-        },
-        {
-          cat: "Embedded Player Control (Section 3.5)",
-          name: "setVideoLayout() Matrix Engine",
-          fn: () => {
-            window.NativeApp.setVideoLayout(JSON.stringify({ mode: "fit", scale: 1.0, panX: 0.0, panY: 0.0 }));
-            return true;
-          }
-        },
+/* callback registry: supports __flexFetchCb(id,res) and __flexFetchCb[id](res) */
+function cb(id,res){const f=cb[id];if(typeof f==='function'){delete cb[id];f(parse(res))}}
+window.__flexFetchCb=cb;
+const uid=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function viaCb(run,ms){return new Promise((ok,no)=>{const id=uid();const t=setTimeout(()=>{delete cb[id];no(new Error('callback timeout'))},ms||20000);cb[id]=r=>{clearTimeout(t);ok(r)};try{run(id)}catch(e){clearTimeout(t);delete cb[id];no(e)}})}
+const afetch=(req,ms)=>viaCb(id=>call('fetchAsync',J(req),id),ms);
+const apick=()=>viaCb(id=>call('pickLocalMedia',id),120000);
 
-        /* 5. Playback Persistence */
-        {
-          cat: "Playback Persistence (Section 3.6)",
-          name: "getAllPlaybackState() Schema",
-          fn: () => {
-            const all = JSON.parse(window.NativeApp.getAllPlaybackState());
-            return Array.isArray(all);
-          }
-        },
+/* results */
+function rec(n,s,d){results.push({n,s,d:d||''});const r=document.createElement('div');r.className='res';const a=document.createElement('span');a.textContent=n;const b=document.createElement('span');b.className=s;b.textContent=s+(d?' · '+String(d).slice(0,140):'');r.appendChild(a);r.appendChild(b);$('res').appendChild(r)}
+function idbTest(){return new Promise((ok,no)=>{const q=indexedDB.open('flexdiag',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onerror=()=>no(q.error);q.onsuccess=()=>{const db=q.result;const tx=db.transaction('k','readwrite');tx.objectStore('k').put('ok','t');tx.oncomplete=()=>{const g=db.transaction('k').objectStore('k').get('t');g.onsuccess=()=>{db.close();g.result==='ok'?ok(true):no(new Error('read mismatch'))};g.onerror=()=>no(g.error)};tx.onerror=()=>no(tx.error)}})}
+async function runAuto(){
+results=[];$('res').innerHTML='';
+const T=async(name,fn)=>{try{const r=await fn();if(r===true)rec(name,'PASS');else if(r&&r.s)rec(name,r.s,r.d);else rec(name,'PASS',typeof r==='string'?r:'')}catch(e){rec(name,'FAIL',e.message||String(e))}};
+await T('Shell attached',()=>{if(!N)throw new Error('window.NativeApp missing');return true});
+if(N){
+await T('Capabilities',()=>{const c=parse(N.getCapabilities());if(typeof c!=='object')throw new Error('not JSON');return{s:'PASS',d:'v'+(c.shellVersion||'?')+', '+Object.keys(c).length+' flags'}});
+await T('Methods in v9.0 contract',()=>{const m=M9.filter(x=>typeof N[x]!=='function');return m.length?{s:'FAIL',d:'missing: '+m.join(', ')}:{s:'PASS',d:M9.length+' present'}});
+await T('Extra methods (getLogs, setPopupBlocking, requestPermission)',()=>{const m=EXTRA.filter(x=>typeof N[x]!=='function');return m.length?{s:'WARN',d:'not found: '+m.join(', ')}:{s:'PASS',d:'all present'}});
+await T('Callback registry + fetchAsync',async()=>{const r=await afetch({url:'https://example.com',method:'GET',timeout:15000});if(!r||r.status!==200)throw new Error('status '+(r&&r.status)+' '+((r&&r.error)||''));return{s:'PASS',d:'200, finalUrl '+r.finalUrl+', '+(r.body||'').length+' chars'}});
+await T('fetchAsync base64',async()=>{const r=await afetch({url:'https://example.com',responseType:'base64',timeout:15000});const t=atob((r&&r.body)||'');if(t.indexOf('Example')<0)throw new Error('decoded body unexpected');return true});
+await T('fetchAsync error handling',async()=>{const r=await afetch({url:'https://nonexistent.invalid',timeout:8000});if(r&&(r.error||r.status>=400||r.status===0))return{s:'PASS',d:J(r).slice(0,100)};throw new Error('no error reported')});
+await T('Sync fetch',()=>{const r=parse(N.fetch(J({url:'https://example.com',method:'GET',timeout:15000})));if(!r||r.status!==200)throw new Error('status '+(r&&r.status));return true});
+await T('IndexedDB',idbTest);
+await T('Safe insets',()=>{const i=parse(N.getSafeInsets());if(typeof i!=='object'||isNaN(i.top))throw new Error('bad insets');return J(i)});
+await T('Site state',()=>{const s=parse(N.getSiteState());if(typeof s!=='object'||!('canGoBack' in s))throw new Error('bad state');return J(s)});
+await T('Player state',()=>{const s=parse(N.getPlayerState());if(typeof s!=='object')throw new Error('bad state');return J(s)});
+await T('Brightness / volume getters',()=>{const b=Number(N.getBrightness()),v=Number(N.getSystemVolume());if(!isFinite(b)||!isFinite(v))throw new Error('not numbers');return'brightness '+b+', volume '+v});
+await T('Notification prefs',()=>{const p=parse(N.getNotificationPrefs());if(typeof p!=='object')throw new Error('bad prefs');return J(p)});
+await T('VPN status',()=>{const s=parse(N.getVpnStatus());if(!s||!s.state)throw new Error('bad status');return J(s)});
+await T('Downloads, media, storage',()=>{const a=parse(N.listDownloads()),b=parse(N.listMedia()),c=parse(N.getStorageInfo());if(!Array.isArray(a)||!Array.isArray(b)||typeof c!=='object')throw new Error('bad shapes');return a.length+' downloads, '+b.length+' media, free '+Math.round(c.freeBytes/1e9)+' GB'});
+await T('Playback history',()=>{const a=parse(N.getAllPlaybackState());if(!Array.isArray(a))throw new Error('not an array');return a.length+' records'});
+if(typeof N.getLogs==='function')await T('getLogs',()=>{const l=parse(N.getLogs());if(!Array.isArray(l))throw new Error('not an array');return l.length+' lines'});
+}
+const c={PASS:0,FAIL:0,WARN:0};results.forEach(r=>{if(c[r.s]!=null)c[r.s]++});
+rec('SUMMARY',c.FAIL?'FAIL':(c.WARN?'WARN':'PASS'),c.PASS+' pass, '+c.WARN+' warn, '+c.FAIL+' fail');
+}
+function reportText(){return 'Flex diagnostics '+new Date().toISOString()+'\n'+results.map(r=>r.s+' | '+r.n+(r.d?' | '+r.d:'')).join('\n')+'\n\nEvents seen: '+J(seen)+'\n\nLog:\n'+$('log').textContent.split('\n').slice(-40).join('\n')}
 
-        /* 6. Media3 Downloader */
-        {
-          cat: "Media3 Downloader & Local Storage (Section 3.7)",
-          name: "listDownloads() Queue Reader",
-          fn: () => {
-            const dl = JSON.parse(window.NativeApp.listDownloads());
-            return Array.isArray(dl);
-          }
-        },
-        {
-          cat: "Media3 Downloader & Local Storage (Section 3.7)",
-          name: "listMedia() Offline Inventory",
-          fn: () => {
-            const m = JSON.parse(window.NativeApp.listMedia());
-            return Array.isArray(m);
-          }
-        },
-        {
-          cat: "Media3 Downloader & Local Storage (Section 3.7)",
-          name: "getStorageInfo() Partition Metrics",
-          fn: () => {
-            const s = JSON.parse(window.NativeApp.getStorageInfo());
-            return s && typeof s.freeBytes === 'number';
-          }
-        },
+/* UI modes */
+function setUi(m){if(m!==ui)prevUi=ui;ui=m;const h=document.documentElement;h.classList.toggle('clear',m!=='app');h.classList.toggle('m-overlay',m==='overlay');h.classList.toggle('m-player',m==='player');$('b3').textContent='mode: '+m;if(m==='player'){$('hud').classList.remove('hide');startPoll()}}
+function leavePlayer(){setUi(prevUi==='player'?'app':prevUi)}
+function hint(t){$('hudind').textContent=t;$('hudind').style.display=t?'block':'none';if(t)log(t)}
+function startPoll(){if(polling)return;polling=setInterval(()=>{try{const s=parse(N.getPlayerState());if(s&&typeof s==='object'){ps=s;hudUpdate();$('audiostate').textContent=s.playing?'Playing '+fmt(s.positionMs)+' / '+fmt(s.durationMs):'Idle';if(ui==='player'){if(!s.playing&&!s.durationMs&&!s.positionMs){if(++badPolls>=6){badPolls=0;hint('Player closed, returning');leavePlayer()}}else badPolls=0}}}catch(e){}},500)}
+function hudUpdate(){const d=ps.durationMs||0,p=ps.positionMs||0;$('ht').textContent=fmt(p);$('hd').textContent=d?fmt(d):'live';if(!seeking&&d)$('hs').value=Math.round(p/d*1000);$('hpp').textContent=ps.playing?'⏸':'▶';$('hsp').textContent=(ps.speed||1)+'x';if(ps.url)$('hudt').textContent=String(ps.url).split('/').pop().slice(0,30)}
+function play(p,audio){const r=call('playStream',J(p));startPoll();if(!audio)setUi('player');log('playStream '+(p.url||'queue'));return r}
+const pc=(cmd,value)=>{try{call('playerControl',J({cmd,value}))}catch(e){hint(e.message)}};
 
-        /* 7. WireGuard App-Only VPN */
-        {
-          cat: "WireGuard VPN Subsystem (Section 3.8)",
-          name: "getVpnStatus() Tunnel State",
-          fn: () => {
-            const st = JSON.parse(window.NativeApp.getVpnStatus());
-            return st && typeof st.state === 'string' && typeof st.hasConfig === 'boolean';
-          }
-        },
-        {
-          cat: "WireGuard VPN Subsystem (Section 3.8)",
-          name: "setVpnKillSwitch() Control",
-          fn: () => {
-            window.NativeApp.setVpnKillSwitch(false);
-            return true;
-          }
-        },
+/* events */
+function onEvt(n,d){seen[n]=(seen[n]||0)+1;
+if(n!=='playbackProgress'&&n!=='downloadProgress')log('EVENT '+n+' '+(d===undefined?'':J(d)).slice(0,180));
+d=d||{};
+if(n==='fabTapped')setUi('overlay');
+else if(n==='overlayHidden')setUi('app');
+else if(n==='siteState')$('ovinfo').textContent=(d.title||'')+' · '+(d.url||'')+(d.loading?' (loading)':'');
+else if(n==='mediaDetected'){const u=String(d.url||'');if(u.indexOf('flex-selftest://')===0)selfResult(u);else{if(u.indexOf('flex-sniff-test')>=0)sniffSeen=true;lastMedia=d;$('lm').textContent='Last media detected ('+(d.source||'?')+'): '+u.slice(0,120)}}
+else if(n==='autoPlayStarted')setUi('player');
+else if(n==='playerState'){Object.assign(ps,d);hudUpdate()}
+else if(n==='playbackProgress'){ps.positionMs=d.positionMs;ps.durationMs=d.durationMs;hudUpdate()}
+else if(n==='ON_PLAYBACK_ERROR')hint('Playback error: '+(d.error||''));
+else if(n==='pipChanged')$('hud').classList.toggle('hide',!!d.inPip);
+else if(n==='downloadProgress'){$('dlp').value=d.progress||0;$('dlt').textContent=(d.fileName||'')+' '+(d.progress||0)+'%'}
+else if(n==='downloadComplete')$('dlt').textContent=(d.fileName||'')+' complete';
+else if(n==='playerClosed'){log('NOTE: playerClosed event exists');leavePlayer()}}
+EVENTS.forEach(n=>window.addEventListener(n,e=>onEvt(n,e.detail)));
+window.__flexEvent=(n,d)=>onEvt(n,parse(d));
 
-        /* 8. Web Filtering & Shell Environment */
-        {
-          cat: "Web Filtering, Sniffer & Environment (Section 3.9)",
-          name: "updateAdBlockRules() Rule Ingestion",
-          fn: () => {
-            window.NativeApp.updateAdBlockRules(JSON.stringify(["doubleclick.net", "popads.net"]));
-            return true;
-          }
-        },
-        {
-          cat: "Web Filtering, Sniffer & Environment (Section 3.9)",
-          name: "updateSniffPatterns() Sniffer Setup",
-          fn: () => {
-            window.NativeApp.updateSniffPatterns(JSON.stringify([".m3u8", ".mp4", ".mpd"]));
-            return true;
-          }
-        },
-        {
-          cat: "Web Filtering, Sniffer & Environment (Section 3.9)",
-          name: "getNotificationPrefs() Schema",
-          fn: () => {
-            const n = JSON.parse(window.NativeApp.getNotificationPrefs());
-            return n && typeof n.downloadProgress === 'boolean';
-          }
-        }
-      ],
+/* site self-test (runs inside the site WebView) */
+function selfTestHtml(){return '<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><body style="font:15px sans-serif;background:#111;color:#fff;padding:16px"><h3>Flex site self-test</h3><pre id=o>running...</pre><script>'+
+'var r={NativeApp:typeof window.NativeApp,FlexSiteBridge:typeof window.FlexSiteBridge},n=0;'+
+'function done(){if(++n<3)return;var s=JSON.stringify(r);document.getElementById("o").textContent=JSON.stringify(r,null,1);try{FlexSiteBridge.reportMedia(JSON.stringify({url:"flex-selftest://r?d="+encodeURIComponent(s)}))}catch(e){document.getElementById("o").textContent+="\\nreportMedia failed: "+e}}'+
+'var i=new Image();i.onload=function(){r.adImage="loaded "+i.naturalWidth+"x"+i.naturalHeight;done()};i.onerror=function(){r.adImage="error";done()};i.src="https://ads.doubleclick.net/flex-test.gif?"+Date.now();'+
+'var s=document.createElement("script");s.onload=function(){r.adScript="loaded(empty)";done()};s.onerror=function(){r.adScript="error";done()};s.src="https://ads.doubleclick.net/flex-test.js?"+Date.now();document.head.appendChild(s);'+
+'fetch("https://example.com/flex-sniff-test.m3u8").catch(function(){});setTimeout(function(){done()},1500);'+
+'<\/script>'}
+function selfResult(url){try{const d=JSON.parse(decodeURIComponent(url.split('d=')[1]));const c=[['NativeApp hidden from site',d.NativeApp==='undefined'],['FlexSiteBridge present',d.FlexSiteBridge!=='undefined'],['Ad image answered (1x1 gif)',/loaded 1x1/.test(d.adImage||'')],['Ad script answered (empty JS)',String(d.adScript||'').indexOf('loaded')===0],['Network sniffer saw .m3u8',sniffSeen]];show('SITE SELF-TEST',c.map(x=>(x[1]?'PASS ':'FAIL ')+x[0]).join('\n')+'\n\nraw: '+J(d))}catch(e){show('SITE SELF-TEST','could not parse: '+e.message)}}
 
-      async flexFetch(url, opts = {}) {
-        return new Promise((resolve, reject) => {
-          const absoluteUrl = new URL(url, window.location.href).href;
-          const callbackId = 'cb_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+function fabIcon(){const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.moveTo(34,24);x.lineTo(34,72);x.lineTo(74,48);x.closePath();x.fill();return c.toDataURL('image/png')}
+const setFab=b=>{call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:b}));show('setFab','sent (visible only in browse mode)')};
+const dl=(o,f)=>{lastDl=o.fileName;show('download',call('download',J(o))||'started')};
 
-          const timeout = setTimeout(() => {
-            delete window.__flexFetchCb[callbackId];
-            reject(new Error("Timed out after 10s"));
-          }, 10000);
+const A={
+runAuto,
+copyRep:()=>{const ta=$('rep');ta.style.display='block';ta.value=reportText();ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}show('Report',ok?'copied to clipboard':'select the text box and copy manually')},
+siteOpen:()=>call('openSite',$('siteUrl').value.trim()),
+siteBack:()=>call('siteBack'),siteFwd:()=>call('siteForward'),siteReload:()=>call('siteReload'),siteStop:()=>call('siteStop'),
+siteClose:()=>{call('closeSite');setUi('app')},
+siteState:()=>show('getSiteState',parse(call('getSiteState'))),
+siteOverlay:()=>{call('showOverlay');setUi('overlay')},
+fabOn:()=>setFab(''),fabBadge:()=>setFab('3'),fabOff:()=>call('setFab',J({visible:false})),
+selfTest:()=>{sniffSeen=false;call('updateAdBlockRules',J(['doubleclick.net']));call('setAutoPlayExternal',false);call('openSite','data:text/html;charset=utf-8,'+encodeURIComponent(selfTestHtml()));show('Self-test','Opening the test page in the site WebView. The result arrives here as a mediaDetected event. If the page does not open, tell me.')},
+pHls:()=>play({url:S.hls,mimeType:'application/x-mpegURL',progressIntervalMs:500,preferredAudioLang:'en',preferredSubtitleLang:'en'}),
+pMp4:()=>play({url:S.mp4,progressIntervalMs:500}),
+pQueue:()=>play({queue:[{url:S.small,title:'Clip'},{url:S.hls,mimeType:'application/x-mpegURL',title:'HLS'}],startIndex:0,progressIntervalMs:500}),
+pResume:()=>{const s=parse(call('getPlaybackState',S.hls));show('Saved state',s);play({url:S.hls,startPositionMs:(s&&s.positionMs)||0,progressIntervalMs:500})},
+pLocal:async()=>{const r=await apick();show('Picked',r);if(r&&r.uri)play({url:r.uri,progressIntervalMs:500})},
+pAudio:()=>play({url:S.mp3,audioMode:true,progressIntervalMs:1000,queue:[{url:S.mp3,title:'Test song',artworkUrl:''}]},true),
+actl:b=>pc(b.dataset.v),
+pState:()=>show('getPlayerState',parse(call('getPlayerState'))),
+pTracks:()=>show('getTracks',parse(call('getTracks'))),
+pHist:()=>show('getAllPlaybackState',parse(call('getAllPlaybackState'))),
+dSmall:()=>dl({url:S.small,fileName:'flex_test_small.mp4',type:'file'}),
+dHls:()=>dl({url:S.hls,fileName:'flex_test_hls.mp4',type:'hls',maxHeight:360,audioLangs:['en'],subtitleLangs:['en']}),
+dPause:()=>call('pauseDownload',lastDl),dResume:()=>call('resumeDownload',lastDl),dCancel:()=>call('cancelDownload',lastDl),
+dDelete:()=>{if(confirm('Delete '+lastDl+'?'))call('deleteMedia',lastDl)},
+dList:()=>show('listDownloads',parse(call('listDownloads'))),dMedia:()=>show('listMedia',parse(call('listMedia'))),dStore:()=>show('getStorageInfo',parse(call('getStorageInfo'))),
+dOffSmall:()=>play({url:S.small,preferOffline:true,progressIntervalMs:500}),
+dOffHls:()=>play({url:S.hls,preferOffline:true,mimeType:'application/x-mpegURL',progressIntervalMs:500}),
+vSet:()=>{const t=$('vcfg').value.trim();if(!t)return show('VPN','Paste a WireGuard config first');call('setVpnConfig',t);$('vcfg').value='';show('VPN','Config sent and the text box was cleared')},
+vClear:()=>call('clearVpnConfig'),vConn:()=>call('vpnConnect'),vDis:()=>call('vpnDisconnect'),vStat:()=>show('getVpnStatus',parse(call('getVpnStatus'))),
+applyBars:()=>{const c=accent();call('setSystemBars',J({color:c,darkIcons:false,navColor:c}));show('setSystemBars',c)},
+insets:()=>{const i=parse(call('getSafeInsets'));$('b2').textContent='insets: '+J(i);show('getSafeInsets',i)},
+briSys:()=>call('setBrightness',-1),
+npGet:()=>show('getNotificationPrefs',parse(call('getNotificationPrefs'))),npOpen:()=>call('openNotificationSettings'),
+ua:()=>call('setUserAgent',$('ua').value),
+abRules:()=>call('updateAdBlockRules',J(lines('abr'))),abAllow:()=>call('setAdBlockAllowlist',J(lines('abw'))),sniff:()=>call('updateSniffPatterns',J(lines('snf'))),
+inj:()=>call('setInjectedScript',$('inj').value),css:()=>call('setCosmeticCss',$('css').value),
+pick:async()=>show('pickLocalMedia',await apick()),
+logs:()=>show('getLogs',parse(call('getLogs'))),
+ext:()=>call('openExternal',$('siteUrl').value.trim()),
+cache:()=>{if(confirm('Clear cache?'))call('clearCache')},cookies:()=>{if(confirm('Clear all cookies?'))call('clearCookies')},minimize:()=>{if(confirm('Minimize the app?'))call('minimizeApp')}
+};
+const C={
+accent:el=>document.documentElement.style.setProperty('--ac',el.value),
+imm:el=>call('setImmersive',el.checked),
+orient:el=>call('setOrientation',el.value),
+bri:el=>call('setBrightness',el.value/100),
+vol:el=>call('setSystemVolume',el.value/100),
+np:()=>{const o={};['downloadProgress','downloadSpeedEta','downloadActions','downloadComplete','playbackControls'].forEach(k=>o[k]=$('np_'+k).checked);call('setNotificationPrefs',J(o));show('setNotificationPrefs',o)},
+wifi:el=>call('setDownloadsWifiOnly',el.checked),
+auto:el=>call('setAutoPlayExternal',el.checked),
+popup:el=>call('setPopupBlocking',el.checked),
+dbg:el=>call('setDebugging',el.checked),
+vauto:el=>call('setVpnAutoConnect',el.checked),
+vkill:el=>{if(el.checked&&!confirm('The kill switch blocks ALL app network while the VPN is down. Enable it?')){el.checked=false;return}call('setVpnKillSwitch',el.checked)}
+};
+const guard=f=>{try{const r=f();if(r&&r.then)r.catch(x=>show('ERROR',x.message))}catch(x){show('ERROR',x.message)}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])guard(()=>A[b.dataset.a](b))});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-c]');if(el&&C[el.dataset.c])guard(()=>C[el.dataset.c](el))});
 
-          window.__flexFetchCb = window.__flexFetchCb || {};
-          window.__flexFetchCb[callbackId] = (resultObj) => {
-            clearTimeout(timeout);
-            delete window.__flexFetchCb[callbackId];
-            resolve(typeof resultObj === 'string' ? JSON.parse(resultObj) : resultObj);
-          };
+/* overlay */
+function closeOv(){try{call('hideOverlay')}catch(e){log(e.message)}setUi('app')}
+$('ov').addEventListener('click',e=>{if(e.target===$('ov'))closeOv()});
+document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o;guard(()=>{if(o==='back')call('siteBack');else if(o==='fwd')call('siteForward');else if(o==='reload')call('siteReload');else if(o==='stop')call('siteStop');else if(o==='home'){call('closeSite');setUi('app')}else if(o==='close')closeOv();else if(o==='play'){if(!lastMedia)return log('No media detected yet');play({url:lastMedia.url,headers:lastMedia.headers||{},progressIntervalMs:500})}})});
 
-          const payload = JSON.stringify({
-            url: absoluteUrl,
-            method: opts.method || 'GET',
-            headers: opts.headers || {},
-            body: opts.body || '',
-            timeout: 30000
-          });
+/* HUD */
+const ind=t=>{$('hudind').textContent=t;$('hudind').style.display=t?'block':'none'};
+const toggleHud=()=>{$('hud').classList.toggle('hide');clearTimeout(hudTimer)};
+$('hx').onclick=()=>{pc('stop');leavePlayer()};
+$('hpp').onclick=()=>pc(ps.playing?'pause':'play');
+document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>pc('seek',Math.max(0,(ps.positionMs||0)+Number(b.dataset.h)*1000)));
+const SP=[0.5,1,1.25,1.5,2];$('hsp').onclick=()=>pc('speed',SP[(SP.indexOf(ps.speed||1)+1)%SP.length]);
+const LY=['fit','fill','zoom'];let li=0;$('hlay').onclick=()=>guard(()=>{li=(li+1)%3;call('setVideoLayout',J({mode:LY[li],scale:1,panX:0,panY:0}));$('hlay').textContent=LY[li]});
+function cycleTrack(type){const t=parse(call('getTracks'));const l=(t&&t[type])||[];if(!l.length)return hint('No '+type+' tracks');const i=l.findIndex(x=>x.selected);const n=(type==='text'&&i===l.length-1)?{id:'off',label:'off'}:l[(i+1)%l.length];call('selectTrack',J({type,id:n.id}));hint(type+': '+(n.label||n.lang||n.id));setTimeout(()=>hint(''),1200)}
+$('hau').onclick=()=>guard(()=>cycleTrack('audio'));$('hsu').onclick=()=>guard(()=>cycleTrack('text'));
+$('hpip').onclick=()=>guard(()=>call('enterPip'));
+const OR=['auto','landscape','portrait'];let oi=0;$('hor').onclick=()=>guard(()=>{oi=(oi+1)%3;call('setOrientation',OR[oi]);hint('Orientation: '+OR[oi]);setTimeout(()=>hint(''),1200)});
+$('hs').addEventListener('input',()=>{seeking=true;$('ht').textContent=fmt($('hs').value/1000*(ps.durationMs||0))});
+$('hs').addEventListener('change',()=>{pc('seek',Math.round($('hs').value/1000*(ps.durationMs||0)));seeking=false});
+(function(){const h=$('hud');let g=null,lastTap=0,tapT=null,lp=null,spd=false;
+h.addEventListener('touchstart',e=>{if(e.target.closest('.hb,button,input'))return;const t=e.touches[0];g={x:t.clientX,y:t.clientY,mode:null,pos:ps.positionMs||0,dur:ps.durationMs||0,b:parseFloat(N&&N.getBrightness())||0.5,v:parseFloat(N&&N.getSystemVolume())||0.5,left:t.clientX<innerWidth/2};lp=setTimeout(()=>{if(g&&!g.mode){spd=true;pc('speed',2);ind('2x speed')}},500)},{passive:true});
+h.addEventListener('touchmove',e=>{if(!g)return;const t=e.touches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;if(!g.mode){if(Math.abs(dx)<12&&Math.abs(dy)<12)return;clearTimeout(lp);g.mode=Math.abs(dx)>Math.abs(dy)?'h':'v'}
+if(g.mode==='h'&&g.dur){g.tgt=Math.max(0,Math.min(g.dur,g.pos+dx/innerWidth*120000));ind('Seek '+fmt(g.tgt)+' / '+fmt(g.dur))}
+else if(g.mode==='v'){const f=-dy/(innerHeight*.7);try{if(g.left){const b=Math.max(0,Math.min(1,g.b+f));call('setBrightness',b);ind('Brightness '+Math.round(b*100)+'%')}else{const v=Math.max(0,Math.min(1,g.v+f));call('setSystemVolume',v);ind('Volume '+Math.round(v*100)+'%')}}catch(x){}}},{passive:true});
+h.addEventListener('touchend',()=>{if(!g)return;clearTimeout(lp);const gg=g;g=null;if(spd){spd=false;pc('speed',1);ind('');return}
+if(gg.mode==='h'&&gg.tgt!=null){pc('seek',Math.round(gg.tgt));ind('');return}if(gg.mode==='v'){setTimeout(()=>ind(''),600);return}
+const now=Date.now();if(now-lastTap<300){clearTimeout(tapT);lastTap=0;pc('seek',Math.max(0,(ps.positionMs||0)+(gg.left?-10000:10000)));ind(gg.left?'-10s':'+10s');setTimeout(()=>ind(''),600)}else{lastTap=now;tapT=setTimeout(toggleHud,300)}},{passive:true})})();
 
-          window.NativeApp.fetchAsync(payload, callbackId);
-        });
-      },
-
-      initUI() {
-        const container = document.getElementById('results-container');
-        container.innerHTML = '';
-        let currentCat = '';
-        let catDiv = null;
-
-        this.tests.forEach((t, i) => {
-          if (t.cat !== currentCat) {
-            currentCat = t.cat;
-            const h = document.createElement('div');
-            h.className = 'category-title';
-            h.textContent = currentCat;
-            container.appendChild(h);
-
-            catDiv = document.createElement('div');
-            catDiv.className = 'test-list';
-            container.appendChild(catDiv);
-          }
-
-          const el = document.createElement('div');
-          el.className = 'test-item';
-          el.id = `test-row-${i}`;
-          el.innerHTML = `
-            <div class="test-info">
-              <div class="test-name">${t.name}</div>
-              <div class="test-detail" id="test-detail-${i}">Waiting...</div>
-            </div>
-            <span class="badge badge-idle" id="test-badge-${i}">IDLE</span>
-          `;
-          catDiv.appendChild(el);
-        });
-
-        document.getElementById('cnt-total').textContent = this.tests.length;
-      },
-
-      async runAll() {
-        if (!window.NativeApp) {
-          alert("window.NativeApp is not detected. Ensure you are running inside the Flex Shell WebView.");
-        }
-
-        let p = 0, f = 0;
-        document.getElementById('cnt-pass').textContent = '0';
-        document.getElementById('cnt-fail').textContent = '0';
-        document.getElementById('cnt-warn').textContent = this.tests.length;
-
-        for (let i = 0; i < this.tests.length; i++) {
-          const t = this.tests[i];
-          const badge = document.getElementById(`test-badge-${i}`);
-          const detail = document.getElementById(`test-detail-${i}`);
-
-          badge.className = 'badge badge-warn';
-          badge.textContent = 'RUN';
-
-          try {
-            const ok = await t.fn();
-            if (ok) {
-              badge.className = 'badge badge-pass';
-              badge.textContent = 'PASS';
-              detail.textContent = 'Contract requirements satisfied';
-              p++;
-            } else {
-              badge.className = 'badge badge-fail';
-              badge.textContent = 'FAIL';
-              detail.textContent = 'Returned unexpected data format';
-              f++;
-            }
-          } catch(err) {
-            badge.className = 'badge badge-fail';
-            badge.textContent = 'ERROR';
-            detail.textContent = err.message || 'Threw unexpected exception';
-            f++;
-          }
-
-          document.getElementById('cnt-pass').textContent = p;
-          document.getElementById('cnt-fail').textContent = f;
-          document.getElementById('cnt-warn').textContent = (this.tests.length - (p + f));
-        }
-      },
-
-      clearResults() {
-        this.initUI();
-        document.getElementById('cnt-pass').textContent = '0';
-        document.getElementById('cnt-fail').textContent = '0';
-        document.getElementById('cnt-warn').textContent = '0';
-      }
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-      Terminal.init();
-      Runner.initUI();
-    });
-  </script>
+/* startup */
+$('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
+if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
+log('Diagnostics ready. Listening for '+EVENTS.length+' events.');
+})();
+</script>
 </body>
 </html>
