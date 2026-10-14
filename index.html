@@ -371,7 +371,29 @@ else if(g.mode==='v'){const f=-dy/(innerHeight*.7);try{if(g.left){const b=Math.m
 h.addEventListener('touchend',()=>{if(!g)return;clearTimeout(lp);const gg=g;g=null;if(spd){spd=false;pc('speed',1);ind('');return}
 if(gg.mode==='h'&&gg.tgt!=null){pc('seek',Math.round(gg.tgt));ind('');return}if(gg.mode==='v'){setTimeout(()=>ind(''),600);return}
 const now=Date.now();if(now-lastTap<300){clearTimeout(tapT);lastTap=0;pc('seek',Math.max(0,(ps.positionMs||0)+(gg.left?-10000:10000)));ind(gg.left?'-10s':'+10s');setTimeout(()=>ind(''),600)}else{lastTap=now;tapT=setTimeout(toggleHud,300)}},{passive:true})})();
-
+/* v9.2 additions */
+['navBlocked','siteDownload'].forEach(n=>window.addEventListener(n,e=>onEvt(n,e.detail)));
+M9.push('setNavBlocking','getNavBlocking');
+const sec=document.createElement('details');
+sec.innerHTML='<summary>9. v9.2 checks</summary>'+
+'<div><button data-a="cap92">Check v9.2 capabilities</button></div>'+
+'<div class="note">Navigation blocking switches</div>'+
+'<label><input type="checkbox" data-c="nb" id="nb_scheme" checked> scheme</label><label><input type="checkbox" data-c="nb" id="nb_adblock" checked> adblock</label><label><input type="checkbox" data-c="nb" id="nb_redirectNoGesture" checked> redirect no gesture</label>'+
+'<div><button class="g" data-a="nbGet">Get nav blocking</button><button data-a="nbTest">Test intent/market block</button></div>'+
+'<div class="note">Status bar gradient</div>'+
+'<div><button data-a="gradDark">Dark gradient</button><button data-a="gradLight">Light gradient</button><button class="g" data-a="gradOff">No gradient</button></div>'+
+'<div class="note">Last site download event</div><pre id="sdl">none</pre>'+
+'<div class="note">Manual: open a site, tap its video fullscreen button (it should go fullscreen and exit cleanly). Tap any download link on a site and watch for the siteDownload event.</div>';
+$('app').appendChild(sec);
+window.addEventListener('siteDownload',e=>{$('sdl').textContent=J(e.detail,null,1)});
+A.cap92=()=>{const c=parse(call('getCapabilities'));const k=['statusBarGradient','navBlockingToggle','siteFullscreen','siteDownloadEvent'];show('v9.2 capabilities',k.map(x=>(c[x]?'PASS ':'FAIL ')+x).join('\n')+'\nshellVersion: '+c.shellVersion)};
+A.nbGet=()=>show('getNavBlocking',parse(call('getNavBlocking')));
+A.nbTest=()=>{call('openSite','data:text/html;charset=utf-8,'+encodeURIComponent('<body style="font:16px sans-serif;background:#111;color:#fff;padding:20px"><h3>Nav-block test</h3><p>Tap each link. PASS if the page stays and nothing opens.</p><p><a href="intent://example.com/#Intent;scheme=https;package=com.android.chrome;end" style="color:#7af;font-size:20px">Open intent link</a></p><p><a href="market://details?id=com.example" style="color:#7af;font-size:20px">Open market link</a></p>'));show('Nav-block test','Tap the links in the site page. A navBlocked event must appear in the log.')};
+const grad=(from,dark)=>{const c=dark?'#0f1115':'#ffffff';call('setSystemBars',J({color:c,darkIcons:!dark,navColor:c,gradient:{from:from,to:'#00000000',extraDp:24}}));show('setSystemBars gradient',from+' to transparent, extraDp 24')};
+A.gradDark=()=>grad('#F20F1115',true);
+A.gradLight=()=>grad('#F2FFFFFF',false);
+A.gradOff=()=>{call('setSystemBars',J({color:accent(),darkIcons:false,navColor:accent(),gradient:null}));show('setSystemBars','gradient removed')};
+C.nb=()=>{const o={scheme:$('nb_scheme').checked,adblock:$('nb_adblock').checked,redirectNoGesture:$('nb_redirectNoGesture').checked};call('setNavBlocking',J(o));show('setNavBlocking',o)};
 /* startup */
 $('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
 if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
