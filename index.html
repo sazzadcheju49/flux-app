@@ -394,7 +394,20 @@ A.gradDark=()=>grad('#F20F1115',true);
 A.gradLight=()=>grad('#F2FFFFFF',false);
 A.gradOff=()=>{call('setSystemBars',J({color:accent(),darkIcons:false,navColor:accent(),gradient:null}));show('setSystemBars','gradient removed')};
 C.nb=()=>{const o={scheme:$('nb_scheme').checked,adblock:$('nb_adblock').checked,redirectNoGesture:$('nb_redirectNoGesture').checked};call('setNavBlocking',J(o));show('setNavBlocking',o)};
-/* startup */
+/* v9.3 additions: cinejoy test, video hook, crash reader */
+const HOOK='(function(){if(window.__flexHook)return;window.__flexHook=1;function rep(u,d){try{FlexSiteBridge.reportMedia(JSON.stringify({url:String(u).slice(0,700),pageUrl:location.href.slice(0,200),durationSec:d||0}))}catch(e){}}function chk(v){var u=v.currentSrc||v.src;if(u&&u.indexOf("blob:")!==0&&(!v.duration||!isFinite(v.duration)||v.duration>60))rep(u,v.duration)}document.addEventListener("play",function(e){if(e.target&&e.target.tagName==="VIDEO")chk(e.target)},true);document.addEventListener("loadedmetadata",function(e){if(e.target&&e.target.tagName==="VIDEO")chk(e.target)},true)})();';
+const s3=document.createElement('details');
+s3.open=true;
+s3.innerHTML='<summary>10. Crash and cinejoy test</summary>'+
+'<div><button data-a="hookOn">1. Install video hook</button><button data-a="cine">2. Open cinejoy.pk</button></div>'+
+'<div><button class="g" data-a="crashGet">getLastCrash</button><button class="g" data-a="crashClear">Clear crash</button><button class="g" data-a="logs">getLogs</button></div>'+
+'<div class="note">Steps: install the hook, open cinejoy.pk, tap a movie and its play button. Then tap the floating button: the overlay should list the detected video under "Play detected". If the app crashes, reopen it and tap getLastCrash.</div>';
+$('app').appendChild(s3);
+A.hookOn=()=>{call('setInjectedScript',HOOK);call('setAutoPlayExternal',false);show('Video hook','installed (auto-play off). It reports the video the page is really playing.')};
+A.cine=()=>{call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:''}));call('openSite','https://cinejoy.pk')};
+A.crashGet=()=>show('getLastCrash',parse(call('getLastCrash'))||'no crash recorded');
+A.crashClear=()=>{call('clearLastCrash');show('Crash','cleared')};
+  /* startup */
 $('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
 if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
 log('Diagnostics ready. Listening for '+EVENTS.length+' events.');
