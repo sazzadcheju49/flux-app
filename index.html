@@ -407,6 +407,20 @@ A.hookOn=()=>{call('setInjectedScript',HOOK);call('setAutoPlayExternal',false);s
 A.cine=()=>{call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:''}));call('openSite','https://cinejoy.pk')};
 A.crashGet=()=>show('getLastCrash',parse(call('getLastCrash'))||'no crash recorded');
 A.crashClear=()=>{call('clearLastCrash');show('Crash','cleared')};
+/* v9.4: pick the best media, filter headers */
+const _onEvt=onEvt;
+const keepH=h=>{const o={};Object.keys(h||{}).forEach(k=>{if(['origin','referer','user-agent','cookie'].indexOf(k.toLowerCase())>=0)o[k]=h[k]});return o};
+onEvt=function(n,d){
+if(n==='mediaDetected'&&d&&d.source!=='page'){
+const u=String(d.url||'');
+seen.mediaDetected=(seen.mediaDetected||0)+1;
+if(u.indexOf('flex-sniff-test')>=0)sniffSeen=true;
+if(/init\.mp4|\.m4s|\.ts(\?|$)|\.vtt|\.jpe?g|\.png|\.webp/i.test(u)){log('skipped fragment ...'+u.slice(-40));return}
+if(/\.m3u8/i.test(u)||!lastMedia||!/\.m3u8/i.test(lastMedia.url||'')){d.headers=keepH(d.headers);lastMedia=d;$('lm').textContent='Best media: '+u.slice(-70);log('best media '+u.slice(0,120))}
+return}
+_onEvt(n,d)};
+s3.insertAdjacentHTML('beforeend','<div><button data-a="playBest">3. Play best detected</button></div>');
+A.playBest=()=>{if(!lastMedia)return show('Play','nothing detected yet');play({url:lastMedia.url,headers:lastMedia.headers||{},progressIntervalMs:500})};  
   /* startup */
 $('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
 if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
