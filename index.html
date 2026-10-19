@@ -437,7 +437,8 @@ if(n==='videoReady'){gotVideo=true;clearTimeout(vTimer);hint('Video ready '+(d&&
 _on2(n,d)};
 s3.insertAdjacentHTML('beforeend','<div class="note">Auto-play test: cinejoy with auto-play ON. The shell should start the native player by itself.</div><div><button data-a="cineAuto">Open cinejoy (auto-play ON)</button><button class="g" data-a="mode">getMode</button></div><div class="note">Notification test: tap Play MP3 (section 3), then pull down the notification shade and lock the screen. You should see play/pause, previous, next and a seek bar.</div>');
 A.cineAuto=()=>{call('setInjectedScript',HOOK);call('setAutoPlayExternal',true);call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:''}));call('openSite','https://cinejoy.pk')};
-A.mode=()=>show('getMode',call('getMode')); 
+A.mode=()=>show('getMode',call('getMode'));
+startPoll=function(){};
   /* startup */
 $('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
 if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
