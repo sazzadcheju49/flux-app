@@ -439,6 +439,11 @@ s3.insertAdjacentHTML('beforeend','<div class="note">Auto-play test: cinejoy wit
 A.cineAuto=()=>{call('setInjectedScript',HOOK);call('setAutoPlayExternal',true);call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:''}));call('openSite','https://cinejoy.pk')};
 A.mode=()=>show('getMode',call('getMode'));
 startPoll=function(){};
+/* v9.6: player debug */
+s3.insertAdjacentHTML('beforeend','<div><button class="g" data-a="pdbg">getPlayerDebug</button></div>');
+A.pdbg=()=>show('getPlayerDebug',parse(call('getPlayerDebug')));
+const _play=play;
+play=function(p,a){const r=_play(p,a);setTimeout(()=>{try{log('DEBUG '+J(parse(N.getPlayerDebug())))}catch(e){log('DEBUG failed '+e.message)}},3000);return r};
   /* startup */
 $('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
 if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
