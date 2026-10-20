@@ -444,7 +444,9 @@ s3.insertAdjacentHTML('beforeend','<div><button class="g" data-a="pdbg">getPlaye
 A.pdbg=()=>show('getPlayerDebug',parse(call('getPlayerDebug')));
 const _play=play;
 play=function(p,a){const r=_play(p,a);setTimeout(()=>{try{log('DEBUG '+J(parse(N.getPlayerDebug())))}catch(e){log('DEBUG failed '+e.message)}},3000);return r};
-  /* startup */
+/* v9.7: autoPlayFailed */
+window.addEventListener('autoPlayFailed',e=>{onEvt('autoPlayFailed',e.detail);hint('Auto-play failed: '+((e.detail&&e.detail.error)||''))});
+/* startup */
 $('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
 if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
 log('Diagnostics ready. Listening for '+EVENTS.length+' events.');
