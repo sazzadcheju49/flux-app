@@ -1,0 +1,4 @@
+doubleclick.net
+pyppo.com
+adsystem
+/ads/
