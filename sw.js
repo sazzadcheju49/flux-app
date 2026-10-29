@@ -1,60 +1,53 @@
-const CACHE_NAME = 'flex-v1';
-const STATIC_ASSETS = [
-  './',
+const CACHE_NAME = 'flex-stage1-v1';
+const NETWORK_FIRST_ASSETS = [
   './index.html',
-  './source.js',
-  './adblock-rules.txt',
-  './cosmetic.css',
   './inject.js',
-  './manifest.json'
+  './cosmetic.css',
+  './adblock-rules.txt'
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(NETWORK_FIRST_ASSETS))
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      )
     )
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
 
-  // Network-first for application core files
-  if (STATIC_ASSETS.some((asset) => url.pathname.endsWith(asset.replace('./', '')))) {
-    e.respondWith(
-      fetch(e.request)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(e.request))
-    );
-    return;
-  }
+  // Network-first for key files
+  const isNetworkFirst = NETWORK_FIRST_ASSETS.some((asset) => url.pathname.endsWith(asset.replace('./', '')));
 
-  // Stale-while-revalidate for TMDB API and dynamic media images
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      const fetchPromise = fetch(e.request)
-        .then((networkRes) => {
-          if (networkRes.status === 200) {
-            const clone = networkRes.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+  if (isNetworkFirst) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           }
-          return networkRes;
+          return response;
         })
-        .catch(() => cached);
-      return cached || fetchPromise;
-    })
-  );
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    // Cache-first for all other static assets
+    event.respondWith(
+      caches.match(event.request).then((cached) => cached || fetch(event.request))
+    );
+  }
 });
