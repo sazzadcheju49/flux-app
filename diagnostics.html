@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flex Shell Diagnostics</title>
+<style>
+:root{--ac:#2563eb;--bg:#0f1115;--cd:#181b21;--tx:#e8eaed;--mu:#8a909b;--ok:#22c55e;--bd:#ef4444;--wn:#f59e0b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif}
+html.clear,html.clear body{background:transparent!important}
+html.clear #app{display:none}
+#app{padding:12px 12px 80px;max-width:720px;margin:auto}
+h1{font-size:18px;margin:4px 0 8px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--cd);color:var(--mu);font-size:12px;margin:0 6px 4px 0}
+details{background:var(--cd);border-radius:12px;margin:10px 0;padding:0 12px 8px}
+summary{padding:12px 0;font-weight:600}
+button,select,input,textarea{font:inherit;color:var(--tx);background:#252932;border:1px solid #333845;border-radius:8px;padding:8px 10px;margin:3px 3px 3px 0}
+button{background:var(--ac);border:0;color:#fff}
+button.g{background:#2a2e38;color:var(--tx)}
+button.r{background:#7f1d1d}
+input[type=checkbox]{width:18px;height:18px;padding:0;vertical-align:middle}
+input[type=range]{padding:0}
+input[type=color]{padding:0;height:36px;width:56px}
+textarea{width:100%;min-height:70px;font-family:monospace;font-size:12px}
+input[type=text],input[type=url]{width:100%}
+label{display:inline-block;margin:4px 12px 4px 0}
+pre{white-space:pre-wrap;word-break:break-all;background:#0b0d10;border-radius:8px;padding:8px;font-size:12px;max-height:200px;overflow:auto;margin:6px 0}
+.res{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #262a33}
+.res span:last-child{text-align:right;word-break:break-word}
+.PASS{color:var(--ok)}.FAIL{color:var(--bd)}.WARN{color:var(--wn)}.INFO{color:var(--mu)}
+progress{width:100%}
+.note{color:var(--mu);font-size:12px;margin:4px 0}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:50}
+html.m-overlay #ov{display:block}
+#ovbar{position:absolute;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);background:rgba(24,27,33,.96);border-radius:16px;padding:10px;color:var(--tx)}
+#ovinfo{font-size:12px;color:var(--mu);margin-bottom:6px;word-break:break-all}
+#hud{display:none;position:fixed;inset:0;z-index:60;user-select:none;-webkit-user-select:none;touch-action:none}
+html.m-player #hud{display:block}
+.hb{position:absolute;left:0;right:0;background:rgba(0,0,0,.55);padding:8px 12px;color:#fff}
+#hudtop{top:0;display:flex;justify-content:space-between;align-items:center;padding-top:calc(env(safe-area-inset-top,0px) + 8px)}
+#hudbot{bottom:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)}
+#hudmid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#hudmid button{font-size:28px;border-radius:50%;width:64px;height:64px;background:rgba(0,0,0,.55)}
+#hudind{position:absolute;top:30%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;border-radius:10px;padding:6px 14px;font-size:16px;display:none}
+#hud.hide .hb,#hud.hide #hudmid{display:none}
+#hudrow{display:flex;align-items:center;gap:8px;color:#fff}
+#hudrow input{flex:1;margin:0}
+</style>
+</head>
+<body>
+<div id="app">
+<h1>Flex Shell Diagnostics</h1>
+<div><span class="badge" id="b1">shell: ?</span><span class="badge" id="b2">insets: ?</span><span class="badge" id="b3">mode: app</span></div>
+
+<details open><summary>1. Auto tests</summary>
+<div><button data-a="runAuto">Run auto tests</button><button class="g" data-a="copyRep">Copy report</button></div>
+<div id="res"></div>
+<textarea id="rep" readonly style="display:none"></textarea>
+<div class="note">Read-only checks plus network calls. Nothing here changes your settings.</div>
+</details>
+
+<details><summary>2. Website, floating button, overlay</summary>
+<input type="url" id="siteUrl" value="https://example.com">
+<div>
+<button data-a="siteOpen">Open site</button><button class="g" data-a="siteBack">Back</button><button class="g" data-a="siteFwd">Fwd</button><button class="g" data-a="siteReload">Reload</button><button class="g" data-a="siteStop">Stop</button><button class="g" data-a="siteClose">Close site</button><button class="g" data-a="siteState">Get state</button><button class="g" data-a="siteOverlay">Show overlay</button>
+</div>
+<div><button data-a="fabOn">FAB on</button><button class="g" data-a="fabBadge">FAB badge 3</button><button class="g" data-a="fabOff">FAB off</button><button data-a="selfTest">Site self-test</button></div>
+<div class="note" id="lm">Last media detected: none</div>
+<div class="note">Open a site, then tap the floating button. This page should appear transparent over the site with a navigation bar. The self-test sets the ad rule "doubleclick.net" and checks that sites cannot see NativeApp, that blocked ads get typed replies, and that the network sniffer fires.</div>
+</details>
+
+<details><summary>3. Player</summary>
+<div>
+<button data-a="pHls">Play HLS</button><button data-a="pMp4">Play MP4</button><button data-a="pQueue">Play queue</button><button data-a="pResume">Resume HLS</button><button data-a="pLocal">Play local file</button>
+</div>
+<div class="note">Audio mode (stays on this page):</div>
+<div>
+<button data-a="pAudio">Play MP3</button><button class="g" data-a="actl" data-v="play">Play</button><button class="g" data-a="actl" data-v="pause">Pause</button><button class="g" data-a="actl" data-v="stop">Stop</button>
+</div>
+<div><button class="g" data-a="pState">getPlayerState</button><button class="g" data-a="pTracks">getTracks</button><button class="g" data-a="pHist">Saved positions</button></div>
+<div class="note" id="audiostate"></div>
+<div class="note">Video opens a transparent HUD over the native video: tap to show or hide controls, swipe left/right to seek, swipe the left or right half up/down for brightness or volume, double-tap the sides for ±10s, long-press for 2x. Hardware Back should close it.</div>
+</details>
+
+<details><summary>4. Downloads</summary>
+<div>
+<button data-a="dSmall">Download small MP4</button><button data-a="dHls">Download HLS (360p)</button>
+</div>
+<progress id="dlp" max="100" value="0"></progress><div class="note" id="dlt">No download yet</div>
+<div>
+<button class="g" data-a="dPause">Pause</button><button class="g" data-a="dResume">Resume</button><button class="g" data-a="dCancel">Cancel</button><button class="r" data-a="dDelete">Delete</button>
+</div>
+<div>
+<button class="g" data-a="dList">listDownloads</button><button class="g" data-a="dMedia">listMedia</button><button class="g" data-a="dStore">Storage</button>
+</div>
+<div><button class="g" data-a="dOffSmall">Play small offline</button><button class="g" data-a="dOffHls">Play HLS offline</button></div>
+<div class="note">For the offline test, let the download finish, turn on airplane mode, then press an offline button.</div>
+</details>
+
+<details><summary>5. VPN</summary>
+<textarea id="vcfg" placeholder="Paste a WireGuard config here"></textarea>
+<div>
+<button data-a="vSet">Save config</button><button class="g" data-a="vClear">Clear config</button><button data-a="vConn">Connect</button><button class="g" data-a="vDis">Disconnect</button><button class="g" data-a="vStat">Status</button>
+</div>
+<label><input type="checkbox" data-c="vauto"> Auto-connect</label>
+<label><input type="checkbox" data-c="vkill"> Kill switch</label>
+<div class="note">The text box is cleared after saving. The kill switch blocks all app network while the VPN is down.</div>
+</details>
+
+<details><summary>6. Settings and hardware</summary>
+<div>Accent <input type="color" id="accent" value="#2563eb" data-c="accent"> <button data-a="applyBars">Apply to bars</button><button class="g" data-a="insets">Safe insets</button></div>
+<label><input type="checkbox" data-c="imm"> Immersive</label>
+<label>Orientation <select data-c="orient"><option>auto</option><option>landscape</option><option>portrait</option></select></label>
+<div>Brightness <input type="range" min="0" max="100" value="50" data-c="bri"> <button class="g" data-a="briSys">System</button></div>
+<div>Volume <input type="range" min="0" max="100" value="50" data-c="vol"></div>
+<div class="note">Notifications</div>
+<div>
+<label><input type="checkbox" data-c="np" id="np_downloadProgress" checked> progress</label>
+<label><input type="checkbox" data-c="np" id="np_downloadSpeedEta" checked> speed/ETA</label>
+<label><input type="checkbox" data-c="np" id="np_downloadActions" checked> actions</label>
+<label><input type="checkbox" data-c="np" id="np_downloadComplete" checked> complete</label>
+<label><input type="checkbox" data-c="np" id="np_playbackControls" checked> playback</label>
+</div>
+<div><button class="g" data-a="npGet">Get prefs</button><button class="g" data-a="npOpen">System settings</button></div>
+<label><input type="checkbox" data-c="wifi"> Wi-Fi only downloads</label>
+<label><input type="checkbox" data-c="auto"> Auto-play external</label>
+<label><input type="checkbox" data-c="popup" checked> Block popups</label>
+<label><input type="checkbox" data-c="dbg"> Remote debugging</label>
+<input type="text" id="ua" placeholder="User agent (site WebView)"><button data-a="ua">Set user agent</button>
+<div class="note">Ad-block rules (one per line)</div>
+<textarea id="abr">doubleclick.net
+adservice
+/ads/</textarea><button data-a="abRules">Update rules</button>
+<div class="note">Allowlist</div>
+<textarea id="abw" style="min-height:40px"></textarea><button data-a="abAllow">Set allowlist</button>
+<div class="note">Sniff patterns</div>
+<textarea id="snf" style="min-height:40px">.m3u8
+.mp4
+.ts
+.mpd
+.mkv
+.webm
+.mp3
+.m4a</textarea><button data-a="sniff">Set patterns</button>
+<div class="note">Injected script (site pages)</div>
+<textarea id="inj" style="min-height:40px">console.log("flex inject ok")</textarea><button data-a="inj">Set script</button>
+<div class="note">Cosmetic CSS (site pages)</div>
+<textarea id="css" style="min-height:40px">.ad,.ads,[id^="ad-"]{display:none!important}</textarea><button data-a="css">Set CSS</button>
+<div>
+<button class="g" data-a="pick">Pick local file</button><button class="g" data-a="logs">getLogs</button><button class="g" data-a="ext">Open URL externally</button><button class="r" data-a="cache">Clear cache</button><button class="r" data-a="cookies">Clear cookies</button><button class="r" data-a="minimize">Minimize</button>
+</div>
+</details>
+
+<details><summary>7. Manual checklist</summary>
+<div class="note">1. App mode: status bar and notch strip show your accent color, and this page does not go under the notch.<br>
+2. Open a site: the page fits the screen. The floating button appears, drags, and snaps to an edge.<br>
+3. Tap the button: transparent overlay with the nav bar. Back, Forward, Reload and Close work. Tapping outside the bar closes it.<br>
+4. Run the site self-test: it should report four PASS lines.<br>
+5. Play HLS: edge-to-edge video with no notch strip, the HUD works, gestures work, and PiP works. Press hardware Back: you should return here.<br>
+6. Download the small file, watch the notification (speed and ETA), then play it offline.<br>
+7. MP3 in audio mode: turn the screen off and confirm it keeps playing.<br>
+8. Enable VPN with a config and confirm the status changes.</div>
+</details>
+
+<details open><summary>8. Output and event log</summary>
+<pre id="out">Results appear here</pre>
+<pre id="log"></pre>
+</details>
+</div>
+
+<div id="ov"><div id="ovbar">
+<div id="ovinfo">No site state yet</div>
+<button class="g" data-o="back">◀</button><button class="g" data-o="fwd">▶</button><button class="g" data-o="reload">⟳</button><button class="g" data-o="stop">✕ Stop</button><button class="g" data-o="home">⌂ Home</button><button data-o="play">▶ Play detected</button><button class="r" data-o="close">Close</button>
+</div></div>
+
+<div id="hud">
+<div class="hb" id="hudtop"><span id="hudt">Playing</span><button class="g" id="hx">✕ Close</button></div>
+<div id="hudmid"><button id="hpp">⏸</button></div>
+<div id="hudind"></div>
+<div class="hb" id="hudbot">
+<div id="hudrow"><span id="ht">0:00</span><input type="range" id="hs" min="0" max="1000" value="0"><span id="hd">0:00</span></div>
+<div>
+<button class="g" data-h="-10">⏪10</button><button class="g" data-h="10">10⏩</button><button class="g" id="hsp">1x</button><button class="g" id="hlay">fit</button><button class="g" id="hau">Audio</button><button class="g" id="hsu">Subs</button><button class="g" id="hpip">PiP</button><button class="g" id="hor">Rotate</button>
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const $=i=>document.getElementById(i),J=JSON.stringify,N=window.NativeApp;
+const S={hls:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',mp4:'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',small:'https://www.w3schools.com/html/mov_bbb.mp4',mp3:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'};
+const EVENTS=['siteState','fabTapped','overlayHidden','autoPlayStarted','mediaDetected','playerState','playbackProgress','playbackEnded','queueItemChanged','tracksChanged','pipChanged','ON_PLAYBACK_ERROR','downloadProgress','downloadPaused','downloadResumed','downloadCancelled','downloadComplete','downloadError','mediaDeleted','networkChange','vpnStatus','playerClosed'];
+const M9=['getCapabilities','openSite','closeSite','siteBack','siteForward','siteReload','siteStop','getSiteState','showOverlay','hideOverlay','setFab','getSafeInsets','setSystemBars','setImmersive','fetch','fetchAsync','playStream','playerControl','getPlayerState','getTracks','selectTrack','setSubtitleStyle','setVideoLayout','setBrightness','getBrightness','setSystemVolume','getSystemVolume','setOrientation','enterPip','getPlaybackState','getAllPlaybackState','download','pauseDownload','resumeDownload','cancelDownload','deleteMedia','listDownloads','listMedia','getStorageInfo','setDownloadsWifiOnly','setVpnConfig','clearVpnConfig','vpnConnect','vpnDisconnect','getVpnStatus','setVpnAutoConnect','setVpnKillSwitch','updateAdBlockRules','setAdBlockAllowlist','updateSniffPatterns','setAutoPlayExternal','setInjectedScript','setCosmeticCss','setUserAgent','setNotificationPrefs','getNotificationPrefs','openNotificationSettings','pickLocalMedia','clearCache','clearCookies','openExternal','minimizeApp','setDebugging'];
+const EXTRA=['getLogs','setPopupBlocking','requestPermission'];
+let ui='app',prevUi='app',ps={},lastMedia=null,lastDl='',results=[],seen={},polling=null,badPolls=0,hudTimer=null,seeking=false,sniffSeen=false;
+
+const parse=v=>{if(typeof v==='string'){try{return JSON.parse(v)}catch(e){return v}}return v};
+const fmt=ms=>{const s=Math.max(0,Math.floor((ms||0)/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const accent=()=>getComputedStyle(document.documentElement).getPropertyValue('--ac').trim()||'#2563eb';
+const lines=id=>$(id).value.split('\n').map(x=>x.trim()).filter(Boolean);
+function log(m){const l=$('log');l.textContent+=new Date().toTimeString().slice(0,8)+' '+m+'\n';const a=l.textContent.split('\n');if(a.length>200)l.textContent=a.slice(-150).join('\n');l.scrollTop=l.scrollHeight}
+function show(label,v){const s=typeof v==='string'?v:J(v,null,1);$('out').textContent=label+'\n'+s;log(label+' '+(s.length>150?s.slice(0,150)+'…':s))}
+function call(n,...a){if(!N)throw new Error('NativeApp missing (open this inside the Flex app)');if(typeof N[n]!=='function')throw new Error('method not found: '+n);return N[n](...a)}
+
+/* callback registry: supports __flexFetchCb(id,res) and __flexFetchCb[id](res) */
+function cb(id,res){const f=cb[id];if(typeof f==='function'){delete cb[id];f(parse(res))}}
+window.__flexFetchCb=cb;
+const uid=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function viaCb(run,ms){return new Promise((ok,no)=>{const id=uid();const t=setTimeout(()=>{delete cb[id];no(new Error('callback timeout'))},ms||20000);cb[id]=r=>{clearTimeout(t);ok(r)};try{run(id)}catch(e){clearTimeout(t);delete cb[id];no(e)}})}
+const afetch=(req,ms)=>viaCb(id=>call('fetchAsync',J(req),id),ms);
+const apick=()=>viaCb(id=>call('pickLocalMedia',id),120000);
+
+/* results */
+function rec(n,s,d){results.push({n,s,d:d||''});const r=document.createElement('div');r.className='res';const a=document.createElement('span');a.textContent=n;const b=document.createElement('span');b.className=s;b.textContent=s+(d?' · '+String(d).slice(0,140):'');r.appendChild(a);r.appendChild(b);$('res').appendChild(r)}
+function idbTest(){return new Promise((ok,no)=>{const q=indexedDB.open('flexdiag',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onerror=()=>no(q.error);q.onsuccess=()=>{const db=q.result;const tx=db.transaction('k','readwrite');tx.objectStore('k').put('ok','t');tx.oncomplete=()=>{const g=db.transaction('k').objectStore('k').get('t');g.onsuccess=()=>{db.close();g.result==='ok'?ok(true):no(new Error('read mismatch'))};g.onerror=()=>no(g.error)};tx.onerror=()=>no(tx.error)}})}
+async function runAuto(){
+results=[];$('res').innerHTML='';
+const T=async(name,fn)=>{try{const r=await fn();if(r===true)rec(name,'PASS');else if(r&&r.s)rec(name,r.s,r.d);else rec(name,'PASS',typeof r==='string'?r:'')}catch(e){rec(name,'FAIL',e.message||String(e))}};
+await T('Shell attached',()=>{if(!N)throw new Error('window.NativeApp missing');return true});
+if(N){
+await T('Capabilities',()=>{const c=parse(N.getCapabilities());if(typeof c!=='object')throw new Error('not JSON');return{s:'PASS',d:'v'+(c.shellVersion||'?')+', '+Object.keys(c).length+' flags'}});
+await T('Methods in v9.0 contract',()=>{const m=M9.filter(x=>typeof N[x]!=='function');return m.length?{s:'FAIL',d:'missing: '+m.join(', ')}:{s:'PASS',d:M9.length+' present'}});
+await T('Extra methods (getLogs, setPopupBlocking, requestPermission)',()=>{const m=EXTRA.filter(x=>typeof N[x]!=='function');return m.length?{s:'WARN',d:'not found: '+m.join(', ')}:{s:'PASS',d:'all present'}});
+await T('Callback registry + fetchAsync',async()=>{const r=await afetch({url:'https://example.com',method:'GET',timeout:15000});if(!r||r.status!==200)throw new Error('status '+(r&&r.status)+' '+((r&&r.error)||''));return{s:'PASS',d:'200, finalUrl '+r.finalUrl+', '+(r.body||'').length+' chars'}});
+await T('fetchAsync base64',async()=>{const r=await afetch({url:'https://example.com',responseType:'base64',timeout:15000});const t=atob((r&&r.body)||'');if(t.indexOf('Example')<0)throw new Error('decoded body unexpected');return true});
+await T('fetchAsync error handling',async()=>{const r=await afetch({url:'https://nonexistent.invalid',timeout:8000});if(r&&(r.error||r.status>=400||r.status===0))return{s:'PASS',d:J(r).slice(0,100)};throw new Error('no error reported')});
+await T('Sync fetch',()=>{const r=parse(N.fetch(J({url:'https://example.com',method:'GET',timeout:15000})));if(!r||r.status!==200)throw new Error('status '+(r&&r.status));return true});
+await T('IndexedDB',idbTest);
+await T('Safe insets',()=>{const i=parse(N.getSafeInsets());if(typeof i!=='object'||isNaN(i.top))throw new Error('bad insets');return J(i)});
+await T('Site state',()=>{const s=parse(N.getSiteState());if(typeof s!=='object'||!('canGoBack' in s))throw new Error('bad state');return J(s)});
+await T('Player state',()=>{const s=parse(N.getPlayerState());if(typeof s!=='object')throw new Error('bad state');return J(s)});
+await T('Brightness / volume getters',()=>{const b=Number(N.getBrightness()),v=Number(N.getSystemVolume());if(!isFinite(b)||!isFinite(v))throw new Error('not numbers');return'brightness '+b+', volume '+v});
+await T('Notification prefs',()=>{const p=parse(N.getNotificationPrefs());if(typeof p!=='object')throw new Error('bad prefs');return J(p)});
+await T('VPN status',()=>{const s=parse(N.getVpnStatus());if(!s||!s.state)throw new Error('bad status');return J(s)});
+await T('Downloads, media, storage',()=>{const a=parse(N.listDownloads()),b=parse(N.listMedia()),c=parse(N.getStorageInfo());if(!Array.isArray(a)||!Array.isArray(b)||typeof c!=='object')throw new Error('bad shapes');return a.length+' downloads, '+b.length+' media, free '+Math.round(c.freeBytes/1e9)+' GB'});
+await T('Playback history',()=>{const a=parse(N.getAllPlaybackState());if(!Array.isArray(a))throw new Error('not an array');return a.length+' records'});
+if(typeof N.getLogs==='function')await T('getLogs',()=>{const l=parse(N.getLogs());if(!Array.isArray(l))throw new Error('not an array');return l.length+' lines'});
+}
+const c={PASS:0,FAIL:0,WARN:0};results.forEach(r=>{if(c[r.s]!=null)c[r.s]++});
+rec('SUMMARY',c.FAIL?'FAIL':(c.WARN?'WARN':'PASS'),c.PASS+' pass, '+c.WARN+' warn, '+c.FAIL+' fail');
+}
+function reportText(){return 'Flex diagnostics '+new Date().toISOString()+'\n'+results.map(r=>r.s+' | '+r.n+(r.d?' | '+r.d:'')).join('\n')+'\n\nEvents seen: '+J(seen)+'\n\nLog:\n'+$('log').textContent.split('\n').slice(-40).join('\n')}
+
+/* UI modes */
+function setUi(m){if(m!==ui)prevUi=ui;ui=m;const h=document.documentElement;h.classList.toggle('clear',m!=='app');h.classList.toggle('m-overlay',m==='overlay');h.classList.toggle('m-player',m==='player');$('b3').textContent='mode: '+m;if(m==='player'){$('hud').classList.remove('hide');startPoll()}}
+function leavePlayer(){setUi(prevUi==='player'?'app':prevUi)}
+function hint(t){('hudind').textContent=t;('hudind').style.display=t?'block':'none';if(t)log(t)}
+function startPoll(){if(polling)return;polling=setInterval(()=>{try{const s=parse(N.getPlayerState());if(s&&typeof s==='object'){ps=s;hudUpdate();$('audiostate').textContent=s.playing?'Playing '+fmt(s.positionMs)+' / '+fmt(s.durationMs):'Idle';if(ui==='player'){if(!s.playing&&!s.durationMs&&!s.positionMs){if(++badPolls>=100000){badPolls=0;hint('Player closed, returning');leavePlayer()}}else badPolls=0}}}catch(e){}},500)}
+function hudUpdate(){const d=ps.durationMs||0,p=ps.positionMs||0;('ht').textContent=fmt(p);('hd').textContent=d?fmt(d):'live';if(!seeking&&d)('hs').value=Math.round(p/d*1000);('hpp').textContent=ps.playing?'⏸':'▶';('hsp').textContent=(ps.speed||1)+'x';if(ps.url)('hudt').textContent=String(ps.url).split('/').pop().slice(0,30)}
+function play(p,audio){const r=call('playStream',J(p));startPoll();if(!audio)setUi('player');log('playStream '+(p.url||'queue'));return r}
+const pc=(cmd,value)=>{try{call('playerControl',J({cmd,value}))}catch(e){hint(e.message)}};
+
+/* events */
+function onEvt(n,d){seen[n]=(seen[n]||0)+1;
+if(n!=='playbackProgress'&&n!=='downloadProgress')log('EVENT '+n+' '+(d===undefined?'':J(d)).slice(0,180));
+d=d||{};
+if(n==='fabTapped')setUi('overlay');
+else if(n==='overlayHidden')setUi('app');
+else if(n==='siteState')$('ovinfo').textContent=(d.title||'')+' · '+(d.url||'')+(d.loading?' (loading)':'');
+else if(n==='mediaDetected'){const u=String(d.url||'');if(u.indexOf('flex-selftest://')===0)selfResult(u);else{if(u.indexOf('flex-sniff-test')>=0)sniffSeen=true;lastMedia=d;$('lm').textContent='Last media detected ('+(d.source||'?')+'): '+u.slice(0,120)}}
+else if(n==='autoPlayStarted')setUi('player');
+else if(n==='playerState'){Object.assign(ps,d);hudUpdate()}
+else if(n==='playbackProgress'){ps.positionMs=d.positionMs;ps.durationMs=d.durationMs;hudUpdate()}
+else if(n==='ON_PLAYBACK_ERROR')hint('Playback error: '+(d.error||''));
+else if(n==='pipChanged')$('hud').classList.toggle('hide',!!d.inPip);
+else if(n==='downloadProgress'){('dlp').value=d.progress||0;('dlt').textContent=(d.fileName||'')+' '+(d.progress||0)+'%'}
+else if(n==='downloadComplete')$('dlt').textContent=(d.fileName||'')+' complete';
+else if(n==='playerClosed'){log('NOTE: playerClosed event exists');leavePlayer()}}
+EVENTS.forEach(n=>window.addEventListener(n,e=>onEvt(n,e.detail)));
+window.__flexEvent=(n,d)=>onEvt(n,parse(d));
+
+/* site self-test (runs inside the site WebView) */
+function selfTestHtml(){return '<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><body style="font:15px sans-serif;background:#111;color:#fff;padding:16px"><h3>Flex site self-test</h3><pre id=o>running...</pre><script>'+
+'var r={NativeApp:typeof window.NativeApp,FlexSiteBridge:typeof window.FlexSiteBridge},n=0;'+
+'function done(){if(++n<3)return;var s=JSON.stringify(r);document.getElementById("o").textContent=JSON.stringify(r,null,1);try{FlexSiteBridge.reportMedia(JSON.stringify({url:"flex-selftest://r?d="+encodeURIComponent(s)}))}catch(e){document.getElementById("o").textContent+="\\nreportMedia failed: "+e}}'+
+'var i=new Image();i.onload=function(){r.adImage="loaded "+i.naturalWidth+"x"+i.naturalHeight;done()};i.onerror=function(){r.adImage="error";done()};i.src="https://ads.doubleclick.net/flex-test.gif?"+Date.now();'+
+'var s=document.createElement("script");s.onload=function(){r.adScript="loaded(empty)";done()};s.onerror=function(){r.adScript="error";done()};s.src="https://ads.doubleclick.net/flex-test.js?"+Date.now();document.head.appendChild(s);'+
+'fetch("https://example.com/flex-sniff-test.m3u8").catch(function(){});setTimeout(function(){done()},1500);'+
+'<\/script>'}
+function selfResult(url){try{const d=JSON.parse(decodeURIComponent(url.split('d=')[1]));const c=[['NativeApp hidden from site',d.NativeApp==='undefined'],['FlexSiteBridge present',d.FlexSiteBridge!=='undefined'],['Ad image answered (1x1 gif)',/loaded 1x1/.test(d.adImage||'')],['Ad script answered (empty JS)',String(d.adScript||'').indexOf('loaded')===0],['Network sniffer saw .m3u8',sniffSeen]];show('SITE SELF-TEST',c.map(x=>(x[1]?'PASS ':'FAIL ')+x[0]).join('\n')+'\n\nraw: '+J(d))}catch(e){show('SITE SELF-TEST','could not parse: '+e.message)}}
+
+function fabIcon(){const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.moveTo(34,24);x.lineTo(34,72);x.lineTo(74,48);x.closePath();x.fill();return c.toDataURL('image/png')}
+const setFab=b=>{call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:b}));show('setFab','sent (visible only in browse mode)')};
+const dl=(o,f)=>{lastDl=o.fileName;show('download',call('download',J(o))||'started')};
+
+const A={
+runAuto,
+copyRep:()=>{const ta=$('rep');ta.style.display='block';ta.value=reportText();ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}show('Report',ok?'copied to clipboard':'select the text box and copy manually')},
+siteOpen:()=>call('openSite',$('siteUrl').value.trim()),
+siteBack:()=>call('siteBack'),siteFwd:()=>call('siteForward'),siteReload:()=>call('siteReload'),siteStop:()=>call('siteStop'),
+siteClose:()=>{call('closeSite');setUi('app')},
+siteState:()=>show('getSiteState',parse(call('getSiteState'))),
+siteOverlay:()=>{call('showOverlay');setUi('overlay')},
+fabOn:()=>setFab(''),fabBadge:()=>setFab('3'),fabOff:()=>call('setFab',J({visible:false})),
+selfTest:()=>{sniffSeen=false;call('updateAdBlockRules',J(['doubleclick.net']));call('setAutoPlayExternal',false);call('openSite','data:text/html;charset=utf-8,'+encodeURIComponent(selfTestHtml()));show('Self-test','Opening the test page in the site WebView. The result arrives here as a mediaDetected event. If the page does not open, tell me.')},
+pHls:()=>play({url:S.hls,mimeType:'application/x-mpegURL',progressIntervalMs:500,preferredAudioLang:'en',preferredSubtitleLang:'en'}),
+pMp4:()=>play({url:S.mp4,progressIntervalMs:500}),
+pQueue:()=>play({queue:[{url:S.small,title:'Clip'},{url:S.hls,mimeType:'application/x-mpegURL',title:'HLS'}],startIndex:0,progressIntervalMs:500}),
+pResume:()=>{const s=parse(call('getPlaybackState',S.hls));show('Saved state',s);play({url:S.hls,startPositionMs:(s&&s.positionMs)||0,progressIntervalMs:500})},
+pLocal:async()=>{const r=await apick();show('Picked',r);if(r&&r.uri)play({url:r.uri,progressIntervalMs:500})},
+pAudio:()=>play({url:S.mp3,audioMode:true,progressIntervalMs:1000,queue:[{url:S.mp3,title:'Test song',artworkUrl:''}]},true),
+actl:b=>pc(b.dataset.v),
+pState:()=>show('getPlayerState',parse(call('getPlayerState'))),
+pTracks:()=>show('getTracks',parse(call('getTracks'))),
+pHist:()=>show('getAllPlaybackState',parse(call('getAllPlaybackState'))),
+dSmall:()=>dl({url:S.small,fileName:'flex_test_small.mp4',type:'file'}),
+dHls:()=>dl({url:S.hls,fileName:'flex_test_hls.mp4',type:'hls',maxHeight:360,audioLangs:['en'],subtitleLangs:['en']}),
+dPause:()=>call('pauseDownload',lastDl),dResume:()=>call('resumeDownload',lastDl),dCancel:()=>call('cancelDownload',lastDl),
+dDelete:()=>{if(confirm('Delete '+lastDl+'?'))call('deleteMedia',lastDl)},
+dList:()=>show('listDownloads',parse(call('listDownloads'))),dMedia:()=>show('listMedia',parse(call('listMedia'))),dStore:()=>show('getStorageInfo',parse(call('getStorageInfo'))),
+dOffSmall:()=>play({url:S.small,preferOffline:true,progressIntervalMs:500}),
+dOffHls:()=>play({url:S.hls,preferOffline:true,mimeType:'application/x-mpegURL',progressIntervalMs:500}),
+vSet:()=>{const t=('vcfg').value.trim();if(!t)returnshow('VPN','PasteaWireGuardconfigfirst');call('setVpnConfig',t);('vcfg').value='';show('VPN','Config sent and the text box was cleared')},
+vClear:()=>call('clearVpnConfig'),vConn:()=>call('vpnConnect'),vDis:()=>call('vpnDisconnect'),vStat:()=>show('getVpnStatus',parse(call('getVpnStatus'))),
+applyBars:()=>{const c=accent();call('setSystemBars',J({color:c,darkIcons:false,navColor:c}));show('setSystemBars',c)},
+insets:()=>{const i=parse(call('getSafeInsets'));$('b2').textContent='insets: '+J(i);show('getSafeInsets',i)},
+briSys:()=>call('setBrightness',-1),
+npGet:()=>show('getNotificationPrefs',parse(call('getNotificationPrefs'))),npOpen:()=>call('openNotificationSettings'),
+ua:()=>call('setUserAgent',$('ua').value),
+abRules:()=>call('updateAdBlockRules',J(lines('abr'))),abAllow:()=>call('setAdBlockAllowlist',J(lines('abw'))),sniff:()=>call('updateSniffPatterns',J(lines('snf'))),
+inj:()=>call('setInjectedScript',('inj').value),css:()=>call('setCosmeticCss',('css').value),
+pick:async()=>show('pickLocalMedia',await apick()),
+logs:()=>show('getLogs',parse(call('getLogs'))),
+ext:()=>call('openExternal',$('siteUrl').value.trim()),
+cache:()=>{if(confirm('Clear cache?'))call('clearCache')},cookies:()=>{if(confirm('Clear all cookies?'))call('clearCookies')},minimize:()=>{if(confirm('Minimize the app?'))call('minimizeApp')}
+};
+const C={
+accent:el=>document.documentElement.style.setProperty('--ac',el.value),
+imm:el=>call('setImmersive',el.checked),
+orient:el=>call('setOrientation',el.value),
+bri:el=>call('setBrightness',el.value/100),
+vol:el=>call('setSystemVolume',el.value/100),
+np:()=>{const o={};['downloadProgress','downloadSpeedEta','downloadActions','downloadComplete','playbackControls'].forEach(k=>o[k]=$('np_'+k).checked);call('setNotificationPrefs',J(o));show('setNotificationPrefs',o)},
+wifi:el=>call('setDownloadsWifiOnly',el.checked),
+auto:el=>call('setAutoPlayExternal',el.checked),
+popup:el=>call('setPopupBlocking',el.checked),
+dbg:el=>call('setDebugging',el.checked),
+vauto:el=>call('setVpnAutoConnect',el.checked),
+vkill:el=>{if(el.checked&&!confirm('The kill switch blocks ALL app network while the VPN is down. Enable it?')){el.checked=false;return}call('setVpnKillSwitch',el.checked)}
+};
+const guard=f=>{try{const r=f();if(r&&r.then)r.catch(x=>show('ERROR',x.message))}catch(x){show('ERROR',x.message)}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])guard(()=>A[b.dataset.a](b))});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-c]');if(el&&C[el.dataset.c])guard(()=>C[el.dataset.c](el))});
+
+/* overlay */
+function closeOv(){try{call('hideOverlay')}catch(e){log(e.message)}setUi('app')}
+$('ov').addEventListener('click',e=>{if(e.target===$('ov'))closeOv()});
+document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o;guard(()=>{if(o==='back')call('siteBack');else if(o==='fwd')call('siteForward');else if(o==='reload')call('siteReload');else if(o==='stop')call('siteStop');else if(o==='home'){call('closeSite');setUi('app')}else if(o==='close')closeOv();else if(o==='play'){if(!lastMedia)return log('No media detected yet');play({url:lastMedia.url,headers:lastMedia.headers||{},progressIntervalMs:500})}})});
+
+/* HUD */
+const ind=t=>{('hudind').textContent=t;('hudind').style.display=t?'block':'none'};
+const toggleHud=()=>{$('hud').classList.toggle('hide');clearTimeout(hudTimer)};
+$('hx').onclick=()=>{pc('stop');leavePlayer()};
+$('hpp').onclick=()=>pc(ps.playing?'pause':'play');
+document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>pc('seek',Math.max(0,(ps.positionMs||0)+Number(b.dataset.h)*1000)));
+const SP=[0.5,1,1.25,1.5,2];$('hsp').onclick=()=>pc('speed',SP[(SP.indexOf(ps.speed||1)+1)%SP.length]);
+const LY=['fit','fill','zoom'];let li=0;$('hlay').onclick=()=>guard(()=>{li=(li+1)%3;call('setVideoLayout',J({mode:LY[li],scale:1,panX:0,panY:0}));$('hlay').textContent=LY[li]});
+function cycleTrack(type){const t=parse(call('getTracks'));const l=(t&&t[type])||[];if(!l.length)return hint('No '+type+' tracks');const i=l.findIndex(x=>x.selected);const n=(type==='text'&&i===l.length-1)?{id:'off',label:'off'}:l[(i+1)%l.length];call('selectTrack',J({type,id:n.id}));hint(type+': '+(n.label||n.lang||n.id));setTimeout(()=>hint(''),1200)}
+('hau').onclick=()=>guard(()=>cycleTrack('audio'));('hsu').onclick=()=>guard(()=>cycleTrack('text'));
+$('hpip').onclick=()=>guard(()=>call('enterPip'));
+const OR=['auto','landscape','portrait'];let oi=0;$('hor').onclick=()=>guard(()=>{oi=(oi+1)%3;call('setOrientation',OR[oi]);hint('Orientation: '+OR[oi]);setTimeout(()=>hint(''),1200)});
+$('hs').addEventListener('input',()=>{seeking=true;$('ht').textContent=fmt($('hs').value/1000*(ps.durationMs||0))});
+$('hs').addEventListener('change',()=>{pc('seek',Math.round($('hs').value/1000*(ps.durationMs||0)));seeking=false});
+(function(){const h=$('hud');let g=null,lastTap=0,tapT=null,lp=null,spd=false;
+h.addEventListener('touchstart',e=>{if(e.target.closest('.hb,button,input'))return;const t=e.touches[0];g={x:t.clientX,y:t.clientY,mode:null,pos:ps.positionMs||0,dur:ps.durationMs||0,b:parseFloat(N&&N.getBrightness())||0.5,v:parseFloat(N&&N.getSystemVolume())||0.5,left:t.clientX<innerWidth/2};lp=setTimeout(()=>{if(g&&!g.mode){spd=true;pc('speed',2);ind('2x speed')}},500)},{passive:true});
+h.addEventListener('touchmove',e=>{if(!g)return;const t=e.touches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;if(!g.mode){if(Math.abs(dx)<12&&Math.abs(dy)<12)return;clearTimeout(lp);g.mode=Math.abs(dx)>Math.abs(dy)?'h':'v'}
+if(g.mode==='h'&&g.dur){g.tgt=Math.max(0,Math.min(g.dur,g.pos+dx/innerWidth*120000));ind('Seek '+fmt(g.tgt)+' / '+fmt(g.dur))}
+else if(g.mode==='v'){const f=-dy/(innerHeight*.7);try{if(g.left){const b=Math.max(0,Math.min(1,g.b+f));call('setBrightness',b);ind('Brightness '+Math.round(b*100)+'%')}else{const v=Math.max(0,Math.min(1,g.v+f));call('setSystemVolume',v);ind('Volume '+Math.round(v*100)+'%')}}catch(x){}}},{passive:true});
+h.addEventListener('touchend',()=>{if(!g)return;clearTimeout(lp);const gg=g;g=null;if(spd){spd=false;pc('speed',1);ind('');return}
+if(gg.mode==='h'&&gg.tgt!=null){pc('seek',Math.round(gg.tgt));ind('');return}if(gg.mode==='v'){setTimeout(()=>ind(''),600);return}
+const now=Date.now();if(now-lastTap<300){clearTimeout(tapT);lastTap=0;pc('seek',Math.max(0,(ps.positionMs||0)+(gg.left?-10000:10000)));ind(gg.left?'-10s':'+10s');setTimeout(()=>ind(''),600)}else{lastTap=now;tapT=setTimeout(toggleHud,300)}},{passive:true})})();
+/* v9.2 additions */
+['navBlocked','siteDownload'].forEach(n=>window.addEventListener(n,e=>onEvt(n,e.detail)));
+M9.push('setNavBlocking','getNavBlocking');
+const sec=document.createElement('details');
+sec.innerHTML='<summary>9. v9.2 checks</summary>'+
+'<div><button data-a="cap92">Check v9.2 capabilities</button></div>'+
+'<div class="note">Navigation blocking switches</div>'+
+'<label><input type="checkbox" data-c="nb" id="nb_scheme" checked> scheme</label><label><input type="checkbox" data-c="nb" id="nb_adblock" checked> adblock</label><label><input type="checkbox" data-c="nb" id="nb_redirectNoGesture" checked> redirect no gesture</label>'+
+'<div><button class="g" data-a="nbGet">Get nav blocking</button><button data-a="nbTest">Test intent/market block</button></div>'+
+'<div class="note">Status bar gradient</div>'+
+'<div><button data-a="gradDark">Dark gradient</button><button data-a="gradLight">Light gradient</button><button class="g" data-a="gradOff">No gradient</button></div>'+
+'<div class="note">Last site download event</div><pre id="sdl">none</pre>'+
+'<div class="note">Manual: open a site, tap its video fullscreen button (it should go fullscreen and exit cleanly). Tap any download link on a site and watch for the siteDownload event.</div>';
+$('app').appendChild(sec);
+window.addEventListener('siteDownload',e=>{$('sdl').textContent=J(e.detail,null,1)});
+A.cap92=()=>{const c=parse(call('getCapabilities'));const k=['statusBarGradient','navBlockingToggle','siteFullscreen','siteDownloadEvent'];show('v9.2 capabilities',k.map(x=>(c[x]?'PASS ':'FAIL ')+x).join('\n')+'\nshellVersion: '+c.shellVersion)};
+A.nbGet=()=>show('getNavBlocking',parse(call('getNavBlocking')));
+A.nbTest=()=>{call('openSite','data:text/html;charset=utf-8,'+encodeURIComponent('<body style="font:16px sans-serif;background:#111;color:#fff;padding:20px"><h3>Nav-block test</h3><p>Tap each link. PASS if the page stays and nothing opens.</p><p><a href="intent://example.com/#Intent;scheme=https;package=com.android.chrome;end" style="color:#7af;font-size:20px">Open intent link</a></p><p><a href="market://details?id=com.example" style="color:#7af;font-size:20px">Open market link</a></p>'));show('Nav-block test','Tap the links in the site page. A navBlocked event must appear in the log.')};
+const grad=(from,dark)=>{const c=dark?'#0f1115':'#ffffff';call('setSystemBars',J({color:c,darkIcons:!dark,navColor:c,gradient:{from:from,to:'#00000000',extraDp:24}}));show('setSystemBars gradient',from+' to transparent, extraDp 24')};
+A.gradDark=()=>grad('#F20F1115',true);
+A.gradLight=()=>grad('#F2FFFFFF',false);
+A.gradOff=()=>{call('setSystemBars',J({color:accent(),darkIcons:false,navColor:accent(),gradient:null}));show('setSystemBars','gradient removed')};
+C.nb=()=>{const o={scheme:('nbscheme').checked,adblock:('nb_adblock').checked,redirectNoGesture:$('nb_redirectNoGesture').checked};call('setNavBlocking',J(o));show('setNavBlocking',o)};
+/* v9.3 additions: cinejoy test, video hook, crash reader */
+const HOOK='(function(){if(window.__flexHook)return;window.__flexHook=1;function rep(u,d){try{FlexSiteBridge.reportMedia(JSON.stringify({url:String(u).slice(0,700),pageUrl:location.href.slice(0,200),durationSec:d||0}))}catch(e){}}function chk(v){var u=v.currentSrc||v.src;if(u&&u.indexOf("blob:")!==0&&(!v.duration||!isFinite(v.duration)||v.duration>60))rep(u,v.duration)}document.addEventListener("play",function(e){if(e.target&&e.target.tagName==="VIDEO")chk(e.target)},true);document.addEventListener("loadedmetadata",function(e){if(e.target&&e.target.tagName==="VIDEO")chk(e.target)},true)})();';
+const s3=document.createElement('details');
+s3.open=true;
+s3.innerHTML='<summary>10. Crash and cinejoy test</summary>'+
+'<div><button data-a="hookOn">1. Install video hook</button><button data-a="cine">2. Open cinejoy.pk</button></div>'+
+'<div><button class="g" data-a="crashGet">getLastCrash</button><button class="g" data-a="crashClear">Clear crash</button><button class="g" data-a="logs">getLogs</button></div>'+
+'<div class="note">Steps: install the hook, open cinejoy.pk, tap a movie and its play button. Then tap the floating button: the overlay should list the detected video under "Play detected". If the app crashes, reopen it and tap getLastCrash.</div>';
+$('app').appendChild(s3);
+A.hookOn=()=>{call('setInjectedScript',HOOK);call('setAutoPlayExternal',false);show('Video hook','installed (auto-play off). It reports the video the page is really playing.')};
+A.cine=()=>{call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:''}));call('openSite','https://cinejoy.pk')};
+A.crashGet=()=>show('getLastCrash',parse(call('getLastCrash'))||'no crash recorded');
+A.crashClear=()=>{call('clearLastCrash');show('Crash','cleared')};
+/* v9.4: pick the best media, filter headers */
+const _onEvt=onEvt;
+const keepH=h=>{const o={};Object.keys(h||{}).forEach(k=>{if(['origin','referer','user-agent','cookie'].indexOf(k.toLowerCase())>=0)o[k]=h[k]});return o};
+onEvt=function(n,d){
+if(n==='mediaDetected'&&d&&d.source!=='page'){
+const u=String(d.url||'');
+seen.mediaDetected=(seen.mediaDetected||0)+1;
+if(u.indexOf('flex-sniff-test')>=0)sniffSeen=true;
+if(/init\.mp4|\.m4s|\.ts(\?|$)|\.vtt|\.jpe?g|\.png|\.webp/i.test(u)){log('skipped fragment ...'+u.slice(-40));return}
+if(/\.m3u8/i.test(u)||!lastMedia||!/\.m3u8/i.test(lastMedia.url||'')){d.headers=keepH(d.headers);lastMedia=d;$('lm').textContent='Best media: '+u.slice(-70);log('best media '+u.slice(0,120))}
+return}
+_onEvt(n,d)};
+s3.insertAdjacentHTML('beforeend','<div><button data-a="playBest">3. Play best detected</button></div>');
+A.playBest=()=>{if(!lastMedia)return show('Play','nothing detected yet');play({url:lastMedia.url,headers:lastMedia.headers||{},progressIntervalMs:500})};  
+/* v9.5: mode tracking, videoReady, notification and auto-play tests */
+['videoReady','modeChanged'].forEach(n=>window.addEventListener(n,e=>onEvt(n,e.detail)));
+M9.push('getMode');
+let gotVideo=false,vTimer=null;
+const _on2=onEvt;
+onEvt=function(n,d){
+if(n==='modeChanged'&&d){
+$('b3').textContent='mode: '+d.mode;
+if(d.mode==='player'){gotVideo=false;clearTimeout(vTimer);vTimer=setTimeout(()=>{if(!gotVideo)hint('No video frame after 6s. Copy getLogs and send it.')},6000);if(ui!=='player')setUi('player')}
+else if(d.mode==='app'&&ui!=='app')setUi('app');
+else if(d.mode==='overlay'&&ui!=='overlay')setUi('overlay');
+}
+if(n==='videoReady'){gotVideo=true;clearTimeout(vTimer);hint('Video ready '+(d&&d.width)+'x'+(d&&d.height));setTimeout(()=>hint(''),1500)}
+_on2(n,d)};
+s3.insertAdjacentHTML('beforeend','<div class="note">Auto-play test: cinejoy with auto-play ON. The shell should start the native player by itself.</div><div><button data-a="cineAuto">Open cinejoy (auto-play ON)</button><button class="g" data-a="mode">getMode</button></div><div class="note">Notification test: tap Play MP3 (section 3), then pull down the notification shade and lock the screen. You should see play/pause, previous, next and a seek bar.</div>');
+A.cineAuto=()=>{call('setInjectedScript',HOOK);call('setAutoPlayExternal',true);call('setFab',J({visible:true,size:56,bgColor:accent(),iconColor:'#FFFFFF',icon:fabIcon(),badge:''}));call('openSite','https://cinejoy.pk')};
+A.mode=()=>show('getMode',call('getMode'));
+startPoll=function(){};
+/* v9.6: player debug */
+s3.insertAdjacentHTML('beforeend','<div><button class="g" data-a="pdbg">getPlayerDebug</button></div>');
+A.pdbg=()=>show('getPlayerDebug',parse(call('getPlayerDebug')));
+const _play=play;
+play=function(p,a){const r=_play(p,a);setTimeout(()=>{try{log('DEBUG '+J(parse(N.getPlayerDebug())))}catch(e){log('DEBUG failed '+e.message)}},3000);return r};
+/* v9.7: autoPlayFailed */
+window.addEventListener('autoPlayFailed',e=>{onEvt('autoPlayFailed',e.detail);hint('Auto-play failed: '+((e.detail&&e.detail.error)||''))});
+/* startup */
+$('b1').textContent=N?'shell: attached':'shell: NOT attached (open inside the Flex app)';
+if(N){try{const c=parse(N.getCapabilities());$('b1').textContent='shell: '+(c.shellVersion||'attached')}catch(e){}try{$('b2').textContent='insets: '+J(parse(N.getSafeInsets()))}catch(e){}}
+log('Diagnostics ready. Listening for '+EVENTS.length+' events.');
+})();
+</script>
+</body>
+</html>
