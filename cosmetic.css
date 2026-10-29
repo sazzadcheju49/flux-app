@@ -1,0 +1,11 @@
+/* Injected cosmetic rules to hide intrusive web ad overlays */
+[id*="ad-"], [id*="ad_"], [class*="ad-"], [class*="ad_"],
+[class*="banner"], [id*="banner"],
+.ad-container, .adsbygoogle, .video-ad-overlay, .advertisement {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  max-height: 0 !important;
+  height: 0 !important;
+}
