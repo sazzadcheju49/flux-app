@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#0f1115">
 <link rel="manifest" href="manifest.json">
 <title>Flex</title>
+<script>if(/[?&]mock=1\b/.test(location.search)&&!window.NativeApp)document.write('<script src="mock-shell.js"><\/script>');</script>
 <style>
 :root{--ac:#2563eb;--bg:#0f1115;--cd:#181b21;--tx:#e8eaed;--mu:#8a909b;--bd:#2a2e38;--sat:0px;--sab:0px}
 html[data-theme=light]{--bg:#ffffff;--cd:#f1f3f6;--tx:#14171c;--mu:#5d6572;--bd:#dfe3e8}
@@ -152,7 +153,17 @@ const ROUTES=['movies','downloads','settings'];
 function showScreen(n){document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id==='s-'+n));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===n));if(n==='downloads')renderDownloads();if(n==='settings')showCrash(true)}
 function route(){const r=location.hash.replace('#/','');showScreen(ROUTES.indexOf(r)>=0?r:'movies')}
 window.addEventListener('hashchange',route);
-document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{location.hash='#/'+b.dataset.t});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{location.replace('#/'+b.dataset.t);route()});
+let lastBackTime=0;
+function pushGuard(){try{history.pushState({flexGuard:1},'',location.href)}catch(e){}}
+window.addEventListener('popstate',()=>{
+if(ui==='player'){pc('stop');setUi(prevUi==='player'?'app':prevUi);pushGuard();return}
+if(ui==='sheet'){setUi('overlay');pushGuard();return}
+if(ui==='overlay'){closeOv();pushGuard();return}
+const now=Date.now();
+if(now-lastBackTime<2000){sh('minimizeApp')}
+else{lastBackTime=now;toast('Press back again to exit');pushGuard()}
+});
 function openSheet(n){showScreen(n);$('sheettitle').textContent=n==='downloads'?'Downloads':'Settings';setUi('sheet')}
 $('sheetclose').onclick=()=>setUi('overlay');
 
@@ -243,7 +254,7 @@ const now=Date.now();if(now-lastTap<300){clearTimeout(tapT);lastTap=0;pc('seek',
 
 /* boot */
 (async function boot(){
-applyTheme();initSettings();route();
+applyTheme();initSettings();route();pushGuard();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 const prev=localStorage.getItem('flexBoot');
 lsSet('flexBoot','start');
